@@ -1,0 +1,9 @@
+set(minimum_cost_perfect_matching_SOURCES BinaryHeap.cpp)
+set(minimum_cost_perfect_matching_SOURCES
+    ${minimum_cost_perfect_matching_SOURCES}
+    Graph.cpp)
+set(minimum_cost_perfect_matching_SOURCES
+    ${minimum_cost_perfect_matching_SOURCES}
+    Matching.cpp)
+
+add_library(minimum_cost_perfect_matching MODULE ${minimum_cost_perfect_matching_SOURCES})

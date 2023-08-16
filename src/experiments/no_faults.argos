@@ -1,0 +1,78 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="0" />
+    <experiment length="0" ticks_per_second="10" random_seed="12345" />
+  </framework>
+  
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    <robust_matching_controller id="non_faulty" library="build/controllers/robust_matching/librobust_matching.dylib">
+      <actuators>
+        <differential_steering implementation="default" />
+      </actuators>
+      <sensors>
+      	<epuck2_encoder implementation="default" />
+        <epuck2_battery implementation="default"/>
+      </sensors>
+      <params />
+    </robust_matching_controller>
+  </controllers>
+
+  <loop_functions library="build/loop_functions/matching_loop_functions/libmatching_loop_functions"
+                  label="matching_loop_functions">
+  </loop_functions>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="30, 30, 5" center="0, 0, 1.5" positional_grid_size="10,10,5">
+
+    <distribute>
+      <position method="uniform" min="-15,-15,0" max="15,15,0" />
+      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
+      <entity quantity="9" max_trials="100">
+    <e-puck2 id="non_faulty">
+      <body position="0,0,0" orientation="0,0,0"/>
+      <controller config="non_faulty"/>
+    </e-puck2>
+      </entity>
+    </distribute>
+
+  </arena>
+
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <dynamics2d id="dyn2d" />
+    <pointmass3d id="pm3d" iterations="10" />
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <range_and_bearing id="rab" />
+  </media>
+
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+    <qt-opengl>
+      <camera>
+        <placements>
+          <placement index="0" position="0,0,80" look_at="0,0,0" up="1,0,0" lens_focal_length="65" />
+        </placements>
+      </camera>
+    </qt-opengl>
+  </visualization>
+  
+</argos-configuration>

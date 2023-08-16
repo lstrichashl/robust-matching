@@ -1,0 +1,5 @@
+add_library(robust_matching SHARED robust_matching.h robust_matching.cpp)
+target_link_libraries(robust_matching
+  argos3core_simulator
+  argos3plugin_simulator_epuck2
+  argos3plugin_simulator_genericrobot)

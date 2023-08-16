@@ -1,0 +1,5 @@
+add_library(adverserial_opposite_direction MODULE adverserial_opposite_direction.h adverserial_opposite_direction.cpp)
+target_link_libraries(adverserial_opposite_direction
+  argos3core_simulator
+  argos3plugin_simulator_epuck2
+  argos3plugin_simulator_genericrobot)
