@@ -10,7 +10,8 @@ using namespace argos;
 class CMatchingLoopFunctions : public CLoopFunctions {
 
 public:
-
+   CMatchingLoopFunctions();
+   virtual ~CMatchingLoopFunctions() {}
    virtual void PreStep();
 
 };

@@ -1,4 +1,4 @@
-link_directories(${CMAKE_BINARY_DIR}/controllers/eyebot_matching)
+link_directories(${CMAKE_BINARY_DIR}/controllers/robust_matching)
 set(matching_loop_functions_SOURCES matching_loop_functions.cpp)
 set(matching_loop_functions_SOURCES
     ${matching_loop_functions_SOURCES}
