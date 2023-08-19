@@ -3,8 +3,8 @@
 
 #include <argos3/core/simulator/loop_functions.h>
 #include <argos3/plugins/robots/e-puck2/simulator/epuck2_entity.h>
-#include "Graph.h"
-#include "Matching.h"
+#include "minimum_cost_perfect_matching/Graph.h"
+#include "minimum_cost_perfect_matching/Matching.h"
 #include <vector>
 
 

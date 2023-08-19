@@ -2,13 +2,13 @@ link_directories(${CMAKE_BINARY_DIR}/src/controllers/robust_matching)
 set(matching_loop_functions_SOURCES matching_loop_functions.cpp)
 set(matching_loop_functions_SOURCES
     ${matching_loop_functions_SOURCES}
-    BinaryHeap.cpp)
+    minimum_cost_perfect_matching/BinaryHeap.cpp)
 set(matching_loop_functions_SOURCES
     ${matching_loop_functions_SOURCES}
-    Graph.cpp)
+    minimum_cost_perfect_matching/Graph.cpp)
 set(matching_loop_functions_SOURCES
     ${matching_loop_functions_SOURCES}
-    Matching.cpp)
+    minimum_cost_perfect_matching/Matching.cpp)
 
 if(ARGOS_QTOPENGL_FOUND)
   include_directories(${ARGOS_QTOPENGL_INCLUDE_DIRS})
@@ -30,6 +30,3 @@ target_link_libraries(matching_loop_functions
 if(ARGOS_QTOPENGL_FOUND)
   target_link_libraries(matching_loop_functions argos3plugin_simulator_qtopengl)
 endif(ARGOS_QTOPENGL_FOUND)
-
-# add_subdirectory(minimum_cost_perfect_matching)
-
