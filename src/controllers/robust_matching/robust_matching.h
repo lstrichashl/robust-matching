@@ -16,7 +16,9 @@ public:
     virtual ~CRobustMatching() {}
     virtual void Init(TConfigurationNode& t_node);
     virtual void ControlStep();
-    virtual void SetWheelSpeedsFromVector(const CVector2& c_heading);
+    virtual void SetWheelSpeedsFromVector(const CVector3& c_heading);
+    virtual CRadians GetZAngleOrientation();
+    virtual CVector3 ToMateVector();
     virtual void Reset();
     CEPuck2Entity* mate;
 

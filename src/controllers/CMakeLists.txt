@@ -1,1 +1,2 @@
 add_subdirectory(robust_matching)
+add_subdirectory(adverserial)

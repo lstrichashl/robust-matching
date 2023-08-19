@@ -43,36 +43,33 @@ void CRobustMatching::SWheelTurningParams::Init(TConfigurationNode& t_node) {
    }
 }
 
-void CRobustMatching::ControlStep() {
-    // m_pcWheels->SetLinearVelocity(2.0f,-2.0f);
-    // SetWheelSpeedsFromVector()
-    CRadians cZAngle, cYAngle, cXAngle;
-    CEPuck2Entity self_entity = *dynamic_cast<CEPuck2Entity*>(&(&CSimulator::GetInstance())->GetSpace().GetEntity(CCI_Controller::GetId()));
-    self_entity.GetEmbodiedEntity().GetOriginAnchor().Orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
-    Real angle = -cZAngle.GetValue();
+CRadians CRobustMatching::GetZAngleOrientation() {
+   CRadians cZAngle, cYAngle, cXAngle;
+   CEPuck2Entity self_entity = *dynamic_cast<CEPuck2Entity*>(&(&CSimulator::GetInstance())->GetSpace().GetEntity(CCI_Controller::GetId()));
+   self_entity.GetEmbodiedEntity().GetOriginAnchor().Orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
+   return cZAngle;
+}
+
+CVector3 CRobustMatching::ToMateVector() {
+   CEPuck2Entity self_entity = *dynamic_cast<CEPuck2Entity*>(&(&CSimulator::GetInstance())->GetSpace().GetEntity(CCI_Controller::GetId()));
     CVector3 self_position = self_entity.GetEmbodiedEntity().GetOriginAnchor().Position;
     CVector3 mate_position = mate->GetEmbodiedEntity().GetOriginAnchor().Position;
     CVector3 to_mate = mate_position - self_position;
-    CVector2 heading;
-    heading.Set(to_mate.GetX()*cos(angle)-to_mate.GetY()*sin(angle), to_mate.GetX()*sin(angle)+to_mate.GetY()*cos(angle)); // to_mate vector is multiplied with the rotation matrix
-    heading = heading.Normalize();
-    // std::cout << 
-    //         mate->GetControllableEntity().GetController().GetId() << 
-    //         ":" << 
-    //         heading.GetX() << 
-    //         " " << 
-    //         heading.GetY() << 
-    //         " angle:" <<
-    //         cos(cZAngle.GetValue()) << 
-    // std::endl;
+    return to_mate;
+}
+
+void CRobustMatching::ControlStep() {
+   CVector3 to_mate = ToMateVector();
+   CRadians cZAngle = GetZAngleOrientation();
+   to_mate.RotateZ(-cZAngle);
     if(to_mate.Length() > 0.08){
-        SetWheelSpeedsFromVector(heading);
+        SetWheelSpeedsFromVector(to_mate.Normalize());
     }
     else {
         m_pcWheels->SetLinearVelocity(0, 0);
         m_pcLedAct->SetAllBlack();
-        m_pcLedAct->SetAllRGBColors(CColor::RED);
-        m_pcLedAct->SetAllRedLeds(true);
+      //   m_pcLedAct->SetAllRGBColors(CColor::RED);
+      //   m_pcLedAct->SetAllRedLeds(true);
     }
 }
 
@@ -82,9 +79,9 @@ void CRobustMatching::Reset(){
 }
 
 // this function was copied from argos-examples/controllers/footbot_flocking
-void CRobustMatching::SetWheelSpeedsFromVector(const CVector2& c_heading) {
+void CRobustMatching::SetWheelSpeedsFromVector(const CVector3& c_heading) {
    /* Get the heading angle */
-   CRadians cHeadingAngle = c_heading.Angle().SignedNormalize();
+   CRadians cHeadingAngle = c_heading.GetZAngle().SignedNormalize();
    /* Get the length of the heading vector */
    Real fHeadingLength = c_heading.Length();
    /* Clamp the speed so that it's not greater than MaxSpeed */
