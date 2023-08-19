@@ -1,39 +1,32 @@
 #include "matching_qt_user_functions.h"
-#include <controllers/footbot_matching/footbot_matching.h>
-#include <argos3/core/simulator/entity/controllable_entity.h>
+#include "matching_loop_functions.h"
 
 /****************************************/
 /****************************************/
 
-CMatchingQTUserFunctions::CMatchingQTUserFunctions() {
-   RegisterUserFunction<CMatchingQTUserFunctions,CFootBotEntity>(&CMatchingQTUserFunctions::Draw);
+CMatchingQTUserFunctions::CMatchingQTUserFunctions() :
+   m_matchingLoopFunctions(dynamic_cast<CMatchingLoopFunctions&>(CSimulator::GetInstance().GetLoopFunctions())) {
 }
 
 /****************************************/
 /****************************************/
 
-void CMatchingQTUserFunctions::Draw(CFootBotEntity& c_entity) {
-   CFootBotMatching& cController = dynamic_cast<CFootBotMatching&>(c_entity.GetControllableEntity().GetController());
-      CVector3 mypos, matched_pos;
-      mypos.Set(
-         c_entity.GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-         c_entity.GetEmbodiedEntity().GetOriginAnchor().Position.GetY(),
-         0.0f
-      );
-      matched_pos.Set(
-         cController.matched_bot->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-         cController.matched_bot->GetEmbodiedEntity().GetOriginAnchor().Position.GetY(),
-         0.0f
-      );
-               
+void CMatchingQTUserFunctions::DrawInWorld() {
+	list<int> matching = m_matchingLoopFunctions.GetMatching().first;
+	double matching_cost = m_matchingLoopFunctions.GetMatching().second;
+   Graph G = m_matchingLoopFunctions.GetGraph();
+   for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
+	{
+		pair<int, int> edge = G.GetEdge( *it );
+      CEPuck2Entity* cFootBot1 = m_matchingLoopFunctions.GetRobots().at(edge.first);
+      CEPuck2Entity* cFootBot2 = m_matchingLoopFunctions.GetRobots().at(edge.second);
+
       DrawRay(CRay3(
-         mypos,
-         matched_pos
+         cFootBot1->GetEmbodiedEntity().GetOriginAnchor().Position,
+         cFootBot2->GetEmbodiedEntity().GetOriginAnchor().Position
       ));
+   }
 }
-
-/****************************************/
-/****************************************/
 
 REGISTER_QTOPENGL_USER_FUNCTIONS(CMatchingQTUserFunctions, "matching_qt_user_functions")
 

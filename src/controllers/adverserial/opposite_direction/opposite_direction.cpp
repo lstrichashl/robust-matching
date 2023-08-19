@@ -6,7 +6,7 @@ void COppositeDirection::ControlStep() {
     CVector3 to_mate = ToMateVector();
     CRadians cZAngle = GetZAngleOrientation();
     to_mate.RotateZ(-cZAngle);
-    SetWheelSpeedsFromVector(-to_mate);
+    SetWheelSpeedsFromVector(-to_mate.Normalize());
 }
 
 void COppositeDirection::Reset() {

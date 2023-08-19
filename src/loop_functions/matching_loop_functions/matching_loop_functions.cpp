@@ -3,38 +3,32 @@
 #include <argos3/plugins/robots/e-puck2/simulator/epuck2_entity.h>
 #include "src/controllers/robust_matching/robust_matching.h"
 #include <list>
-#include "Graph.h"
-#include "Matching.h"
 
-CMatchingLoopFunctions::CMatchingLoopFunctions() {}
-
-void CMatchingLoopFunctions::PreStep(){
+void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
     CSpace::TMapPerType& m_cRobots = GetSpace().GetEntitiesByType("e-puck2");
-    std::vector<std::pair<int, CVector2>> positions;
-    std::vector<CEPuck2Entity*> footbots;
-    int index = 0;
-    int number_of_robots = 0;
     for(CSpace::TMapPerType::iterator it = m_cRobots.begin(); it != m_cRobots.end(); ++it) {
         CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
-        footbots.push_back(robot);
-        CVector2 position;
-        position.Set(robot->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-                robot->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
-        positions.push_back(std::make_pair(index, position));
-        index++;
-        number_of_robots++;
+        m_robots.push_back(robot);
+    }
+}
+
+void CMatchingLoopFunctions::PreStep(){
+    std::vector<std::pair<int, CVector2>> positions;
+    int number_of_robots = m_robots.size();
+    for (unsigned i=0; i<number_of_robots; i++){
+        CVector2 position(m_robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
+                m_robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
+        positions.push_back(std::make_pair(i, position));
     }
     std::vector<std::pair<int, CVector2>>::iterator it1;
     std::vector<std::pair<int, CVector2>>::iterator it2;
     Graph G(number_of_robots);
 	vector<double> cost(number_of_robots*number_of_robots);
-    for(it1 = positions.begin(); it1 != positions.end(); ++it1){
-        for(it2 = positions.begin(); it2 != positions.end(); ++it2){
-            std::pair<int, CVector2> pos1 = *it1;
-            std::pair<int, CVector2> pos2 = *it2;
-            Real distance = (pos1.second - pos2.second).Length();
-            G.AddEdge(pos1.first, pos2.first);
-            cost[G.GetEdgeIndex(pos1.first, pos2.first)] = distance;
+    for(unsigned i=0; i<number_of_robots; i++){
+        for(unsigned j=0;j<number_of_robots;j++){
+            Real distance = (positions[i].second - positions[j].second).Length();
+            G.AddEdge(i, j);
+            cost[G.GetEdgeIndex(i,j)] = distance;
         }
     }
     Matching M(G);
@@ -47,13 +41,16 @@ void CMatchingLoopFunctions::PreStep(){
 	for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
 	{
 		pair<int, int> edge = G.GetEdge( *it );
-        CEPuck2Entity* cFootBot1 = footbots.at(edge.first);
-        CEPuck2Entity* cFootBot2 = footbots.at(edge.second);
-        CRobustMatching& cController1 = dynamic_cast<CRobustMatching&>(cFootBot1->GetControllableEntity().GetController());
-        CRobustMatching& cController2 = dynamic_cast<CRobustMatching&>(cFootBot2->GetControllableEntity().GetController());
-        cController1.mate = cFootBot2;
-        cController2.mate = cFootBot1;
+        CEPuck2Entity* robot1 = m_robots[edge.first];
+        CEPuck2Entity* robot2 = m_robots[edge.second];
+        CRobustMatching& cController1 = dynamic_cast<CRobustMatching&>(robot1->GetControllableEntity().GetController());
+        CRobustMatching& cController2 = dynamic_cast<CRobustMatching&>(robot2->GetControllableEntity().GetController());
+        cController1.mate = robot2;
+        cController2.mate = robot1;
 	}
+
+    m_solution = solution;
+    m_robotGraph = G;
 }
 
 REGISTER_LOOP_FUNCTIONS(CMatchingLoopFunctions, "matching_loop_functions")

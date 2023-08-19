@@ -6,6 +6,8 @@
 
 using namespace argos;
 
+class CMatchingLoopFunctions;
+
 class CMatchingQTUserFunctions : public CQTOpenGLUserFunctions {
 
 public:
@@ -14,8 +16,11 @@ public:
 
    virtual ~CMatchingQTUserFunctions() {}
 
-   void Draw(CFootBotEntity& c_entity);
-   
+   virtual void DrawInWorld();
+
+private:
+   CMatchingLoopFunctions& m_matchingLoopFunctions;
+
 };
 
 #endif

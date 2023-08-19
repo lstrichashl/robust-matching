@@ -68,7 +68,7 @@
         <distribute>
 		   <position method="uniform" min="-0.75,-0.75,0" max="0.75,0.75,0" />
 		   <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-		   <entity quantity="9" max_trials="100">
+		   <entity quantity="1" max_trials="100">
                 <e-puck2 id="faulty" rab_range="5" rab_data_size="3">
                     <controller config="faulty" />
                 </e-puck2>
@@ -111,6 +111,8 @@
   <!-- ****************** -->
   <visualization>
     <qt-opengl>
+      <user_functions library="build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+                  label="matching_qt_user_functions" />
       <camera>
         <placements>
             <placement index="0" position="0.0,-0.792159,1.51472" look_at="0.0,-0.41199,0.58981" up="-0.00924894,0.924863,0.380188" lens_focal_length="20"                 />
