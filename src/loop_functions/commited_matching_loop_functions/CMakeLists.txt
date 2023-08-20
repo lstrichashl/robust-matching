@@ -1,0 +1,11 @@
+set(commited_matching_loop_functions_SOURCES
+  commited_matching_loop_functions.h
+  commited_matching_loop_functions.cpp)
+
+add_library(commited_matching_loop_functions MODULE
+  ${commited_matching_loop_functions_SOURCES})
+target_link_libraries(commited_matching_loop_functions
+  matching_loop_functions
+  argos3core_simulator
+  argos3plugin_simulator_entities
+  argos3plugin_simulator_footbot)

@@ -17,7 +17,7 @@ if(ARGOS_QTOPENGL_FOUND)
     matching_qt_user_functions.cpp)
 endif(ARGOS_QTOPENGL_FOUND)
 
-add_library(matching_loop_functions MODULE ${matching_loop_functions_SOURCES})
+add_library(matching_loop_functions SHARED ${matching_loop_functions_SOURCES})
 target_link_libraries(matching_loop_functions
   robust_matching
   argos3core_simulator
