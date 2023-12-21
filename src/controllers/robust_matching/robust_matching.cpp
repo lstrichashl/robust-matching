@@ -63,7 +63,8 @@ void CRobustMatching::ControlStep() {
    CRadians cZAngle = GetZAngleOrientation();
    to_mate.RotateZ(-cZAngle);
     if(to_mate.Length() > 0.08){
-        SetWheelSpeedsFromVector(to_mate.Normalize());
+         SetWheelSpeedsFromVector(to_mate.Normalize());
+         m_pcLedAct->SetAllRGBColors(CColor::GREEN);
     }
     else {
         m_pcWheels->SetLinearVelocity(0, 0);

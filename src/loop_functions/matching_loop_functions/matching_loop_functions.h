@@ -13,10 +13,11 @@ using namespace argos;
 class CMatchingLoopFunctions : public CLoopFunctions {
 
 public:
-   CMatchingLoopFunctions() {}
+   CMatchingLoopFunctions();
    virtual ~CMatchingLoopFunctions() {}
    virtual void Init(TConfigurationNode& t_tree);
    virtual void PreStep();
+   virtual CRadians GetZAngleOrientation(CQuaternion orientation);
    virtual Graph GetGraph(){
       return m_robotGraph;
    }
@@ -30,6 +31,7 @@ public:
 private:
    Graph m_robotGraph;
    pair< list<int>, double > m_solution;
+   vector<double> m_costs;
    vector<CEPuck2Entity*> m_robots;
 };
 

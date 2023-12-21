@@ -6,14 +6,14 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="0" ticks_per_second="10" random_seed="1" />
+    <experiment length="100" ticks_per_second="10" random_seed="12345" />
   </framework>
   
   <!-- *************** -->
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <robust_matching_controller id="non_faulty" library="build/src/controllers/robust_matching/librobust_matching.dylib">
+    <robust_matching_controller id="non_faulty" library="/Users/lior.strichash/private/robust-matching/build/src/controllers/robust_matching/librobust_matching">
       <actuators>
         <differential_steering implementation="default" />
         <epuck2_leds implementation="default" medium="leds" />
@@ -30,7 +30,7 @@
       </params>
     </robust_matching_controller>
 
-    <adverserial_opposite_direction_controller id="faulty" library="build/src/controllers/adverserial/opposite_direction/libopposite_direction.so">
+    <adverserial_opposite_direction_controller id="faulty" library="/Users/lior.strichash//private/robust-matching/build/src/controllers/adverserial/opposite_direction/libopposite_direction">
       <actuators>
         <differential_steering implementation="default" />
         <epuck2_leds implementation="default" medium="leds" />
@@ -48,7 +48,7 @@
     </adverserial_opposite_direction_controller>
   </controllers>
 
-  <loop_functions library="build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+  <loop_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
                   label="matching_loop_functions">
   </loop_functions>
 
@@ -59,8 +59,8 @@
 		 <distribute>
 		   <position method="uniform" min="-0.75,-0.75,0" max="0.75,0.75,0" />
 		   <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-		   <entity quantity="18" max_trials="100">
-		     <e-puck2 id="1" rab_range="5" rab_data_size="3">
+		   <entity quantity="8" max_trials="100">
+		     <e-puck2 id="12" rab_range="5" rab_data_size="3">
 		       <controller config="non_faulty" />
 		     </e-puck2>
 		   </entity>
@@ -68,7 +68,7 @@
         <distribute>
 		   <position method="uniform" min="-0.75,-0.75,0" max="0.75,0.75,0" />
 		   <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-		   <entity quantity="2" max_trials="100">
+		   <entity quantity="8" max_trials="100">
                 <e-puck2 id="faulty" rab_range="5" rab_data_size="3">
                     <controller config="faulty" />
                 </e-puck2>
@@ -110,8 +110,8 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-    <qt-opengl>
-      <user_functions library="build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+      <!-- <qt-opengl>
+      <user_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
                   label="matching_qt_user_functions" />
       <camera>
         <placements>
@@ -119,7 +119,7 @@
 
         </placements>
       </camera>
-    </qt-opengl>
+    </qt-opengl> -->
   </visualization>
   
 </argos-configuration>
