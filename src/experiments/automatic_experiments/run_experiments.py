@@ -1,17 +1,19 @@
 import xmltodict
 import os
 import subprocess
+from pathlib import Path
 
 base_dir = '/Users/lior.strichash/private/robust-matching/src/experiments/automatic_experiments'
 template_file_path = f'{base_dir}/template.argos'
+number_of_test_runs = 3
 
 os.system("cd ~/private/robust-matching/build && make")
 
-for random_seed in range(30):
+for random_seed in range(number_of_test_runs):
     non_faulty_count = 15
     faulty_count = 5
-    tmp_file_path = f'{base_dir}/random_seed{random_seed}_non_faulty{non_faulty_count}_faulty{faulty_count}.argos'
-
+    tmp_file_path = f'{base_dir}/non_faulty{non_faulty_count}_faulty{faulty_count}/random_seed{random_seed}.argos'
+    os.makedirs(os.path.dirname(tmp_file_path), exist_ok=True)
     with open(template_file_path) as fd:
         doc = xmltodict.parse(fd.read())
 
