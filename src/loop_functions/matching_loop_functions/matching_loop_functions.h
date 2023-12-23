@@ -33,6 +33,9 @@ private:
    pair< list<int>, double > m_solution;
    vector<double> m_costs;
    vector<CEPuck2Entity*> m_robots;
+   int m_tickNumber;
+
+   virtual void write_to_log(Graph graph, pair< list<int>, double > solution);
 };
 
 #endif

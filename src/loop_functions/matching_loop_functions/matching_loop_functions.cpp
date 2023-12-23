@@ -16,9 +16,11 @@ double get_costs_diff(vector<double> cost1, vector<double> cost2){
     return sum_diffs;
 }
 
+
 CMatchingLoopFunctions::CMatchingLoopFunctions():
     m_solution(0,-1),
-    m_costs(0)
+    m_costs(0),
+    m_tickNumber(0)
     {}
 
 void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
@@ -87,15 +89,27 @@ void CMatchingLoopFunctions::PreStep(){
         cController2.mate = robot1; 
     }
 
-    std::string file_name = GetSimulator().GetExperimentFileName();
-    ofstream MyFile(file_name + ".log", std::ios_base::app);
-    MyFile << "Files can be tricky, but it is fun enough!" << endl;
-    MyFile.close();
+    write_to_log(G, solution);
+    m_tickNumber++;
 }
 
+void CMatchingLoopFunctions::write_to_log(Graph graph, pair< list<int>, double > solution){
+    std::string cost_string = "\"cost\":\""+to_string(solution.second) + "\"";
+    std::string tick_string = "\"tick\":\""+to_string(m_tickNumber)+"\"";
+    list<int> matching = solution.first;
+    std::string matcing_string = "\"matching\":\""; 
+    for(list<int>::iterator it = matching.begin(); it != matching.end(); it++){
+        pair<int, int> edge = graph.GetEdge( *it );
+        matcing_string += "(" + to_string(edge.first) + "," + to_string(edge.second) + "),";
+    }
+    matcing_string.pop_back();
+    matcing_string += "\"";
+    std::string log =  "{" + matcing_string + "," + cost_string + "," + tick_string + "}";
 
-// void CMatchingLoopFunctions::SaveGraph(){
-    
-// }
+    std::string file_name = GetSimulator().GetExperimentFileName();
+    ofstream os(file_name + ".log", std::ios_base::app);
+    os << log << endl;
+    os.close();
+}
 
 REGISTER_LOOP_FUNCTIONS(CMatchingLoopFunctions, "matching_loop_functions")
