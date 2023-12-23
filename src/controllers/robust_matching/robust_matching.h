@@ -42,10 +42,15 @@ public:
       void Init(TConfigurationNode& t_tree);
    };
 
+   virtual std::string GetType(){
+      return m_typename;
+   }
+
 protected:
     CCI_DifferentialSteeringActuator *m_pcWheels;
     SWheelTurningParams m_sWheelTurningParams;
     CCI_EPuck2LEDsActuator *m_pcLedAct;
+    std::string m_typename;
 };
 
 

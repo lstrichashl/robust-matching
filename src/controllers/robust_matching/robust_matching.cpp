@@ -9,7 +9,8 @@
 
 CRobustMatching::CRobustMatching() :
    m_pcWheels(NULL),
-   m_pcLedAct(NULL)
+   m_pcLedAct(NULL),
+   m_typename("CRobustMatching")
 {}
 
 

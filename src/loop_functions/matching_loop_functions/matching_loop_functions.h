@@ -16,7 +16,9 @@ public:
    CMatchingLoopFunctions();
    virtual ~CMatchingLoopFunctions() {}
    virtual void Init(TConfigurationNode& t_tree);
+   virtual void Destroy();
    virtual void PreStep();
+   virtual bool IsExperimentFinished();
    virtual CRadians GetZAngleOrientation(CQuaternion orientation);
    virtual Graph GetGraph(){
       return m_robotGraph;
@@ -27,13 +29,14 @@ public:
    virtual vector<CEPuck2Entity*> GetRobots(){
       return m_robots;
    }
+   virtual std::string GetLogFileName();
 
 private:
    Graph m_robotGraph;
    pair< list<int>, double > m_solution;
    vector<double> m_costs;
    vector<CEPuck2Entity*> m_robots;
-   int m_tickNumber;
+   vector<std::string> m_logs;
 
    virtual void write_to_log(Graph graph, pair< list<int>, double > solution);
 };

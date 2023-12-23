@@ -1,6 +1,8 @@
 #include "opposite_direction.h"
 
-COppositeDirection::COppositeDirection() {}
+COppositeDirection::COppositeDirection(){
+    m_typename = "COppositeDirection";
+   }
 
 void COppositeDirection::ControlStep() {
     CVector3 to_mate = ToMateVector();

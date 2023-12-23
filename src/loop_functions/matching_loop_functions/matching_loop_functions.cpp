@@ -20,7 +20,7 @@ double get_costs_diff(vector<double> cost1, vector<double> cost2){
 CMatchingLoopFunctions::CMatchingLoopFunctions():
     m_solution(0,-1),
     m_costs(0),
-    m_tickNumber(0)
+    m_logs(0)
     {}
 
 void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
@@ -29,6 +29,29 @@ void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
         CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
         m_robots.push_back(robot);
     }
+}
+
+void CMatchingLoopFunctions::Destroy(){
+    ofstream os(GetLogFileName(), std::ios_base::app);
+
+    std::string robot_types = "[";
+    for (unsigned i=0; i<m_robots.size(); i++){
+        CRobustMatching& cController1 = dynamic_cast<CRobustMatching&>(m_robots[i]->GetControllableEntity().GetController());
+        robot_types += "{\"robot_id\":\""+to_string(i)+"\",\"type\":\""+cController1.GetType()+"\"},";
+    }
+    robot_types.pop_back();
+    robot_types += "]";
+
+    std::string all_log = "[";
+    for(unsigned i = 0; i < m_logs.size(); i++){
+        all_log += m_logs[i] + ",";
+    }
+    all_log.pop_back();
+    all_log += "]";
+
+    std::string filecontent = "{\"robot_types\":"+robot_types+",\"logs\":"+all_log+"}";
+    os << filecontent << endl;
+    os.close();
 }
 
 CRadians CMatchingLoopFunctions::GetZAngleOrientation(CQuaternion orientation) {
@@ -68,11 +91,6 @@ void CMatchingLoopFunctions::PreStep(){
     }
     Matching M(G);
     pair< list<int>, double > solution = M.SolveMinimumCostPerfectMatching(cost);
-
-    // if(m_costs.size() > 0 && get_costs_diff(cost, m_costs) < 0.05) {
-    //     GetSimulator().Terminate();
-    // }
-
 	list<int> matching = solution.first;
 	double matching_cost = solution.second;
     m_solution = solution;
@@ -90,26 +108,30 @@ void CMatchingLoopFunctions::PreStep(){
     }
 
     write_to_log(G, solution);
-    m_tickNumber++;
 }
 
 void CMatchingLoopFunctions::write_to_log(Graph graph, pair< list<int>, double > solution){
     std::string cost_string = "\"cost\":\""+to_string(solution.second) + "\"";
-    std::string tick_string = "\"tick\":\""+to_string(m_tickNumber)+"\"";
+    std::string tick_string = "\"tick\":\""+to_string(GetSpace().GetSimulationClock())+"\"";
     list<int> matching = solution.first;
-    std::string matcing_string = "\"matching\":\""; 
+    std::string matcing_string = "\"matching\":\"["; 
     for(list<int>::iterator it = matching.begin(); it != matching.end(); it++){
         pair<int, int> edge = graph.GetEdge( *it );
         matcing_string += "(" + to_string(edge.first) + "," + to_string(edge.second) + "),";
     }
     matcing_string.pop_back();
-    matcing_string += "\"";
+    matcing_string += "]\"";
     std::string log =  "{" + matcing_string + "," + cost_string + "," + tick_string + "}";
 
-    std::string file_name = GetSimulator().GetExperimentFileName();
-    ofstream os(file_name + ".log", std::ios_base::app);
-    os << log << endl;
-    os.close();
+    m_logs.push_back(log);
+}
+
+std::string CMatchingLoopFunctions::GetLogFileName(){
+    return GetSimulator().GetExperimentFileName() + ".log";
+}
+
+bool CMatchingLoopFunctions::IsExperimentFinished() {
+    return false;
 }
 
 REGISTER_LOOP_FUNCTIONS(CMatchingLoopFunctions, "matching_loop_functions")
