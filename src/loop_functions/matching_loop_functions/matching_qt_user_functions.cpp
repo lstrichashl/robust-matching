@@ -18,8 +18,8 @@ void CMatchingQTUserFunctions::DrawInWorld() {
    for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
 	{
 		pair<int, int> edge = G.GetEdge( *it );
-      CEPuck2Entity* cFootBot1 = m_matchingLoopFunctions.GetRobots().at(edge.first);
-      CEPuck2Entity* cFootBot2 = m_matchingLoopFunctions.GetRobots().at(edge.second);
+      CEPuck2Entity* cFootBot1 = m_matchingLoopFunctions.GetRobotsInMatching().at(edge.first);
+      CEPuck2Entity* cFootBot2 = m_matchingLoopFunctions.GetRobotsInMatching().at(edge.second);
 
       DrawRay(CRay3(
          cFootBot1->GetEmbodiedEntity().GetOriginAnchor().Position,

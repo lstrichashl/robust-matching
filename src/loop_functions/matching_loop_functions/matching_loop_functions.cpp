@@ -7,6 +7,21 @@
 #include <iostream>
 #include <fstream>
 
+struct MatchingResult{
+    Graph _graph;
+    Matching _matching;
+    vector<double> _cost;
+    pair< list<int>, double > _solution;
+    vector<CEPuck2Entity*> _robots;
+
+    MatchingResult(Graph graph, Matching matching, vector<double> cost, pair< list<int>, double > solution, vector<CEPuck2Entity*> robots):
+        _graph(graph),
+        _matching(matching),
+        _cost(cost),
+        _solution(solution),
+        _robots(robots)
+    {}
+};
 
 double get_costs_diff(vector<double> cost1, vector<double> cost2){
     double sum_diffs = 0;
@@ -54,24 +69,24 @@ void CMatchingLoopFunctions::Destroy(){
     os.close();
 }
 
-CRadians CMatchingLoopFunctions::GetZAngleOrientation(CQuaternion orientation) {
+CRadians GetZAngleOrientation(CQuaternion orientation) {
    CRadians cZAngle, cYAngle, cXAngle;
    orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
    return cZAngle;
 }
 
-void CMatchingLoopFunctions::PreStep(){
-    std::vector<std::pair<int, CVector2>> positions;
+MatchingResult GetMatchingResult(vector<CEPuck2Entity*> robots) {
+std::vector<std::pair<int, CVector2>> positions;
     std::vector<std::pair<int, CQuaternion>> orientations;
-    int number_of_robots = m_robots.size();
+    int number_of_robots = robots.size();
     for (unsigned i=0; i<number_of_robots; i++){
-        CVector2 position(m_robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-                m_robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
+        CVector2 position(robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
+                robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
         positions.push_back(std::make_pair(i, position));
-        orientations.push_back(std::make_pair(i, m_robots[i]->GetEmbodiedEntity().GetOriginAnchor().Orientation));
+        orientations.push_back(std::make_pair(i, robots[i]->GetEmbodiedEntity().GetOriginAnchor().Orientation));
     }
     Graph G(number_of_robots);
-	vector<double> cost(number_of_robots*number_of_robots);
+    vector<double> cost(number_of_robots*number_of_robots);
     for(unsigned i=0; i<number_of_robots; i++){
         for(unsigned j=0;j<number_of_robots;j++){
             if(i != j) {
@@ -89,19 +104,57 @@ void CMatchingLoopFunctions::PreStep(){
     }
     Matching M(G);
     pair< list<int>, double > solution = M.SolveMinimumCostPerfectMatching(cost);
+    MatchingResult result = MatchingResult(G, M, cost, solution, robots);
+    return result;
+}
+
+MatchingResult GetBestMatching(vector<CEPuck2Entity*> robots) {
+    if(robots.size() % 2 == 0){
+        return GetMatchingResult(robots);
+    }
+    vector<CEPuck2Entity*> robots_clone = robots;
+    robots_clone.erase(robots_clone.begin());
+    MatchingResult a = GetMatchingResult(robots_clone);
+    MatchingResult* b = &a;
+    unsigned j = 0;
+    for(unsigned i = 1; i < robots.size(); i++) {
+        robots_clone = robots;
+        robots_clone.erase(std::next(robots_clone.begin(), i));
+        MatchingResult result = GetMatchingResult(robots_clone);
+        if(result._solution.second < b->_solution.second) {
+            b = &result;
+            j = i;
+        }
+    }
+    
+    cout << j << endl;
+
+    robots_clone = robots;
+    robots_clone.erase(robots_clone.begin()+j);
+    MatchingResult bestMatchingResult = GetMatchingResult(robots_clone);
+    return bestMatchingResult;
+}
+
+void CMatchingLoopFunctions::PreStep(){
+    MatchingResult result = GetBestMatching(m_robots);
+    pair< list<int>, double > solution = result._solution;
+    vector<double> cost = result._cost;
 	list<int> matching = solution.first;
 	double matching_cost = solution.second;
     m_solution = solution;
-    m_robotGraph = G;
+    m_robotGraph = result._graph;
     m_costs = cost;
     vector<int> nf_matchig;
     vector<int> nf_half_matchig;
+    m_robots_in_matching = result._robots;
+
+    cout << matching_cost << endl;
 
     for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
     {
-        pair<int, int> edge = G.GetEdge( *it );
-        CEPuck2Entity* robot1 = m_robots[edge.first];
-        CEPuck2Entity* robot2 = m_robots[edge.second];
+        pair<int, int> edge = m_robotGraph.GetEdge( *it );
+        CEPuck2Entity* robot1 = m_robots_in_matching[edge.first];
+        CEPuck2Entity* robot2 = m_robots_in_matching[edge.second];
         CRobustMatching& cController1 = dynamic_cast<CRobustMatching&>(robot1->GetControllableEntity().GetController());
         CRobustMatching& cController2 = dynamic_cast<CRobustMatching&>(robot2->GetControllableEntity().GetController());
         if(cController1.GetType() == "CRobustMatching" && cController2.GetType() == "CRobustMatching"){
@@ -122,8 +175,7 @@ void CMatchingLoopFunctions::PreStep(){
     for(vector<int>::iterator it = nf_half_matchig.begin(); it != nf_half_matchig.end(); it++)
 		nf_half_matching_cost += cost[*it];
 
-    // cout << nf_half_matching_cost << endl;
-    write_to_log(G, solution, nf_matching_cost, nf_half_matching_cost);
+    write_to_log(result._graph, solution, nf_matching_cost, nf_half_matching_cost);
 }
 
 void CMatchingLoopFunctions::write_to_log(Graph graph, pair< list<int>, double > solution, double nf_matching_cost, double nf_half_matching_cost){
