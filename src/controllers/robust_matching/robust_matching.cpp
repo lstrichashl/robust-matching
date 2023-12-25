@@ -52,11 +52,16 @@ CRadians CRobustMatching::GetZAngleOrientation() {
 }
 
 CVector3 CRobustMatching::ToMateVector() {
-   CEPuck2Entity self_entity = *dynamic_cast<CEPuck2Entity*>(&(&CSimulator::GetInstance())->GetSpace().GetEntity(CCI_Controller::GetId()));
-    CVector3 self_position = self_entity.GetEmbodiedEntity().GetOriginAnchor().Position;
-    CVector3 mate_position = mate->GetEmbodiedEntity().GetOriginAnchor().Position;
-    CVector3 to_mate = mate_position - self_position;
-    return to_mate;
+   if(mate != NULL) {
+      CEPuck2Entity self_entity = *dynamic_cast<CEPuck2Entity*>(&(&CSimulator::GetInstance())->GetSpace().GetEntity(CCI_Controller::GetId()));
+      CVector3 self_position = self_entity.GetEmbodiedEntity().GetOriginAnchor().Position;
+      CVector3 mate_position = mate->GetEmbodiedEntity().GetOriginAnchor().Position;
+      CVector3 to_mate = mate_position - self_position;
+      return to_mate;
+   }
+   else {
+      return CVector3(0,0,0);
+   }
 }
 
 void CRobustMatching::ControlStep() {
