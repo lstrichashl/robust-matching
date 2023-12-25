@@ -70,8 +70,6 @@ void CMatchingLoopFunctions::PreStep(){
         positions.push_back(std::make_pair(i, position));
         orientations.push_back(std::make_pair(i, m_robots[i]->GetEmbodiedEntity().GetOriginAnchor().Orientation));
     }
-    std::vector<std::pair<int, CVector2>>::iterator it1;
-    std::vector<std::pair<int, CVector2>>::iterator it2;
     Graph G(number_of_robots);
 	vector<double> cost(number_of_robots*number_of_robots);
     for(unsigned i=0; i<number_of_robots; i++){
@@ -96,6 +94,9 @@ void CMatchingLoopFunctions::PreStep(){
     m_solution = solution;
     m_robotGraph = G;
     m_costs = cost;
+    vector<int> nf_matchig;
+    vector<int> nf_half_matchig;
+
     for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
     {
         pair<int, int> edge = G.GetEdge( *it );
@@ -103,16 +104,33 @@ void CMatchingLoopFunctions::PreStep(){
         CEPuck2Entity* robot2 = m_robots[edge.second];
         CRobustMatching& cController1 = dynamic_cast<CRobustMatching&>(robot1->GetControllableEntity().GetController());
         CRobustMatching& cController2 = dynamic_cast<CRobustMatching&>(robot2->GetControllableEntity().GetController());
+        if(cController1.GetType() == "CRobustMatching" && cController2.GetType() == "CRobustMatching"){
+            nf_matchig.push_back(*it);
+        }
+        if(cController1.GetType() == "CRobustMatching" || cController2.GetType() == "CRobustMatching"){
+            nf_half_matchig.push_back(*it);
+        }
         cController1.mate = robot2;
         cController2.mate = robot1; 
     }
 
-    write_to_log(G, solution);
+    double nf_matching_cost = 0;
+    for(vector<int>::iterator it = nf_matchig.begin(); it != nf_matchig.end(); it++)
+		nf_matching_cost += cost[*it];
+
+    double nf_half_matching_cost = 0;
+    for(vector<int>::iterator it = nf_half_matchig.begin(); it != nf_half_matchig.end(); it++)
+		nf_half_matching_cost += cost[*it];
+
+    // cout << nf_half_matching_cost << endl;
+    write_to_log(G, solution, nf_matching_cost, nf_half_matching_cost);
 }
 
-void CMatchingLoopFunctions::write_to_log(Graph graph, pair< list<int>, double > solution){
+void CMatchingLoopFunctions::write_to_log(Graph graph, pair< list<int>, double > solution, double nf_matching_cost, double nf_half_matching_cost){
     std::string cost_string = "\"cost\":\""+to_string(solution.second) + "\"";
     std::string tick_string = "\"tick\":\""+to_string(GetSpace().GetSimulationClock())+"\"";
+    std::string nf_matching_cost_string = "\"nf_matching_cost\":\""+to_string(nf_matching_cost)+"\"";
+    std::string nf_half_matching_cost_string = "\"nf_half_matching_cost\":\""+to_string(nf_half_matching_cost)+"\"";
     list<int> matching = solution.first;
     std::string matcing_string = "\"matching\":\"["; 
     for(list<int>::iterator it = matching.begin(); it != matching.end(); it++){
@@ -121,7 +139,7 @@ void CMatchingLoopFunctions::write_to_log(Graph graph, pair< list<int>, double >
     }
     matcing_string.pop_back();
     matcing_string += "]\"";
-    std::string log =  "{" + matcing_string + "," + cost_string + "," + tick_string + "}";
+    std::string log =  "{" + matcing_string + "," + cost_string + "," + tick_string + "," + nf_matching_cost_string + "," + nf_half_matching_cost_string + "}";
 
     m_logs.push_back(log);
 }
