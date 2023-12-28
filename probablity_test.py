@@ -47,38 +47,31 @@ def get_f_pairs_from_file(file_path):
     f = open(file_path, 'r')
     reader = csv.reader(f)
     next(reader, None)  # skip the headers
-    nf_values = {}
+    number_of_faulty_pairs = {}
     for row in reader:
         faulty_count = int(row[0].split('_')[2][6:])
         if(faulty_count != 0):
             nf_pairs = row[4]
-            nf_values[float(nf_pairs)] = faulty_count
-    nf_pairs = list(nf_values.keys())
-    nf_pairs = sorted(nf_pairs, key=lambda item: nf_values[item])
-    
-    x = [10-p for p in nf_pairs]
+            number_of_faulty_pairs[faulty_count] = 10-float(nf_pairs)
+    return number_of_faulty_pairs
 
-    return x
-
-if __name__ == "__main__":
+def plot_f_faulty_robots_in_20_robots_system():
     f_range = range(1,10+1)
     expected1 = get_expected_faulty_pairs_in_system_of_n_robots(n = 20, f_range=f_range)
     result = get_f_pairs_from_file("/Users/lior.strichash/private/robust-matching/src/experiments/automatic_experiments/results/process_experiments.csv")
-    
-    
     plt.plot(f_range, np.array(expected1), "--", label="expected")
-    plt.plot(f_range, np.array(result), "o", label="experiments")
+    plt.plot(result.keys(), result.values(), "o", label="experiments")
     plt.grid(linestyle = ':')
     plt.xlabel("f")
     plt.legend()
     plt.xticks(f_range)
-    plt.yticks(range((int(min(expected1+result))),int(max(expected1+result))+1)) 
-    plt.ylabel("Expected number of faulty pairs")
-
+    y_min_value = int(min(expected1+list(result.values())))
+    y_max_value = int(max(expected1+list(result.values())))+1
+    y_range = range(y_min_value, y_max_value)
+    plt.yticks(y_range) 
+    plt.ylabel("Number of faulty pairs")
     plt.show() 
-    # n = 20
-    # probablity = get_probablity_function_of_n_robots_f_faulty(20,10)
-    # probablity = get_probablity_function_of_n_robots_f_faulty(20,9)
-    # probablity = get_probablity_function_of_n_robots_f_faulty(20,8)
-    # probablity = get_probablity_function_of_n_robots_f_faulty(20,7)
-    # probablity = get_probablity_function_of_n_robots_f_faulty(20,6)
+
+
+if __name__ == "__main__":
+    plot_f_faulty_robots_in_20_robots_system()
