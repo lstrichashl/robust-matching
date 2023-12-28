@@ -31,7 +31,6 @@ public:
    virtual vector<CEPuck2Entity*> GetRobotsInMatching(){
       return m_robots_in_matching;
    }
-   virtual std::string GetLogFileName();
 
 private:
    Graph m_robotGraph;
@@ -41,6 +40,8 @@ private:
    vector<std::string> m_logs;
    vector<CEPuck2Entity*> m_robots_in_matching;
    bool m_isCommited;
+
+   std::string m_log_file_path;
 
    virtual void write_to_log(Graph graph, pair< list<int>, double > solution, double nf_matching_cost, double nf_half_matching_cost);
 };

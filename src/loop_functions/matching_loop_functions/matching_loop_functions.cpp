@@ -45,11 +45,13 @@ void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
         CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
         m_robots.push_back(robot);
     }
+    TConfigurationNode& paramsNode = GetNode(t_tree, "params");
     try{
-        TConfigurationNode& paramsNode = GetNode(t_tree, "params");
         bool is_commited;
         GetNodeAttribute(paramsNode, "is_commited", is_commited);
         m_isCommited = is_commited;
+
+        GetNodeAttribute(paramsNode, "log_file_path", m_log_file_path);
     }
     catch(...){
         cout << "error with loading params tag in CMatchingLoopFunctions class" << endl;
@@ -57,8 +59,7 @@ void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
 }
 
 void CMatchingLoopFunctions::Destroy(){
-    ofstream os(GetLogFileName());
-
+    ofstream os(m_log_file_path);
     std::string robot_types = "[";
     for (unsigned i=0; i<m_robots.size(); i++){
         CRobustMatching& cController1 = dynamic_cast<CRobustMatching&>(m_robots[i]->GetControllableEntity().GetController());
@@ -202,10 +203,6 @@ void CMatchingLoopFunctions::write_to_log(Graph graph, pair< list<int>, double >
     std::string log =  "{" + matcing_string + "," + cost_string + "," + tick_string + "," + nf_matching_cost_string + "," + nf_half_matching_cost_string + "}";
 
     m_logs.push_back(log);
-}
-
-std::string CMatchingLoopFunctions::GetLogFileName(){
-    return GetSimulator().GetExperimentFileName() + ".log";
 }
 
 bool CMatchingLoopFunctions::IsExperimentFinished() {

@@ -3,6 +3,7 @@ import math
 import pathlib
 import csv
 from tqdm import tqdm
+import numpy as np
 
 PAIRING_THRESHOLD =  0.07
 
@@ -60,14 +61,6 @@ def get_minimum_cost_nf_matching(logs, robot_types):
             min_cost = log["nf_matching_cost"]
     return min_cost
 
-# def get_maximum_nf_pairing(logs, robot_types):
-#     max_matching = log["matching"]
-#     for log in logs:
-#         nf_pairs = get_nf_pairs(log["matching"], robot_types)
-#         if len(nf_pairs) > len(max_pair):
-#             max_matching = 
-
-
 def stat_experiment(
     file_path
 ):
@@ -80,66 +73,91 @@ def stat_experiment(
     optimality = 0
     return stablity, time_to_pairing, min_cost, len(nf_pairs), optimality
 
-def stat_set(
+def stat_experiment_set(
     directory_path
 ):
     files = [f for f in pathlib.Path(directory_path).iterdir() if f.is_file()]
-    avg_stablity = 0
-    avg_time_to_pairing = 0
-    avg_min_cost = 0
-    avg_number_of_pairs = 0
-    avg_optimality = 0
+    arr_stablity = []
+    arr_time_to_pairing = []
+    arr_min_cost = []
+    arr_number_of_pairs = []
+    arr_optimality = []
     for file in files:
         stablity, time_to_pairing, min_cost, number_of_pairs, optimality = stat_experiment(file)
-        avg_stablity += stablity
-        avg_time_to_pairing += time_to_pairing
-        avg_min_cost += min_cost
-        avg_number_of_pairs += number_of_pairs
-        avg_optimality += optimality
-    avg_stablity /= len(files)
-    avg_time_to_pairing /= len(files)
-    avg_min_cost /= len(files)
-    avg_number_of_pairs /= len(files)
-    avg_optimality /= len(files)
-    return avg_stablity, avg_time_to_pairing, avg_min_cost, avg_number_of_pairs, avg_optimality
+        arr_stablity.append(stablity)
+        arr_time_to_pairing.append(time_to_pairing)
+        arr_min_cost.append(min_cost)
+        arr_number_of_pairs.append(number_of_pairs)
+        arr_optimality.append(optimality)
+    return arr_stablity, arr_time_to_pairing, arr_min_cost, arr_number_of_pairs, arr_optimality
+
+
+def get_std_mean(array):
+    nparray = np.array(array)
+    return {"std": np.std(nparray), "mean": np.mean(nparray)}
+
 
 def stat_all(
-    results_path
+    results_path,
+    from_cache = True
 ):
+    cache_file = f"{results_path}/cache.json"
+    if from_cache and pathlib.Path(cache_file).is_file():
+        with open(cache_file, 'r') as f:
+            results = json.load(f)
+            return results
     experiments = [f for f in pathlib.Path(results_path).iterdir() if f.is_dir()]
     results = []
     for exp in tqdm(experiments):
-        stablity, time_to_pairing, min_cost, number_of_pairs, optimality = stat_set(
+        stablity, time_to_pairing, min_cost, number_of_pairs, optimality = stat_experiment_set(
             directory_path=exp
         )
         results.append({
             "name": exp.name,
-            "stablity": stablity,
-            "time_to_pairing": time_to_pairing,
-            "min_cost": min_cost,
-            "number_of_pairs": number_of_pairs,
-            "optimality": optimality
+            "stablity": get_std_mean(stablity),
+            "time_to_pairing": get_std_mean(time_to_pairing),
+            "min_cost": get_std_mean(min_cost),
+            "number_of_pairs":  get_std_mean(number_of_pairs),
+            "optimality": get_std_mean(optimality)
         })
+    with open(cache_file, 'w') as f:
+        json.dump(results, f)
     return results
 
+def get_f_faulty_pairs_by_algorithm(
+    results,
+    algorithm
+):
+    stds = {}
+    means = {}
+    for r in results:
+        configuration = r["name"].split('_')
+        faulty_count = int(configuration[2][6:])
+        nf_pairs = r["number_of_pairs"]
+        if (configuration[3] == "isCommited1" and algorithm == "commited") or (configuration[3] == "isCommited0" and algorithm == "repeated"):
+            means[faulty_count] = 10-float(nf_pairs["mean"])
+            stds[faulty_count] = float(nf_pairs["std"])
+    return means, stds
 
 def main():
-    # avg_stablity, avg_time_to_pairing, avg_min_cost, avg_number_of_pairs, avg_optimality = stat_set(
-    #     directory_path="/Users/lior.strichash/private/robust-matching/src/experiments/automatic_experiments/non_faulty15_faulty5"
-    # )
     results = stat_all(
-        results_path="/Users/lior.strichash/private/robust-matching/src/experiments/automatic_experiments/results"
+        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results",
+        from_cache = True
     )
-    r2 = []
-    for r in results:
-        r2.append([r["name"], r["time_to_pairing"], r["stablity"], r["optimality"], r["number_of_pairs"]])
-    header = ["name", "time_to_pairing", "stablity", "optimality", "number of pairs"]
-    with open("/Users/lior.strichash/private/robust-matching/src/experiments/automatic_experiments/results/process_experiments.csv", "w") as f:
-        writer = csv.writer(f)
-        writer.writerow(header)
-        writer.writerows(r2)
+    # r2 = []
+    # for r in results:
+    #     r2.append([r["name"], r["time_to_pairing"], r["stablity"], r["optimality"], r["number_of_pairs"]])
+    # header = ["name", "time_to_pairing", "stablity", "optimality", "number of pairs"]
+    # with open("/Users/lior.strichash/private/robust-matching/automatic_experiments/results/process_experiments.csv", "w") as f:
+    #     writer = csv.writer(f)
+    #     writer.writerow(header)
+    #     writer.writerows(r2)
+
+    means, stds = get_f_faulty_pairs_by_algorithm(results=results)
+
     
 if __name__ == "__main__":
-    avg_stablity, avg_time_to_pairing, avg_min_cost, avg_number_of_pairs, avg_optimality = stat_set(
-        directory_path="/Users/lior.strichash/private/robust-matching/src/experiments/automatic_experiments/results/non_faulty11_faulty0"
-    )
+    main()
+    # avg_stablity, avg_time_to_pairing, avg_min_cost, avg_number_of_pairs, avg_optimality = stat_set(
+    #     directory_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/non_faulty11_faulty0"
+    # )

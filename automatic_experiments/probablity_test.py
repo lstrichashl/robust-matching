@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
+from process_logs import get_f_faulty_pairs_by_algorithm, stat_all
+
 def M(n):
     k = int(n/2)
     return factorial(n) / (pow(2,k)*factorial(k))
@@ -58,17 +60,21 @@ def get_f_pairs_from_file(file_path):
 def plot_f_faulty_robots_in_20_robots_system():
     f_range = range(1,10+1)
     expected1 = get_expected_faulty_pairs_in_system_of_n_robots(n = 20, f_range=f_range)
-    result = get_f_pairs_from_file("/Users/lior.strichash/private/robust-matching/src/experiments/automatic_experiments/results/process_experiments.csv")
-    plt.plot(f_range, np.array(expected1), "--", label="expected")
-    plt.plot(result.keys(), result.values(), "o", label="experiments")
+
+    results = stat_all(
+        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results"
+    )
+    means_commited, stds_commited = get_f_faulty_pairs_by_algorithm(results,
+                                     algorithm="commited")
+    means_repeated, stds_repeated = get_f_faulty_pairs_by_algorithm(results,
+                                     algorithm="repeated")
+    plt.plot(f_range, np.array(expected1), "--", label="expected", color="gray", alpha=0.3)
+    plt.errorbar(list(means_repeated.keys()), list(means_repeated.values()), list(stds_repeated.values()), fmt="o", label="repeated", capsize=5)
+    plt.errorbar(list(means_commited.keys()), list(means_commited.values()), list(stds_commited.values()), fmt="o", label="commited", capsize=5)
     plt.grid(linestyle = ':')
     plt.xlabel("f")
     plt.legend()
     plt.xticks(f_range)
-    y_min_value = int(min(expected1+list(result.values())))
-    y_max_value = int(max(expected1+list(result.values())))+1
-    y_range = range(y_min_value, y_max_value)
-    plt.yticks(y_range) 
     plt.ylabel("Number of faulty pairs")
     plt.show() 
 
