@@ -35,7 +35,8 @@ double get_costs_diff(vector<double> cost1, vector<double> cost2){
 CMatchingLoopFunctions::CMatchingLoopFunctions():
     m_solution(0,-1),
     m_costs(0),
-    m_logs(0)
+    m_logs(0),
+    m_isCommited(false)
     {}
 
 void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
@@ -44,10 +45,19 @@ void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
         CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
         m_robots.push_back(robot);
     }
+    try{
+        TConfigurationNode& paramsNode = GetNode(t_tree, "params");
+        bool is_commited;
+        GetNodeAttribute(paramsNode, "is_commited", is_commited);
+        m_isCommited = is_commited;
+    }
+    catch(...){
+        cout << "error with loading params tag in CMatchingLoopFunctions class" << endl;
+    }
 }
 
 void CMatchingLoopFunctions::Destroy(){
-    ofstream os(GetLogFileName(), std::ios_base::app);
+    ofstream os(GetLogFileName());
 
     std::string robot_types = "[";
     for (unsigned i=0; i<m_robots.size(); i++){
@@ -64,7 +74,9 @@ void CMatchingLoopFunctions::Destroy(){
     all_log.pop_back();
     all_log += "]";
 
-    std::string filecontent = "{\"robot_types\":"+robot_types+",\"logs\":"+all_log+"}";
+    std::string param_string = "{\"is_commited\":\""+to_string(m_isCommited)+"\"}";
+
+    std::string filecontent = "{\"params\":"+param_string+",\"robot_types\":"+robot_types+",\"logs\":"+all_log+"}";
     os << filecontent << endl;
     os.close();
 }
@@ -97,8 +109,8 @@ std::vector<std::pair<int, CVector2>> positions;
                 Real angle_distance = 1 - (abs(cZAngle1.GetValue() - cZAngle2.GetValue()) / 3.141592);
                 G.AddEdge(i, j);
                 cost[G.GetEdgeIndex(i,j)] = distance_vector1.Length();
-                cost[G.GetEdgeIndex(i,j)] += + 0.01 * angle_distance;
-                // cout << "(" << i << "," << j << "): " << angle_distance << "," << distance_vector1.Length() << endl;
+                // cost[G.GetEdgeIndex(i,j)] += + 0.00605 * angle_distance;
+                // cost[G.GetEdgeIndex(i,j)] += + 0.01 * angle_distance;
             }
         }
     }
@@ -126,9 +138,6 @@ MatchingResult GetBestMatching(vector<CEPuck2Entity*> robots) {
             j = i;
         }
     }
-    
-    cout << j << endl;
-
     robots_clone = robots;
     robots_clone.erase(robots_clone.begin()+j);
     MatchingResult bestMatchingResult = GetMatchingResult(robots_clone);
@@ -136,20 +145,20 @@ MatchingResult GetBestMatching(vector<CEPuck2Entity*> robots) {
 }
 
 void CMatchingLoopFunctions::PreStep(){
-    MatchingResult result = GetBestMatching(m_robots);
-    pair< list<int>, double > solution = result._solution;
-    vector<double> cost = result._cost;
-	list<int> matching = solution.first;
-	double matching_cost = solution.second;
-    m_solution = solution;
-    m_robotGraph = result._graph;
-    m_costs = cost;
+    if(m_solution.second == -1 || !m_isCommited) {
+        MatchingResult result = GetBestMatching(m_robots);
+        m_solution = result._solution;
+        m_costs = result._cost;
+        m_robotGraph = result._graph;
+        m_robots_in_matching = result._robots;
+    }
+    list<int> matching = m_solution.first;
     vector<int> nf_matchig;
     vector<int> nf_half_matchig;
-    m_robots_in_matching = result._robots;
-
-    cout << matching_cost << endl;
-
+    for(unsigned i = 0; i < m_robots.size(); i++) {
+        CRobustMatching& cController = dynamic_cast<CRobustMatching&>(m_robots[i]->GetControllableEntity().GetController());
+        cController.mate = NULL;
+    }
     for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
     {
         pair<int, int> edge = m_robotGraph.GetEdge( *it );
@@ -166,16 +175,15 @@ void CMatchingLoopFunctions::PreStep(){
         cController1.mate = robot2;
         cController2.mate = robot1; 
     }
-
     double nf_matching_cost = 0;
     for(vector<int>::iterator it = nf_matchig.begin(); it != nf_matchig.end(); it++)
-		nf_matching_cost += cost[*it];
+		nf_matching_cost += m_costs[*it];
 
     double nf_half_matching_cost = 0;
     for(vector<int>::iterator it = nf_half_matchig.begin(); it != nf_half_matchig.end(); it++)
-		nf_half_matching_cost += cost[*it];
+		nf_half_matching_cost += m_costs[*it];
 
-    write_to_log(result._graph, solution, nf_matching_cost, nf_half_matching_cost);
+    write_to_log(m_robotGraph, m_solution, nf_matching_cost, nf_half_matching_cost);
 }
 
 void CMatchingLoopFunctions::write_to_log(Graph graph, pair< list<int>, double > solution, double nf_matching_cost, double nf_half_matching_cost){

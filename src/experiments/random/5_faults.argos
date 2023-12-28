@@ -50,6 +50,9 @@
 
   <loop_functions library="build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
                   label="matching_loop_functions">
+        <params 
+          is_commited="true"
+        />
   </loop_functions>
 
   <!-- *********************** -->

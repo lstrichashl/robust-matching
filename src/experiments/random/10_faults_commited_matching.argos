@@ -48,8 +48,11 @@
     </adverserial_opposite_direction_controller>
   </controllers>
 
-  <loop_functions library="build/src/loop_functions/commited_matching_loop_functions/libcommited_matching_loop_functions"
-                  label="commited_matching_loop_functions">
+  <loop_functions library="build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+                  label="matching_loop_functions">
+        <params 
+          is_commited="true"
+        />
   </loop_functions>
 
   <!-- *********************** -->
