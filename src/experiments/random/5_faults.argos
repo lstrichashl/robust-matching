@@ -51,7 +51,9 @@
   <loop_functions library="build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
                   label="matching_loop_functions">
         <params 
-          is_commited="true"
+          is_commited="false"
+          log_file_path="/Users/lior.strichash/private/robust-matching/src/experiments/random/5_faults2222.argos.log"
+          repeat_interval="100"
         />
   </loop_functions>
 

@@ -8,8 +8,8 @@ if __name__ == "__main__":
         random_seed=8,
         non_faulty_count=11,
         faulty_count=0,
+        algorithm="repeated100",
         visualization=True,
-        is_commited=False
     )
     work(file)
     print(stat_experiment(

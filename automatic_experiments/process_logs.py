@@ -124,19 +124,16 @@ def stat_all(
         json.dump(results, f)
     return results
 
-def get_f_faulty_pairs_by_algorithm(
-    results,
-    algorithm
+def get_f_faulty_pairs(
+    results
 ):
     stds = {}
     means = {}
     for r in results:
-        configuration = r["name"].split('_')
-        faulty_count = int(configuration[2][6:])
+        faulty_count = int(r["name"][6:])
         nf_pairs = r["number_of_pairs"]
-        if (configuration[3] == "isCommited1" and algorithm == "commited") or (configuration[3] == "isCommited0" and algorithm == "repeated"):
-            means[faulty_count] = 10-float(nf_pairs["mean"])
-            stds[faulty_count] = float(nf_pairs["std"])
+        means[faulty_count] = 10-float(nf_pairs["mean"])
+        stds[faulty_count] = float(nf_pairs["std"])
     return means, stds
 
 def main():

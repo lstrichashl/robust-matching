@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
-from process_logs import get_f_faulty_pairs_by_algorithm, stat_all
+from process_logs import get_f_faulty_pairs, stat_all
 
 def M(n):
     k = int(n/2)
@@ -62,12 +62,13 @@ def plot_f_faulty_robots_in_20_robots_system():
     expected1 = get_expected_faulty_pairs_in_system_of_n_robots(n = 20, f_range=f_range)
 
     results = stat_all(
-        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results"
+        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/repeated1"
     )
-    means_commited, stds_commited = get_f_faulty_pairs_by_algorithm(results,
-                                     algorithm="commited")
-    means_repeated, stds_repeated = get_f_faulty_pairs_by_algorithm(results,
-                                     algorithm="repeated")
+    results_commited = stat_all(
+        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/commited"
+    )
+    means_commited, stds_commited = get_f_faulty_pairs(results_commited)
+    means_repeated, stds_repeated = get_f_faulty_pairs(results)
     plt.plot(f_range, np.array(expected1), "--", label="expected", color="gray", alpha=0.3)
     plt.errorbar(list(means_repeated.keys()), list(means_repeated.values()), list(stds_repeated.values()), fmt="o", label="repeated", capsize=5, color="orange")
     plt.errorbar(list(means_commited.keys()), list(means_commited.values()), list(stds_commited.values()), fmt="o", label="commited", capsize=5, color="#1f77b4")
