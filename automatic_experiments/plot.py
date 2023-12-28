@@ -69,15 +69,14 @@ def plot_f_faulty_robots_in_20_robots_system():
     means_repeated, stds_repeated = get_f_faulty_pairs_by_algorithm(results,
                                      algorithm="repeated")
     plt.plot(f_range, np.array(expected1), "--", label="expected", color="gray", alpha=0.3)
-    plt.errorbar(list(means_repeated.keys()), list(means_repeated.values()), list(stds_repeated.values()), fmt="o", label="repeated", capsize=5)
-    plt.errorbar(list(means_commited.keys()), list(means_commited.values()), list(stds_commited.values()), fmt="o", label="commited", capsize=5)
+    plt.errorbar(list(means_repeated.keys()), list(means_repeated.values()), list(stds_repeated.values()), fmt="o", label="repeated", capsize=5, color="orange")
+    plt.errorbar(list(means_commited.keys()), list(means_commited.values()), list(stds_commited.values()), fmt="o", label="commited", capsize=5, color="#1f77b4")
     plt.grid(linestyle = ':')
     plt.xlabel("f")
     plt.legend()
     plt.xticks(f_range)
     plt.ylabel("Number of faulty pairs")
     plt.show() 
-
 
 if __name__ == "__main__":
     plot_f_faulty_robots_in_20_robots_system()
