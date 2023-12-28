@@ -2,3 +2,9 @@ build/
 .vscode/
 
 *.log
+*.pyc
+*.qt
+*.DS_Store
+.python-version
+
+cache.json
