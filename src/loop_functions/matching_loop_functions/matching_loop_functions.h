@@ -42,6 +42,7 @@ private:
    bool m_isCommited;
 
    std::string m_log_file_path;
+   UInt32 m_repeat_interval;
 
    virtual void write_to_log(Graph graph, pair< list<int>, double > solution, double nf_matching_cost, double nf_half_matching_cost);
 };

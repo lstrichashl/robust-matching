@@ -36,7 +36,8 @@ CMatchingLoopFunctions::CMatchingLoopFunctions():
     m_solution(0,-1),
     m_costs(0),
     m_logs(0),
-    m_isCommited(false)
+    m_isCommited(false),
+    m_repeat_interval(1)
     {}
 
 void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
@@ -52,6 +53,7 @@ void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
         m_isCommited = is_commited;
 
         GetNodeAttribute(paramsNode, "log_file_path", m_log_file_path);
+        GetNodeAttribute(paramsNode, "repeat_interval", m_repeat_interval);
     }
     catch(...){
         cout << "error with loading params tag in CMatchingLoopFunctions class" << endl;
@@ -146,7 +148,8 @@ MatchingResult GetBestMatching(vector<CEPuck2Entity*> robots) {
 }
 
 void CMatchingLoopFunctions::PreStep(){
-    if(m_solution.second == -1 || !m_isCommited) {
+    UInt32 time = GetSpace().GetSimulationClock();
+    if(m_solution.second == -1 || (time % m_repeat_interval == 0 && !m_isCommited)) {
         MatchingResult result = GetBestMatching(m_robots);
         m_solution = result._solution;
         m_costs = result._cost;
