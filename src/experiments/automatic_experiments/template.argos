@@ -110,7 +110,7 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-      <!-- <qt-opengl>
+      <qt-opengl>
       <user_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
                   label="matching_qt_user_functions" />
       <camera>
@@ -119,7 +119,7 @@
 
         </placements>
       </camera>
-    </qt-opengl> -->
+    </qt-opengl>
   </visualization>
   
 </argos-configuration>
