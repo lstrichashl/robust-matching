@@ -44,13 +44,13 @@ def how_many_times_matching_changed(logs):
 def get_nf_pairs(matching, robot_types):
     nf_pairs = []
     for pair in matching:
-        if pair[0] in robot_types["CRobustMatching"] and pair[1] in robot_types["CRobustMatching"]:
+        if pair[0] in robot_types["non_faulty"] and pair[1] in robot_types["non_faulty"]:
             nf_pairs.append(pair)
     return nf_pairs
 
 def get_time_to_pairing(logs, robot_types):
     for log in logs:
-        if log["nf_half_matching_cost"] < PAIRING_THRESHOLD * len(robot_types["CRobustMatching"])/2:
+        if log["nf_half_matching_cost"] < PAIRING_THRESHOLD * len(robot_types["non_faulty"])/2:
             return log["tick"]
     return -1
 

@@ -1,5 +1,6 @@
-add_library(robust_matching SHARED robust_matching.h robust_matching.cpp)
+add_library(robust_matching SHARED matching_regular_bot.h matching_regular_bot.cpp opposite_direction/opposite_direction.h opposite_direction/opposite_direction.cpp)
 target_link_libraries(robust_matching
+  abstract_controllers
   argos3core_simulator
   argos3plugin_simulator_epuck2
   argos3plugin_simulator_genericrobot)

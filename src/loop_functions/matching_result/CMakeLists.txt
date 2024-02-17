@@ -1,0 +1,10 @@
+add_library(matching_result SHARED matching_result.h)
+
+target_link_libraries(matching_result
+  minimum_cost_perfect_matching
+  argos3core_simulator
+  argos3plugin_simulator_dynamics2d
+  argos3plugin_simulator_entities
+  argos3plugin_simulator_footbot
+  argos3plugin_simulator_genericrobot
+  argos3plugin_simulator_media)

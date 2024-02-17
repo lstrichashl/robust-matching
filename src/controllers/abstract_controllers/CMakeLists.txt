@@ -1,0 +1,5 @@
+add_library(abstract_controllers SHARED base_controller.h)
+target_link_libraries(abstract_controllers
+  argos3core_simulator
+  argos3plugin_simulator_epuck2
+  argos3plugin_simulator_genericrobot)

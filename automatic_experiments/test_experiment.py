@@ -6,9 +6,10 @@ if __name__ == "__main__":
     build()
     file, log_file = create_experiment_file( # faulty robot that break two nf_robots
         random_seed=8,
-        non_faulty_count=11,
-        faulty_count=0,
-        algorithm="repeated100",
+        non_faulty_count=10,
+        faulty_count=10,
+        algorithm="virtual_forces",
+        length=300,
         visualization=True,
     )
     work(file)

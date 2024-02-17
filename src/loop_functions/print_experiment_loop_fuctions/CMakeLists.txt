@@ -1,0 +1,18 @@
+link_directories(${CMAKE_BINARY_DIR}/src/controllers/robust_matching)
+set(print_experiment_loop_fuctions_SOURCES print_experiment_loop_fuctions.cpp)
+
+add_library(print_experiment_loop_fuctions SHARED ${print_experiment_loop_fuctions_SOURCES})
+target_link_libraries(print_experiment_loop_fuctions
+  virtual_forces
+  minimum_cost_perfect_matching
+  matching_result
+  argos3core_simulator
+  argos3plugin_simulator_dynamics2d
+  argos3plugin_simulator_entities
+  argos3plugin_simulator_footbot
+  argos3plugin_simulator_genericrobot
+  argos3plugin_simulator_media)
+
+if(ARGOS_QTOPENGL_FOUND)
+  target_link_libraries(print_experiment_loop_fuctions argos3plugin_simulator_qtopengl)
+endif(ARGOS_QTOPENGL_FOUND)

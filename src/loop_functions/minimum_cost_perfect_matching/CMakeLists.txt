@@ -1,0 +1,9 @@
+add_library(minimum_cost_perfect_matching SHARED BinaryHeap.cpp Graph.cpp Matching.cpp)
+
+target_link_libraries(minimum_cost_perfect_matching
+  argos3core_simulator
+  argos3plugin_simulator_dynamics2d
+  argos3plugin_simulator_entities
+  argos3plugin_simulator_footbot
+  argos3plugin_simulator_genericrobot
+  argos3plugin_simulator_media)

@@ -33,6 +33,10 @@
 
   <loop_functions library="build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
                   label="matching_loop_functions">
+        <params 
+          is_commited="false"
+          log_file_path="tmp"
+        />
   </loop_functions>
 
   <!-- *********************** -->

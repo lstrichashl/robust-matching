@@ -61,21 +61,34 @@ def plot_f_faulty_robots_in_20_robots_system():
     f_range = range(1,10+1)
     expected1 = get_expected_faulty_pairs_in_system_of_n_robots(n = 20, f_range=f_range)
 
-    results = stat_all(
+    results_repeated = stat_all(
         results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/repeated1"
     )
     results_commited = stat_all(
         results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/commited"
     )
+    results_virtual_forces = stat_all(
+        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/virtual_forces_new3",
+        from_cache=False
+    )
+    results_virtual_forces_unlimited_range = stat_all(
+        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/virtual_forces_unlimited_range"
+    )
     means_commited, stds_commited = get_f_faulty_pairs(results_commited)
-    means_repeated, stds_repeated = get_f_faulty_pairs(results)
-    plt.plot(f_range, np.array(expected1), "--", label="expected", color="gray", alpha=0.3)
-    plt.errorbar(list(means_repeated.keys()), list(means_repeated.values()), list(stds_repeated.values()), fmt="o", label="repeated", capsize=5, color="orange")
-    plt.errorbar(list(means_commited.keys()), list(means_commited.values()), list(stds_commited.values()), fmt="o", label="commited", capsize=5, color="#1f77b4")
+    means_repeated, stds_repeated = get_f_faulty_pairs(results_repeated)
+    means_forces, stds_forces = get_f_faulty_pairs(results_virtual_forces)
+    mean_unlimited_forces, std_unlimited_forces = get_f_faulty_pairs(results_virtual_forces_unlimited_range)
+    # plt.plot(f_range, np.array(expected1), "--", label="expected", color="gray", alpha=0.3)
+    # plt.errorbar(list(means_repeated.keys()), list(means_repeated.values()), list(stds_repeated.values()), fmt="o", label="repeated", capsize=5)
+    # plt.errorbar(list(means_commited.keys()), list(means_commited.values()), list(stds_commited.values()), fmt="o", label="commited", capsize=5)
+    plt.errorbar(list(means_forces.keys()), list(means_forces.values()), list(stds_forces.values()), fmt="o", label="virtual_forces_new", capsize=5)
+    plt.errorbar(list(mean_unlimited_forces.keys()), list(mean_unlimited_forces.values()), list(std_unlimited_forces.values()), fmt="o", label="virtual_forces_unlimited_range", capsize=5)
+    
     plt.grid(linestyle = ':')
     plt.xlabel("f")
     plt.legend()
     plt.xticks(f_range)
+    plt.yticks(range(0,11))
     plt.ylabel("Number of faulty pairs")
     plt.show() 
 

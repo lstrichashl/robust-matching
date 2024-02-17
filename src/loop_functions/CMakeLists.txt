@@ -1,1 +1,4 @@
 add_subdirectory(matching_loop_functions)
+add_subdirectory(minimum_cost_perfect_matching)
+add_subdirectory(matching_result)
+add_subdirectory(print_experiment_loop_fuctions)

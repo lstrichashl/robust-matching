@@ -1,33 +1,115 @@
-#include "robust_matching.h"
-
+#include "virtual_forces_bot.h"
 #include <argos3/core/utility/configuration/argos_configuration.h>
 #include <argos3/core/simulator/space/space.h>
 #include <argos3/core/simulator/simulator.h>
 #include <argos3/plugins/robots/e-puck2/simulator/epuck2_entity.h>
-#include "math.h"
 
-
-CRobustMatching::CRobustMatching() :
+CVirtualForces::CVirtualForces():
    m_pcWheels(NULL),
-   m_pcLedAct(NULL),
-   m_typename("CRobustMatching")
-{}
+   m_pcLedAct(NULL)
+{
+    m_typename = "non_faulty";
+}
 
 
-void CRobustMatching::Init(TConfigurationNode& t_node) {
+void CVirtualForces::Init(TConfigurationNode& t_node) {
     m_pcWheels = GetActuator<CCI_DifferentialSteeringActuator>("differential_steering");
     m_pcLedAct = GetActuator<CCI_EPuck2LEDsActuator>("epuck2_leds");
+    m_pcRABAct    = GetActuator<CCI_RangeAndBearingActuator  >("range_and_bearing" );
+    m_pcRABSens   = GetSensor  <CCI_RangeAndBearingSensor    >("range_and_bearing" );
     try {
       m_sWheelTurningParams.Init(GetNode(t_node, "wheel_turning"));
     }
     catch(CARGoSException& ex) {
         THROW_ARGOSEXCEPTION_NESTED("Error parsing the controller parameters.", ex);
     }
+
     Reset();
 }
 
+void CVirtualForces::Reset() {
+    m_eState = STATE_ALONE;
+    m_pcRABAct->SetData(0, STATE_ALONE);
+    m_pcLedAct->SetAllRGBColors(CColor::GREEN);
+}
 
-void CRobustMatching::SWheelTurningParams::Init(TConfigurationNode& t_node) {
+void CVirtualForces::ControlStep() {
+    switch (m_eState)
+    {
+    case STATE_ALONE:
+        Alone();
+        break;
+    case STATE_PAIRED:
+        Paired();
+    default:
+        break;
+    }
+}
+
+void CVirtualForces::Alone(){
+    if(m_eState != STATE_ALONE){
+        m_eState = STATE_ALONE;
+        m_pcRABAct->SetData(0, STATE_ALONE);
+    }
+    if(ShouldTransitionToPaired()) {
+        Paired();
+    }
+    else {
+        CVector2 cDirection = FlockingVector();
+        SetWheelSpeedsFromVector(cDirection);
+    }
+}
+
+void CVirtualForces::Paired(){
+    if(m_eState != STATE_PAIRED){
+        m_eState = STATE_PAIRED;
+        m_pcRABAct->SetData(0, STATE_PAIRED);
+    }
+    m_pcWheels->SetLinearVelocity(0, 0);
+}
+
+bool CVirtualForces::ShouldTransitionToPaired(){
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+    if(! tMsgs.empty()) {
+        for(size_t i = 0; i < tMsgs.size(); ++i) {
+            if(tMsgs[i].Range < 8 && tMsgs[i].Data[0] == STATE_ALONE){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+
+CVector2 CVirtualForces::FlockingVector() {
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+    if(! tMsgs.empty()) {
+        CVector2 cAccum;
+        for(size_t i = 0; i < tMsgs.size(); ++i) {
+            if(tMsgs[i].Data[0] == STATE_ALONE) {
+                Real fLJ = ElectricalForcePotentail(tMsgs[i].Range);
+                cAccum += CVector2(fLJ,
+                            tMsgs[i].HorizontalBearing);
+            }
+            else {
+                if(tMsgs[i].Range < 20){
+                    Real repulsice_force = -0.1 * ElectricalForcePotentail(tMsgs[i].Range);
+                    cAccum += CVector2(repulsice_force,
+                                tMsgs[i].HorizontalBearing);
+                }
+            }
+        }
+        return cAccum;
+    }
+    else {
+        return CVector2();
+    }
+}
+
+
+
+
+void CVirtualForces::SWheelTurningParams::Init(TConfigurationNode& t_node) {
    try {
       TurningMechanism = NO_TURN;
       CDegrees cAngle;
@@ -44,51 +126,10 @@ void CRobustMatching::SWheelTurningParams::Init(TConfigurationNode& t_node) {
    }
 }
 
-CRadians CRobustMatching::GetZAngleOrientation() {
-   CRadians cZAngle, cYAngle, cXAngle;
-   CEPuck2Entity self_entity = *dynamic_cast<CEPuck2Entity*>(&(&CSimulator::GetInstance())->GetSpace().GetEntity(CCI_Controller::GetId()));
-   self_entity.GetEmbodiedEntity().GetOriginAnchor().Orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
-   return cZAngle;
-}
-
-CVector3 CRobustMatching::ToMateVector() {
-   if(mate != NULL) {
-      CEPuck2Entity self_entity = *dynamic_cast<CEPuck2Entity*>(&(&CSimulator::GetInstance())->GetSpace().GetEntity(CCI_Controller::GetId()));
-      CVector3 self_position = self_entity.GetEmbodiedEntity().GetOriginAnchor().Position;
-      CVector3 mate_position = mate->GetEmbodiedEntity().GetOriginAnchor().Position;
-      CVector3 to_mate = mate_position - self_position;
-      return to_mate;
-   }
-   else {
-      return CVector3(0,0,0);
-   }
-}
-
-void CRobustMatching::ControlStep() {
-   CVector3 to_mate = ToMateVector();
-   CRadians cZAngle = GetZAngleOrientation();
-   to_mate.RotateZ(-cZAngle);
-    if(to_mate.Length() > 0.07){
-         SetWheelSpeedsFromVector(to_mate.Normalize());
-         m_pcLedAct->SetAllRGBColors(CColor::GREEN);
-    }
-    else {
-        m_pcWheels->SetLinearVelocity(0, 0);
-        m_pcLedAct->SetAllBlack();
-      //   m_pcLedAct->SetAllRGBColors(CColor::RED);
-      //   m_pcLedAct->SetAllRedLeds(true);
-    }
-}
-
-void CRobustMatching::Reset(){
-    m_pcLedAct->SetAllBlack();
-    m_pcLedAct->SetAllRGBColors(CColor::GREEN);
-}
-
 // this function was copied from argos-examples/controllers/footbot_flocking
-void CRobustMatching::SetWheelSpeedsFromVector(const CVector3& c_heading) {
+void CVirtualForces::SetWheelSpeedsFromVector(const CVector2& c_heading) {
    /* Get the heading angle */
-   CRadians cHeadingAngle = c_heading.GetZAngle().SignedNormalize();
+   CRadians cHeadingAngle = c_heading.Angle().SignedNormalize();
    /* Get the length of the heading vector */
    Real fHeadingLength = c_heading.Length();
    /* Clamp the speed so that it's not greater than MaxSpeed */
@@ -154,4 +195,4 @@ void CRobustMatching::SetWheelSpeedsFromVector(const CVector3& c_heading) {
    m_pcWheels->SetLinearVelocity(fLeftWheelSpeed, fRightWheelSpeed);
 }
 
-REGISTER_CONTROLLER(CRobustMatching, "robust_matching_controller")
+REGISTER_CONTROLLER(CVirtualForces, "virtual_forces_bot_controller")

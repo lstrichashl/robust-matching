@@ -6,54 +6,55 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="200" ticks_per_second="10" random_seed="12345" />
+    <experiment length="150" ticks_per_second="10" random_seed="12345" />
   </framework>
   
   <!-- *************** -->
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <robust_matching_controller id="non_faulty" library="build/src/controllers/robust_matching/librobust_matching.dylib">
+    <virtual_forces_bot_controller id="non_faulty" library="build/src/controllers/virtual_forces/libvirtual_forces.dylib">
       <actuators>
         <differential_steering implementation="default" />
         <epuck2_leds implementation="default" medium="leds" />
+        <range_and_bearing implementation="default" />
       </actuators>
       <sensors>
       	<epuck2_encoder implementation="default" />
         <epuck2_battery implementation="default"/>
+        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
       </sensors>
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="10"
                        no_turn_angle_threshold="3"
-                       max_speed="10" />
+                       max_speed="1" />
       </params>
-    </robust_matching_controller>
-
-    <adverserial_opposite_direction_controller id="faulty" library="build/src/controllers/robust_matching/librobust_matching.dylib">
+    </virtual_forces_bot_controller>
+    <virtual_forces_adverserial_controller id="faulty" library="build/src/controllers/virtual_forces/libvirtual_forces.dylib">
       <actuators>
         <differential_steering implementation="default" />
         <epuck2_leds implementation="default" medium="leds" />
+        <range_and_bearing implementation="default" />
       </actuators>
       <sensors>
       	<epuck2_encoder implementation="default" />
         <epuck2_battery implementation="default"/>
+        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
       </sensors>
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="10"
                        no_turn_angle_threshold="3"
-                       max_speed="10" />
+                       max_speed="1" />
       </params>
-    </adverserial_opposite_direction_controller>
+    </virtual_forces_adverserial_controller>
   </controllers>
 
-  <loop_functions library="build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
-                  label="matching_loop_functions">
-        <params 
-          is_commited="false"
-          log_file_path="tmp_log.json"
-          repeat_interval="1"
+  <loop_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions"
+                  label="print_experiment_loop_fuctions">
+        <params
+          log_file_path="tmp"
         />
   </loop_functions>
 
@@ -64,8 +65,8 @@
 		 <distribute>
 		   <position method="uniform" min="-0.75,-0.75,0" max="0.75,0.75,0" />
 		   <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-		   <entity quantity="10" max_trials="100">
-		     <e-puck2 id="1" rab_range="5" rab_data_size="3">
+		   <entity quantity="8" max_trials="100">
+		     <e-puck2 id="12" rab_range="5" rab_data_size="3">
 		       <controller config="non_faulty" />
 		     </e-puck2>
 		   </entity>
@@ -73,7 +74,7 @@
         <distribute>
 		   <position method="uniform" min="-0.75,-0.75,0" max="0.75,0.75,0" />
 		   <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-		   <entity quantity="10" max_trials="100">
+		   <entity quantity="8" max_trials="100">
                 <e-puck2 id="faulty" rab_range="5" rab_data_size="3">
                     <controller config="faulty" />
                 </e-puck2>
@@ -115,9 +116,7 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-    <qt-opengl>
-      <user_functions library="build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
-                  label="matching_qt_user_functions" />
+      <qt-opengl>
       <camera>
         <placements>
             <placement index="0" position="0.0,-0.792159,1.51472" look_at="0.0,-0.41199,0.58981" up="-0.00924894,0.924863,0.380188" lens_focal_length="20"                 />

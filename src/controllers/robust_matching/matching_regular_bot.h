@@ -5,11 +5,12 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_differential_steering_actuator.h>
 #include <argos3/plugins/robots/e-puck2/simulator/epuck2_entity.h>
 #include <argos3/plugins/robots/e-puck2/control_interface/ci_epuck2_leds_actuator.h>
+#include "src/controllers/abstract_controllers/base_controller.h"
 
 
 using namespace argos;
 
-class CRobustMatching : public CCI_Controller {
+class CRobustMatching : public CCI_Controller, public BaseConrtoller {
 
 public:
     CRobustMatching();
@@ -42,15 +43,10 @@ public:
       void Init(TConfigurationNode& t_tree);
    };
 
-   virtual std::string GetType(){
-      return m_typename;
-   }
-
 protected:
     CCI_DifferentialSteeringActuator *m_pcWheels;
     SWheelTurningParams m_sWheelTurningParams;
     CCI_EPuck2LEDsActuator *m_pcLedAct;
-    std::string m_typename;
 };
 
 

@@ -1,14 +1,5 @@
 link_directories(${CMAKE_BINARY_DIR}/src/controllers/robust_matching)
 set(matching_loop_functions_SOURCES matching_loop_functions.cpp)
-set(matching_loop_functions_SOURCES
-    ${matching_loop_functions_SOURCES}
-    minimum_cost_perfect_matching/BinaryHeap.cpp)
-set(matching_loop_functions_SOURCES
-    ${matching_loop_functions_SOURCES}
-    minimum_cost_perfect_matching/Graph.cpp)
-set(matching_loop_functions_SOURCES
-    ${matching_loop_functions_SOURCES}
-    minimum_cost_perfect_matching/Matching.cpp)
 
 if(ARGOS_QTOPENGL_FOUND)
   include_directories(${ARGOS_QTOPENGL_INCLUDE_DIRS})
@@ -19,7 +10,10 @@ endif(ARGOS_QTOPENGL_FOUND)
 
 add_library(matching_loop_functions SHARED ${matching_loop_functions_SOURCES})
 target_link_libraries(matching_loop_functions
+  abstract_controllers
   robust_matching
+  minimum_cost_perfect_matching
+  matching_result
   argos3core_simulator
   argos3plugin_simulator_dynamics2d
   argos3plugin_simulator_entities
