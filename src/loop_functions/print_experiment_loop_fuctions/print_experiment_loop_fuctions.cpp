@@ -40,6 +40,7 @@ void CPrintExperimentFunctions::Destroy(){
 }
 
 void CPrintExperimentFunctions::PreStep(){
+    CBasicLoopFunctions::PreStep();
     // std::vector<std::pair<int,int>> matching = GetRobotPairs(m_robots);
     // std::vector<std::pair<int, CVector2>> positions = GetPositions(m_robots);
     // std::string matcing_string = "\"matching\":\"["; 

@@ -86,15 +86,8 @@ public:
       void Init(TConfigurationNode& t_tree);
    };
 
-protected:
-   /* Current robot state */
-   enum EState {
-      STATE_ALONE = 0,
-      STATE_PAIRED
-   };
 
 protected:
-    EState m_eState;
     CCI_DifferentialSteeringActuator *m_pcWheels;
     CCI_EPuck2LEDsActuator *m_pcLedAct;
     CCI_RangeAndBearingActuator* m_pcRABAct;

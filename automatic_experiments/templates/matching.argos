@@ -115,8 +115,8 @@
   <!-- ****************** -->
   <visualization>
       <qt-opengl>
-      <user_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
-                  label="matching_qt_user_functions" />
+      <!-- <user_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+                  label="matching_qt_user_functions" /> -->
       <camera>
         <placements>
             <placement index="0" position="0.0,-0.792159,1.51472" look_at="0.0,-0.41199,0.58981" up="-0.00924894,0.924863,0.380188" lens_focal_length="20"                 />

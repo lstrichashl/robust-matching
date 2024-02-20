@@ -2,7 +2,6 @@
 #include <argos3/core/simulator/simulator.h>
 #include <argos3/plugins/robots/e-puck2/simulator/epuck2_entity.h>
 #include "src/controllers/robust_matching/matching_regular_bot.h"
-#include "src/loop_functions/matching_result/matching_result.h"
 #include <list>
 
 #include <iostream>
@@ -47,7 +46,7 @@ void CMatchingLoopFunctions::Destroy(){
 }
 
 void CMatchingLoopFunctions::PreStep(){
-    m_robots_positions = GetPositions(m_robots);
+    CBasicLoopFunctions::PreStep();
     UInt32 time = GetSpace().GetSimulationClock();
     if(m_solution.second == -1 || (time % m_repeat_interval == 0 && !m_isCommited)) {
         MatchingResult result = GetBestMatching(m_robots);

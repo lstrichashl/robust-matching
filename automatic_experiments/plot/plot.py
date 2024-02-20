@@ -79,7 +79,7 @@ def stat_all(
         json.dump(results, f)
     return results
 
-def stats_to_plot_data(results):
+def get_number_of_pairs(results):
     stds = {}
     means = {}
     for r in results:
@@ -88,10 +88,21 @@ def stats_to_plot_data(results):
         means[faulty_count] = float(nf_pairs["mean"])
         stds[faulty_count] = float(nf_pairs["std"])
     return means, stds
+
+def get_time_to_stable(results):
+    stds = {}
+    means = {}
+    for r in results:
+        faulty_count = int(r["name"][6:])
+        nf_pairs = r["time_to_pairing"]
+        means[faulty_count] = float(nf_pairs["mean"])
+        stds[faulty_count] = float(nf_pairs["std"])
+    return means, stds
+
         
 
 
-def plot_f_faulty_robots_in_20_robots_system():
+def plot_pairs():
     f_range = range(0,10+1)
     number_of_robots = 20
     # expected_commited = get_expected_faulty_pairs_in_system_of_n_robots(n = number_of_robots, f_range=f_range)
@@ -106,9 +117,9 @@ def plot_f_faulty_robots_in_20_robots_system():
         results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/VirtualForces",
         from_cache=False
     )
-    means_commited, stds_commited = stats_to_plot_data(results_commited)
-    means_forces, stds_forces = stats_to_plot_data(results_virtual_forces)
-    plt.plot(f_range, np.array(worst_case), "--", label="worst", color="red", alpha=0.3)
+    means_commited, stds_commited = get_number_of_pairs(results_commited)
+    means_forces, stds_forces = get_number_of_pairs(results_virtual_forces)
+    plt.plot(f_range, np.array(worst_case), "--", label="matching worst", color="red", alpha=0.3)
     plt.plot(f_range, np.array(best_case), "--", label="best", color="green", alpha=0.3)
     plt.errorbar(list(means_commited.keys()), list(means_commited.values()), list(stds_commited.values()), fmt="o", label="commited", capsize=5)
     plt.errorbar(list(means_forces.keys()), list(means_forces.values()), list(stds_forces.values()), fmt="o", label="Virtual Forces", capsize=5)
@@ -121,5 +132,31 @@ def plot_f_faulty_robots_in_20_robots_system():
     plt.ylabel("number of pairs")
     plt.show() 
 
+
+def plot_time():
+    f_range = range(0,10+1)
+    number_of_robots = 20
+
+    results_commited = stat_all(
+        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/AlgoMatching"
+    )
+    results_virtual_forces = stat_all(
+        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/VirtualForces",
+        from_cache=False
+    )
+    means_commited, stds_commited = get_time_to_stable(results_commited)
+    means_forces, stds_forces = get_time_to_stable(results_virtual_forces)
+    plt.errorbar(list(means_commited.keys()), list(means_commited.values()), list(stds_commited.values()), fmt="o", label="commited", capsize=5)
+    plt.errorbar(list(means_forces.keys()), list(means_forces.values()), list(stds_forces.values()), fmt="o", label="Virtual Forces", capsize=5)
+    
+    plt.grid(linestyle = ':')
+    plt.xlabel("f")
+    plt.legend()
+    plt.xticks(f_range)
+    plt.ylabel("time to be stable")
+    plt.show() 
+
+
 if __name__ == "__main__":
-    plot_f_faulty_robots_in_20_robots_system()
+    plot_time()
+    # plot_pairs()

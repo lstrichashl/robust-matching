@@ -17,7 +17,7 @@
 // #include <argos3/core/simulator/simulator.h>
 // #include <argos3/plugins/robots/e-puck2/simulator/epuck2_entity.h>
 
-#include "src/controllers/abstract_controllers/base_controller.h"
+// #include "src/controllers/abstract_controllers/base_controller.h"
 #include <list>
 #include <iostream>
 #include <fstream>
@@ -131,93 +131,93 @@ MatchingResult GetBestMatching(vector<CEPuck2Entity*> robots) {
     MatchingResult bestMatchingResult = GetMatchingResult(robots_clone);
     return bestMatchingResult;
 }
-vector<int> Get_nf_matching(MatchingResult result){
-    list<int> matching = result._solution.first;
-    vector<int> nf_matchig;
-    for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
-    {
-        pair<int, int> edge = result._graph.GetEdge( *it );
-        CEPuck2Entity* robot1 = result._robots[edge.first];
-        CEPuck2Entity* robot2 = result._robots[edge.second];
-        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robot1->GetControllableEntity().GetController());
-        BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robot2->GetControllableEntity().GetController());
-        if(cController1.GetType() == "non_faulty" && cController2.GetType() == "non_faulty"){
-            nf_matchig.push_back(*it);
-        }
-    }
-    return nf_matchig;
-}
+// vector<int> Get_nf_matching(MatchingResult result){
+//     list<int> matching = result._solution.first;
+//     vector<int> nf_matchig;
+//     for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
+//     {
+//         pair<int, int> edge = result._graph.GetEdge( *it );
+//         CEPuck2Entity* robot1 = result._robots[edge.first];
+//         CEPuck2Entity* robot2 = result._robots[edge.second];
+//         BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robot1->GetControllableEntity().GetController());
+//         BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robot2->GetControllableEntity().GetController());
+//         if(cController1.GetType() == "non_faulty" && cController2.GetType() == "non_faulty"){
+//             nf_matchig.push_back(*it);
+//         }
+//     }
+//     return nf_matchig;
+// }
 
-vector<int> Get_nf_half_matching(MatchingResult result){
-    list<int> matching = result._solution.first;
-    vector<int> nf_half_matchig;
-    for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
-    {
-        pair<int, int> edge = result._graph.GetEdge( *it );
-        CEPuck2Entity* robot1 = result._robots[edge.first];
-        CEPuck2Entity* robot2 = result._robots[edge.second];
-        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robot1->GetControllableEntity().GetController());
-        BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robot2->GetControllableEntity().GetController());
-        if(cController1.GetType() == "non_faulty" || cController2.GetType() == "non_faulty"){
-            nf_half_matchig.push_back(*it);
-        }
-    }
-    return nf_half_matchig;
-}
+// vector<int> Get_nf_half_matching(MatchingResult result){
+//     list<int> matching = result._solution.first;
+//     vector<int> nf_half_matchig;
+//     for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
+//     {
+//         pair<int, int> edge = result._graph.GetEdge( *it );
+//         CEPuck2Entity* robot1 = result._robots[edge.first];
+//         CEPuck2Entity* robot2 = result._robots[edge.second];
+//         BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robot1->GetControllableEntity().GetController());
+//         BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robot2->GetControllableEntity().GetController());
+//         if(cController1.GetType() == "non_faulty" || cController2.GetType() == "non_faulty"){
+//             nf_half_matchig.push_back(*it);
+//         }
+//     }
+//     return nf_half_matchig;
+// }
 
-double GetMatchingCost(vector<int> nf_matchig, vector<double> costs){
-    double nf_matching_cost = 0;
-    for(vector<int>::iterator it = nf_matchig.begin(); it != nf_matchig.end(); it++)
-		nf_matching_cost += costs[*it];
-    return nf_matching_cost;
-}
+// double GetMatchingCost(vector<int> nf_matchig, vector<double> costs){
+//     double nf_matching_cost = 0;
+//     for(vector<int>::iterator it = nf_matchig.begin(); it != nf_matchig.end(); it++)
+// 		nf_matching_cost += costs[*it];
+//     return nf_matching_cost;
+// }
 
-std::vector<std::pair<int, CVector2>> GetPositions(vector<CEPuck2Entity*> robots){
-    std::vector<std::pair<int, CVector2>> positions;
-    int number_of_robots = robots.size();
-    for (unsigned i=0; i<number_of_robots; i++){
-        CVector2 position(robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-                robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
-        positions.push_back(std::make_pair(i, position));
-    }
-    return positions;
-}
+// std::vector<std::pair<int, CVector2>> GetPositions(vector<CEPuck2Entity*> robots){
+//     std::vector<std::pair<int, CVector2>> positions;
+//     int number_of_robots = robots.size();
+//     for (unsigned i=0; i<number_of_robots; i++){
+//         CVector2 position(robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
+//                 robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
+//         positions.push_back(std::make_pair(i, position));
+//     }
+//     return positions;
+// }
 
-Clusters GetRobotPairs(vector<CEPuck2Entity*> robots) {
-    vector<pair<int, CVector2>> positions = GetPositions(robots);
-    vector<vector<int>> possible_robots_in_aggregarion_radios;
-    Clusters robot_pairs;
-    for (unsigned i = 0; i < positions.size(); i++){
-        std::vector<int> robots_in_radios;
-        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robots[i]->GetControllableEntity().GetController());
-        if(cController1.GetType() != "non_faulty"){
-            continue;
-        }
-        for (unsigned j = 0; j < positions.size(); j++){
-            BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robots[j]->GetControllableEntity().GetController());
-            if(cController2.GetType() != "non_faulty"){
-                continue;
-            }
-            if(i == j) {
-                continue;
-            }
-            double distance = (positions[i].second - positions[j].second).Length();
-            if(distance <= cController2.PAIRING_THRESHOLD) {
-                robots_in_radios.push_back(j);
-            }
-        }
-        possible_robots_in_aggregarion_radios.push_back(robots_in_radios);
-    }
-    for(int i = 0; i < possible_robots_in_aggregarion_radios.size(); i++){
-        if(possible_robots_in_aggregarion_radios[i].size() == 1){
-            int other_robot_index = possible_robots_in_aggregarion_radios[i][0];
-            if(possible_robots_in_aggregarion_radios[other_robot_index][0] == i){
-                if(i < other_robot_index){ // make sure we add the pair only once (for example instead of [(7,8),(8,7)] will be added [(7,8)])
-                    vector<int> pairs = {i,other_robot_index};
-                    robot_pairs.AddCluster(pairs);
-                }
-            }
-        }
-    }
-    return robot_pairs;
-}
+// Clusters GetRobotPairs(vector<CEPuck2Entity*> robots) {
+//     vector<pair<int, CVector2>> positions = GetPositions(robots);
+//     vector<vector<int>> possible_robots_in_aggregarion_radios;
+//     Clusters robot_pairs;
+//     for (unsigned i = 0; i < positions.size(); i++){
+//         std::vector<int> robots_in_radios;
+//         BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robots[i]->GetControllableEntity().GetController());
+//         if(cController1.GetType() != "non_faulty"){
+//             continue;
+//         }
+//         for (unsigned j = 0; j < positions.size(); j++){
+//             BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robots[j]->GetControllableEntity().GetController());
+//             if(cController2.GetType() != "non_faulty"){
+//                 continue;
+//             }
+//             if(i == j) {
+//                 continue;
+//             }
+//             double distance = (positions[i].second - positions[j].second).Length();
+//             if(distance <= cController2.PAIRING_THRESHOLD) {
+//                 robots_in_radios.push_back(j);
+//             }
+//         }
+//         possible_robots_in_aggregarion_radios.push_back(robots_in_radios);
+//     }
+//     for(int i = 0; i < possible_robots_in_aggregarion_radios.size(); i++){
+//         if(possible_robots_in_aggregarion_radios[i].size() == 1){
+//             int other_robot_index = possible_robots_in_aggregarion_radios[i][0];
+//             if(possible_robots_in_aggregarion_radios[other_robot_index][0] == i){
+//                 if(i < other_robot_index){ // make sure we add the pair only once (for example instead of [(7,8),(8,7)] will be added [(7,8)])
+//                     vector<int> pairs = {i,other_robot_index};
+//                     robot_pairs.AddCluster(pairs);
+//                 }
+//             }
+//         }
+//     }
+//     return robot_pairs;
+// }

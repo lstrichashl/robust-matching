@@ -70,20 +70,23 @@ void CRobustMatching::ControlStep() {
    CRadians cZAngle = GetZAngleOrientation();
    to_mate.RotateZ(-cZAngle);
     if(to_mate.Length() > PAIRING_THRESHOLD){
+         m_eState = STATE_ALONE;
          SetWheelSpeedsFromVector(to_mate.Normalize());
          m_pcLedAct->SetAllRGBColors(CColor::GREEN);
     }
     else {
-        m_pcWheels->SetLinearVelocity(0, 0);
-        m_pcLedAct->SetAllBlack();
+         m_eState = STATE_PAIRED;
+         m_pcWheels->SetLinearVelocity(0, 0);
+         m_pcLedAct->SetAllBlack();
       //   m_pcLedAct->SetAllRGBColors(CColor::RED);
       //   m_pcLedAct->SetAllRedLeds(true);
     }
 }
 
 void CRobustMatching::Reset(){
-    m_pcLedAct->SetAllBlack();
-    m_pcLedAct->SetAllRGBColors(CColor::GREEN);
+   m_eState = STATE_ALONE;
+   m_pcLedAct->SetAllBlack();
+   m_pcLedAct->SetAllRGBColors(CColor::GREEN);
 }
 
 // this function was copied from argos-examples/controllers/footbot_flocking

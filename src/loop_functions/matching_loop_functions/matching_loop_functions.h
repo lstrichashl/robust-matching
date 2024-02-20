@@ -34,7 +34,6 @@ private:
    Graph m_robotGraph;
    pair< list<int>, double > m_solution;
    vector<double> m_costs;
-   std::vector<std::pair<int, CVector2>>  m_robots_positions;
    vector<CEPuck2Entity*> m_robots_in_matching;
    bool m_isCommited;
 
