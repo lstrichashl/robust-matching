@@ -3,6 +3,7 @@ set(print_experiment_loop_fuctions_SOURCES print_experiment_loop_fuctions.cpp)
 
 add_library(print_experiment_loop_fuctions SHARED ${print_experiment_loop_fuctions_SOURCES})
 target_link_libraries(print_experiment_loop_fuctions
+  basic_loop_functions
   virtual_forces
   minimum_cost_perfect_matching
   matching_result

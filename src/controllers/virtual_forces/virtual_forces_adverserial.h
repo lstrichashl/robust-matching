@@ -18,7 +18,7 @@ public:
     virtual ~CAdverserialVirtualForces() {}
     virtual void ControlStep();
     virtual void Reset();
-    // virtual bool ShouldTransitionToPaired();
+    virtual bool ShouldTransitionToPaired();
     virtual CVector2 FlockingVector();
 };
 

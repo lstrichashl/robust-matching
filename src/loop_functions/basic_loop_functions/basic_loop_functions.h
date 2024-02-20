@@ -1,0 +1,31 @@
+#ifndef BASIC_LOOP_FUNCTIONS_H
+#define BASIC_LOOP_FUNCTIONS_H
+
+#include <argos3/core/simulator/loop_functions.h>
+#include <argos3/plugins/robots/e-puck2/simulator/epuck2_entity.h>
+#include "src/controllers/abstract_controllers/base_controller.h"
+#include <vector>
+
+using namespace argos;
+
+class CBasicLoopFunctions : public CLoopFunctions {
+
+public:
+   CBasicLoopFunctions();
+   virtual ~CBasicLoopFunctions() {}
+   virtual void Init(TConfigurationNode& t_tree);
+   virtual bool IsExperimentFinished();
+   virtual vector<CEPuck2Entity*> GetRobots(){
+      return m_robots;
+   }
+
+protected:
+   vector<CEPuck2Entity*> m_robots;
+   vector<string> m_logs;
+
+   string m_log_file_path;
+
+   virtual void write_all_logs(vector<string> logs, string params_string);
+};
+
+#endif

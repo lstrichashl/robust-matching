@@ -38,6 +38,34 @@ struct MatchingResult{
     {}
 };
 
+class Clusters{
+    public:
+        string ToString(){
+            std::stringstream ss;
+            ss << "[";
+            for (size_t i = 0; i < _clusters.size(); ++i) {
+                ss << "(";
+                for (size_t j = 0; j < _clusters[i].size(); ++j) {
+                    ss << _clusters[i][j];
+                    if (j < _clusters[i].size() - 1) {
+                        ss << ",";
+                    }
+                }
+                ss << ")";
+                if (i < _clusters.size() - 1) {
+                    ss << ",";
+                }
+            }
+            ss << "]";
+            return ss.str(); 
+        }
+        void AddCluster(vector<int> cluster){
+            _clusters.push_back(cluster);
+        }
+    private:
+        vector<vector<int>> _clusters;
+};
+
 CRadians GetZAngleOrientation(CQuaternion orientation) {
    CRadians cZAngle, cYAngle, cXAngle;
    orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
@@ -155,13 +183,11 @@ std::vector<std::pair<int, CVector2>> GetPositions(vector<CEPuck2Entity*> robots
     return positions;
 }
 
-std::vector<std::pair<int,int>> GetRobotPairs(vector<CEPuck2Entity*> robots) {
-    std::vector<std::pair<int, CVector2>> positions = GetPositions(robots);
-    std::vector<vector<int>> possible_robots_in_aggregarion_radios;
-    std::vector<std::pair<int,int>> robot_pairs;
+Clusters GetRobotPairs(vector<CEPuck2Entity*> robots) {
+    vector<pair<int, CVector2>> positions = GetPositions(robots);
+    vector<vector<int>> possible_robots_in_aggregarion_radios;
+    Clusters robot_pairs;
     for (unsigned i = 0; i < positions.size(); i++){
-        double min_distance = 10000000;
-        double min_robot = -1;
         std::vector<int> robots_in_radios;
         BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robots[i]->GetControllableEntity().GetController());
         if(cController1.GetType() != "non_faulty"){
@@ -176,18 +202,19 @@ std::vector<std::pair<int,int>> GetRobotPairs(vector<CEPuck2Entity*> robots) {
                 continue;
             }
             double distance = (positions[i].second - positions[j].second).Length();
-            if(distance < 0.1) {
+            if(distance < 0.08) {
                 robots_in_radios.push_back(j);
             }
         }
         possible_robots_in_aggregarion_radios.push_back(robots_in_radios);
     }
-    for(unsigned i = 0; i < possible_robots_in_aggregarion_radios.size(); i++){
+    for(int i = 0; i < possible_robots_in_aggregarion_radios.size(); i++){
         if(possible_robots_in_aggregarion_radios[i].size() == 1){
             int other_robot_index = possible_robots_in_aggregarion_radios[i][0];
             if(possible_robots_in_aggregarion_radios[other_robot_index][0] == i){
                 if(i < other_robot_index){ // make sure we add the pair only once (for example instead of [(7,8),(8,7)] will be added [(7,8)])
-                    robot_pairs.push_back(std::make_pair(i, other_robot_index));
+                    vector<int> pairs = {i,other_robot_index};
+                    robot_pairs.AddCluster(pairs);
                 }
             }
         }

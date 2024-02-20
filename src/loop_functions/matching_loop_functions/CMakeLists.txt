@@ -11,6 +11,7 @@ endif(ARGOS_QTOPENGL_FOUND)
 add_library(matching_loop_functions SHARED ${matching_loop_functions_SOURCES})
 target_link_libraries(matching_loop_functions
   abstract_controllers
+  basic_loop_functions
   robust_matching
   minimum_cost_perfect_matching
   matching_result

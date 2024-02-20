@@ -49,7 +49,7 @@ def create_experiment_file(random_seed, non_faulty_count, faulty_count, algorith
 def create_all_files(number_of_test_runs, n_robots,algorithm):
     file_paths = []
     for random_seed in range(1,number_of_test_runs+1):
-        for faulty_count in range(1,11):
+        for faulty_count in range(0,1):
             non_faulty_count = n_robots-faulty_count
             tmp_file_path, _ = create_experiment_file(random_seed, non_faulty_count, faulty_count, algorithm, length=500)
             file_paths.append(tmp_file_path)
@@ -72,7 +72,7 @@ def main():
     #                         create_all_files(number_of_test_runs=50, n_robots=n_robots, algorithm="repeated640"),
     #                         create_all_files(number_of_test_runs=50, n_robots=n_robots, algorithm="repeated1000")]
     #                     )
-    file_paths = create_all_files(number_of_test_runs=50, n_robots=n_robots, algorithm="virtual_forces_new3")
+    file_paths = create_all_files(number_of_test_runs=50, n_robots=n_robots, algorithm="virtual_forces_new4")
     for tmp_file_path in file_paths:
         tp.apply_async(work, (tmp_file_path,))
 

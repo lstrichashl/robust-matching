@@ -5,9 +5,9 @@ from process_logs import stat_experiment
 if __name__ == "__main__":
     build()
     file, log_file = create_experiment_file( # faulty robot that break two nf_robots
-        random_seed=8,
-        non_faulty_count=10,
-        faulty_count=10,
+        random_seed=26,
+        non_faulty_count=20,
+        faulty_count=0,
         algorithm="virtual_forces",
         length=300,
         visualization=True,

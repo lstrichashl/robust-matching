@@ -65,14 +65,30 @@ void CVirtualForces::Paired(){
         m_eState = STATE_PAIRED;
         m_pcRABAct->SetData(0, STATE_PAIRED);
     }
+    if(ShouldTransitionToAlone()){
+        Alone();
+    }
     m_pcWheels->SetLinearVelocity(0, 0);
+}
+
+bool CVirtualForces::ShouldTransitionToAlone(){
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+    bool has_near_robot = false;
+    if(! tMsgs.empty()) {
+        for(size_t i = 0; i < tMsgs.size(); ++i) {
+            if(tMsgs[i].Range < 8){
+                has_near_robot = true;
+            }
+        }
+    }
+    return !has_near_robot;
 }
 
 bool CVirtualForces::ShouldTransitionToPaired(){
     const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
     if(! tMsgs.empty()) {
         for(size_t i = 0; i < tMsgs.size(); ++i) {
-            if(tMsgs[i].Range < 8){
+            if(tMsgs[i].Range < 8 && tMsgs[i].Data[0] == STATE_ALONE){
                 return true;
             }
         }
@@ -96,15 +112,16 @@ CVector2 CVirtualForces::FlockingVector() {
             /*
             * We consider only the neighbors in state flock
             */
-            fLJ = ::pow(tMsgs[i].Range, -2);
             if(tMsgs[i].Data[0] == STATE_ALONE) {
+                fLJ = ElectricalForce(tMsgs[i].Range);
                 cAccum += CVector2(fLJ,
                             tMsgs[i].HorizontalBearing);
             }
             else {
-                if(tMsgs[i].Range < 20){ 
-                    cAccum += CVector2(0.1 * fLJ,
-                                tMsgs[i].HorizontalBearing + tMsgs[i].HorizontalBearing.PI);
+                if(tMsgs[i].Range < 20){
+                    Real force = -0.05 * ElectricalForce(tMsgs[i].Range);
+                    cAccum += CVector2(force,
+                                tMsgs[i].HorizontalBearing);
                 }
             }
         }

@@ -10,22 +10,26 @@ CAdverserialVirtualForces::CAdverserialVirtualForces(){
 
 void CAdverserialVirtualForces::Reset() {
     m_eState = STATE_ALONE;
-    m_pcRABAct->SetData(0, STATE_ALONE);
+    m_pcRABAct->SetData(0, STATE_PAIRED);
     m_pcLedAct->SetAllRGBColors(CColor::RED);
     m_pcLedAct->SetAllRedLeds(true);
 }
 
 void CAdverserialVirtualForces::ControlStep() {
-    switch (m_eState)
-    {
-    case STATE_ALONE:
-        Alone();
-        break;
-    case STATE_PAIRED:
-        Paired();
-    default:
-        break;
-    }
+    // switch (m_eState)
+    // {
+    // case STATE_ALONE:
+    //     Alone();
+    //     break;
+    // case STATE_PAIRED:
+    //     Paired();
+    // default:
+    //     break;
+    // }
+}
+
+bool CAdverserialVirtualForces::ShouldTransitionToPaired(){
+    return CVirtualForces::ShouldTransitionToPaired();
 }
 
 CVector2 CAdverserialVirtualForces::FlockingVector() {
@@ -43,15 +47,15 @@ CVector2 CAdverserialVirtualForces::FlockingVector() {
             /*
             * We consider only the neighbors in state flock
             */
-            fLJ = ::pow(tMsgs[i].Range, -2);
+            fLJ = LinearForce(tMsgs[i].Range);
             if(tMsgs[i].Data[0] == STATE_ALONE) {
                 cAccum += CVector2(fLJ,
                             tMsgs[i].HorizontalBearing + tMsgs[i].HorizontalBearing.PI);
             }
             else {
-                if(tMsgs[i].Range < 20){ 
-                cAccum += CVector2(0.2 * fLJ,
-                            tMsgs[i].HorizontalBearing + tMsgs[i].HorizontalBearing.PI);
+                if(tMsgs[i].Range < 15){ 
+                    cAccum += CVector2(0.05 * fLJ,
+                                tMsgs[i].HorizontalBearing + tMsgs[i].HorizontalBearing.PI);
                 }
             }
         }
