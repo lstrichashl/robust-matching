@@ -76,7 +76,7 @@ bool CVirtualForces::ShouldTransitionToAlone(){
     bool has_near_robot = false;
     if(! tMsgs.empty()) {
         for(size_t i = 0; i < tMsgs.size(); ++i) {
-            if(tMsgs[i].Range < 8){
+            if(tMsgs[i].Range/100 < PAIRING_THRESHOLD){
                 has_near_robot = true;
             }
         }
@@ -88,7 +88,7 @@ bool CVirtualForces::ShouldTransitionToPaired(){
     const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
     if(! tMsgs.empty()) {
         for(size_t i = 0; i < tMsgs.size(); ++i) {
-            if(tMsgs[i].Range < 8 && tMsgs[i].Data[0] == STATE_ALONE){
+            if(tMsgs[i].Range/100 < PAIRING_THRESHOLD && tMsgs[i].Data[0] == STATE_ALONE){
                 return true;
             }
         }
@@ -118,7 +118,7 @@ CVector2 CVirtualForces::FlockingVector() {
                             tMsgs[i].HorizontalBearing);
             }
             else {
-                if(tMsgs[i].Range < 20){
+                if(tMsgs[i].Range/100 < PAIRING_THRESHOLD * 3){
                     Real force = -0.05 * ElectricalForce(tMsgs[i].Range);
                     cAccum += CVector2(force,
                                 tMsgs[i].HorizontalBearing);

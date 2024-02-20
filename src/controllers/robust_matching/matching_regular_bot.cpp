@@ -69,7 +69,7 @@ void CRobustMatching::ControlStep() {
    CVector3 to_mate = ToMateVector();
    CRadians cZAngle = GetZAngleOrientation();
    to_mate.RotateZ(-cZAngle);
-    if(to_mate.Length() > 0.07){
+    if(to_mate.Length() > PAIRING_THRESHOLD){
          SetWheelSpeedsFromVector(to_mate.Normalize());
          m_pcLedAct->SetAllRGBColors(CColor::GREEN);
     }

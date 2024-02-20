@@ -41,6 +41,7 @@ void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
 }
 
 void CMatchingLoopFunctions::Destroy(){
+    add_log();
     std::string param_string = "{\"is_commited\":\""+to_string(m_isCommited)+"\"}";
     write_all_logs(m_logs, param_string);
 }
@@ -85,18 +86,16 @@ void CMatchingLoopFunctions::PreStep(){
     double nf_half_matching_cost = 0;
     for(vector<int>::iterator it = nf_half_matchig.begin(); it != nf_half_matchig.end(); it++)
 		nf_half_matching_cost += m_costs[*it];
-
-    add_log(m_robotGraph, m_solution, nf_matching_cost, nf_half_matching_cost);
 }
 
-void CMatchingLoopFunctions::add_log(Graph graph, pair< list<int>, double > solution, double nf_matching_cost, double nf_half_matching_cost){
-    std::string cost_string = "\"cost\":\""+to_string(solution.second) + "\"";
+void CMatchingLoopFunctions::add_log(){
+    // std::string cost_string = "\"cost\":\""+to_string(solution.second) + "\"";
     std::string tick_string = "\"tick\":\""+to_string(GetSpace().GetSimulationClock())+"\"";
-    std::string nf_matching_cost_string = "\"nf_matching_cost\":\""+to_string(nf_matching_cost)+"\"";
-    std::string nf_half_matching_cost_string = "\"nf_half_matching_cost\":\""+to_string(nf_half_matching_cost)+"\"";
+    // std::string nf_matching_cost_string = "\"nf_matching_cost\":\""+to_string(nf_matching_cost)+"\"";
+    // std::string nf_half_matching_cost_string = "\"nf_half_matching_cost\":\""+to_string(nf_half_matching_cost)+"\"";
     Clusters pairs = GetRobotPairs(m_robots);
     std::string matcing_string = "\"pairs\":" + pairs.ToString();
-    std::string log =  "{" + matcing_string + "," + cost_string + "," + tick_string + "," + nf_matching_cost_string + "," + nf_half_matching_cost_string + "}";
+    std::string log =  "{" + matcing_string + "," + tick_string + "}";
 
     m_logs.push_back(log);
 }

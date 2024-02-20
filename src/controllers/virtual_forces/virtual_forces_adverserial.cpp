@@ -16,16 +16,16 @@ void CAdverserialVirtualForces::Reset() {
 }
 
 void CAdverserialVirtualForces::ControlStep() {
-    // switch (m_eState)
-    // {
-    // case STATE_ALONE:
-    //     Alone();
-    //     break;
-    // case STATE_PAIRED:
-    //     Paired();
-    // default:
-    //     break;
-    // }
+    switch (m_eState)
+    {
+    case STATE_ALONE:
+        Alone();
+        break;
+    case STATE_PAIRED:
+        Paired();
+    default:
+        break;
+    }
 }
 
 bool CAdverserialVirtualForces::ShouldTransitionToPaired(){
@@ -47,13 +47,13 @@ CVector2 CAdverserialVirtualForces::FlockingVector() {
             /*
             * We consider only the neighbors in state flock
             */
-            fLJ = LinearForce(tMsgs[i].Range);
+            fLJ = ElectricalForce(tMsgs[i].Range);
             if(tMsgs[i].Data[0] == STATE_ALONE) {
                 cAccum += CVector2(fLJ,
                             tMsgs[i].HorizontalBearing + tMsgs[i].HorizontalBearing.PI);
             }
             else {
-                if(tMsgs[i].Range < 15){ 
+                if(tMsgs[i].Range/100 < PAIRING_THRESHOLD * 3){ 
                     cAccum += CVector2(0.05 * fLJ,
                                 tMsgs[i].HorizontalBearing + tMsgs[i].HorizontalBearing.PI);
                 }

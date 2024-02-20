@@ -44,14 +44,14 @@ class Clusters{
             std::stringstream ss;
             ss << "[";
             for (size_t i = 0; i < _clusters.size(); ++i) {
-                ss << "(";
+                ss << "[";
                 for (size_t j = 0; j < _clusters[i].size(); ++j) {
                     ss << _clusters[i][j];
                     if (j < _clusters[i].size() - 1) {
                         ss << ",";
                     }
                 }
-                ss << ")";
+                ss << "]";
                 if (i < _clusters.size() - 1) {
                     ss << ",";
                 }
@@ -202,7 +202,7 @@ Clusters GetRobotPairs(vector<CEPuck2Entity*> robots) {
                 continue;
             }
             double distance = (positions[i].second - positions[j].second).Length();
-            if(distance < 0.08) {
+            if(distance <= cController2.PAIRING_THRESHOLD) {
                 robots_in_radios.push_back(j);
             }
         }

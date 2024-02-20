@@ -54,14 +54,11 @@ void CPrintExperimentFunctions::PreStep(){
 }
 
 void CPrintExperimentFunctions::write_to_log(Clusters pairs){
-    std::string cost_string = "\"cost\":\""+to_string(0) + "\"";
-    std::string tick_string = "\"tick\":\""+to_string(GetSpace().GetSimulationClock())+"\"";
+    std::string tick_string = "\"tick\":"+to_string(GetSpace().GetSimulationClock());
     // double nf_matching_cost = GetMatchingCost(Get_nf_matching(result), result._cost);
     // double nf_half_matching_cost = GetMatchingCost(Get_nf_half_matching(result), result._cost);
-    std::string nf_matching_cost_string = "\"nf_matching_cost\":\""+to_string(0)+"\"";
-    std::string nf_half_matching_cost_string = "\"nf_half_matching_cost\":\""+to_string(0)+"\"";
-    std::string matcing_string = "\"matching\":" + pairs.ToString();
-    std::string log =  "{" + matcing_string + "," + cost_string + "," + tick_string + "," + nf_matching_cost_string + "," + nf_half_matching_cost_string + "}";
+    std::string matcing_string = "\"pairs\":" + pairs.ToString();
+    std::string log =  "{" + matcing_string + "," + tick_string + "}";
 
     m_logs.push_back(log);
 }

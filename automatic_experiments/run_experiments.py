@@ -1,12 +1,15 @@
+from typing import List
 import xmltodict
 import os
 import subprocess
 from pathlib import Path
 from multiprocessing.pool import ThreadPool
 from functools import reduce
+from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm
 
 base_dir = '/Users/lior.strichash/private/robust-matching/automatic_experiments'
-template_file_path = f'{base_dir}/templates/matching.argos'
+template_file_path = '/Users/lior.strichash/private/robust-matching/automatic_experiments/templates/template.argos'
+
 
 def work(tmp_file_path):
     process = subprocess.Popen(['argos3', '-c', tmp_file_path])
@@ -17,46 +20,23 @@ def work(tmp_file_path):
 def build():
     os.system("cd ~/private/robust-matching/build && make")
 
-def create_experiment_file(random_seed, non_faulty_count, faulty_count, algorithm, length=150, visualization=False):
-    tmp_file_path = f'{base_dir}/results/{algorithm}/faulty{faulty_count}/random_seed{random_seed}.argos'
-    log_file = f"{tmp_file_path}.log"
-    os.makedirs(os.path.dirname(tmp_file_path), exist_ok=True)
-    if "virtual_forces" in algorithm:
-        template_file_path=f'{base_dir}/templates/virtual_forces.argos'
-    else:
-        template_file_path = f'{base_dir}/templates/matching.argos'
-    with open(template_file_path) as fd:
-        doc = xmltodict.parse(fd.read())
-
-    doc['argos-configuration']['framework']['experiment']['@random_seed'] = random_seed
-    doc['argos-configuration']['framework']['experiment']['@length'] = length
-    doc['argos-configuration']['arena']['distribute'][0]['entity']['@quantity'] = non_faulty_count
-    doc['argos-configuration']['arena']['distribute'][1]['entity']['@quantity'] = faulty_count
-    doc['argos-configuration']['visualization'] = doc['argos-configuration']['visualization'] if visualization else {}
-    doc['argos-configuration']['loop_functions']['params']['@is_commited'] = "true" if algorithm == "commited" else "false" 
-    doc['argos-configuration']['loop_functions']['params']['@log_file_path'] = log_file
-    if "repeated" in algorithm:
-        doc['argos-configuration']['loop_functions']['params']['@repeat_interval'] = algorithm[8:]
-    elif "commited" in algorithm:
-        doc['argos-configuration']['loop_functions']['params']['@repeat_interval'] = 100000
-    to_save_string = xmltodict.unparse(doc)
-
-    with open(tmp_file_path, 'w') as f:
-        f.write(to_save_string)
-
-    return tmp_file_path, log_file
-
-def create_all_files(number_of_test_runs, n_robots,algorithm):
+def create_all_files(number_of_test_runs: int, n_robots: int, non_faulty_algorithm:NonFaultyAlgorithm, faulty_algorithm:FaultyAlgorithm):
     file_paths = []
     for random_seed in range(1,number_of_test_runs+1):
-        for faulty_count in range(0,1):
-            non_faulty_count = n_robots-faulty_count
-            tmp_file_path, _ = create_experiment_file(random_seed, non_faulty_count, faulty_count, algorithm, length=500)
-            file_paths.append(tmp_file_path)
+        for faulty_count in range(0, int(n_robots/2 + 1)):
+            experiment = Experiment(
+                non_faulty_count=n_robots-faulty_count,
+                faulty_count=faulty_count,
+                non_faulty_algorithm=non_faulty_algorithm,
+                faulty_algorithm=faulty_algorithm,
+                random_seed=random_seed
+            )
+            argos_file_path = experiment.generate_argos_file()
+            file_paths.append(argos_file_path)
     return file_paths
 
 def main():
-    num = 16  # set to the number of workers you want (it defaults to the cpu count of your machine)
+    num = 16  # set to the number of workers you want (the default is the cpu count of your machine)
     tp = ThreadPool(num)
     n_robots = 20
     build()
@@ -72,7 +52,8 @@ def main():
     #                         create_all_files(number_of_test_runs=50, n_robots=n_robots, algorithm="repeated640"),
     #                         create_all_files(number_of_test_runs=50, n_robots=n_robots, algorithm="repeated1000")]
     #                     )
-    file_paths = create_all_files(number_of_test_runs=50, n_robots=n_robots, algorithm="virtual_forces_new4")
+    # file_paths = create_all_files(number_of_test_runs=50, n_robots=n_robots, non_faulty_algorithm=VirtualForces(), faulty_algorithm=Crash())
+    file_paths = create_all_files(number_of_test_runs=50, n_robots=n_robots, non_faulty_algorithm=AlgoMatching(is_commited=True), faulty_algorithm=Crash())
     for tmp_file_path in file_paths:
         tp.apply_async(work, (tmp_file_path,))
 

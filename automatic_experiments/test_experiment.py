@@ -1,18 +1,45 @@
-from run_experiments import create_experiment_file, work, build
-from process_logs import stat_experiment
+from run_experiments import work, build
+from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm
+from argparse import ArgumentParser, Namespace
+
+def parse_options() -> Namespace:
+    parser = ArgumentParser()
+    parser.add_argument("-s", "--random_seed", type=int)
+    parser.add_argument("-nf", "--non_faulty", type=int, default=20)
+    parser.add_argument("-f", "--faulty", type=int, default=0)
+    parser.add_argument("-l", "--length", type=int, default=300)
+    parser.add_argument("-v", "--visualization", type=bool, default=True)
+    parser.add_argument("-a", "--algorithm", type=str, default="virtual_forces")
+    options = parser.parse_args()
+    return options
 
 
 if __name__ == "__main__":
+    options = parse_options()
     build()
-    file, log_file = create_experiment_file( # faulty robot that break two nf_robots
-        random_seed=26,
-        non_faulty_count=20,
-        faulty_count=0,
-        algorithm="virtual_forces",
-        length=300,
-        visualization=True,
-    )
+    if options.algorithm == "virtual_forces":
+        non_faulty_algorithm = VirtualForces()
+        faulty_algorithm = Crash()
+        experiment = Experiment(
+                    non_faulty_count=options.non_faulty,
+                    faulty_count=options.faulty,
+                    non_faulty_algorithm=non_faulty_algorithm,
+                    faulty_algorithm=faulty_algorithm,
+                    random_seed=options.random_seed,
+                    length=options.length,
+                    visualization=options.visualization
+        )
+    elif options.algorithm == "commited":
+        non_faulty_algorithm = AlgoMatching(is_commited=True)
+        faulty_algorithm = Crash()
+        experiment = Experiment(
+                    non_faulty_count=options.non_faulty,
+                    faulty_count=options.faulty,
+                    non_faulty_algorithm=non_faulty_algorithm,
+                    faulty_algorithm=faulty_algorithm,
+                    random_seed=options.random_seed,
+                    length=options.length,
+                    visualization=options.visualization
+        )
+    file = experiment.generate_argos_file()
     work(file)
-    print(stat_experiment(
-        file_path=log_file
-    ))

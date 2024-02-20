@@ -11,6 +11,7 @@ public:
    virtual std::string GetType(){
       return m_typename;
    }
+   double PAIRING_THRESHOLD = 0.07;
 
 
 protected:

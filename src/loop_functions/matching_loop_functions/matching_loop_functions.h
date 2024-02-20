@@ -40,7 +40,7 @@ private:
 
    UInt32 m_repeat_interval;
 
-   virtual void add_log(Graph graph, pair< list<int>, double > solution, double nf_matching_cost, double nf_half_matching_cost);
+   virtual void add_log();
 };
 
 #endif
