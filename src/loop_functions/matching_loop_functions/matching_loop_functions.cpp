@@ -59,7 +59,7 @@ void CMatchingLoopFunctions::PreStep(){
     vector<int> nf_matchig;
     vector<int> nf_half_matchig;
     for(unsigned i = 0; i < m_robots.size(); i++) {
-        CRobustMatching& cController = dynamic_cast<CRobustMatching&>(m_robots[i]->GetControllableEntity().GetController());
+        BaseConrtoller& cController = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
         cController.mate = NULL;
     }
     for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
@@ -67,8 +67,8 @@ void CMatchingLoopFunctions::PreStep(){
         pair<int, int> edge = m_robotGraph.GetEdge( *it );
         CEPuck2Entity* robot1 = m_robots_in_matching[edge.first];
         CEPuck2Entity* robot2 = m_robots_in_matching[edge.second];
-        CRobustMatching& cController1 = dynamic_cast<CRobustMatching&>(robot1->GetControllableEntity().GetController());
-        CRobustMatching& cController2 = dynamic_cast<CRobustMatching&>(robot2->GetControllableEntity().GetController());
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robot1->GetControllableEntity().GetController());
+        BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robot2->GetControllableEntity().GetController());
         if(cController1.GetType() == "non_faulty" && cController2.GetType() == "non_faulty"){
             nf_matchig.push_back(*it);
         }

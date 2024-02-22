@@ -9,8 +9,9 @@ CAdverserialVirtualForces::CAdverserialVirtualForces(){
 }
 
 void CAdverserialVirtualForces::Reset() {
+    CVirtualForces::Reset();
     m_eState = STATE_ALONE;
-    m_pcRABAct->SetData(0, STATE_PAIRED);
+    m_pcRABAct->SetData(0, STATE_ALONE);
     m_pcLedAct->SetAllRGBColors(CColor::RED);
     m_pcLedAct->SetAllRedLeds(true);
 }

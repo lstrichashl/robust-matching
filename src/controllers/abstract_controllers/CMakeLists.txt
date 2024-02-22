@@ -1,4 +1,4 @@
-add_library(abstract_controllers SHARED base_controller.h)
+add_library(abstract_controllers SHARED base_controller.h base_controller.cpp crash_controller.h crash_controller.cpp)
 target_link_libraries(abstract_controllers
   argos3core_simulator
   argos3plugin_simulator_epuck2
