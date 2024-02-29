@@ -41,7 +41,6 @@ private:
 
    double m_range;
 
-   virtual void add_log();
 };
 
 #endif

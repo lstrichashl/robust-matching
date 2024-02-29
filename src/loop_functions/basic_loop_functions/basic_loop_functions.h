@@ -25,9 +25,11 @@ public:
    virtual vector<CEPuck2Entity*> GetNFRobots();
    vector<CVector2> GetPositions(vector<CEPuck2Entity*> robots);
    Clusters GetRobotPairs(vector<CEPuck2Entity*> robots);
+   virtual void add_log();
 
 protected:
    vector<CEPuck2Entity*> m_robots;
+   vector<CEPuck2Entity*> m_nf_robots;
    vector<string> m_logs;
 
    string m_log_file_path;

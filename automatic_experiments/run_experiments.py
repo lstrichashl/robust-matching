@@ -1,3 +1,4 @@
+from itertools import product
 from typing import List
 import xmltodict
 import os
@@ -20,7 +21,7 @@ def work(tmp_file_path):
 def build():
     os.system("cd ~/private/robust-matching/build && make")
 
-def create_all_files(number_of_test_runs: int, n_robots: int, non_faulty_algorithm:NonFaultyAlgorithm, faulty_algorithm:FaultyAlgorithm, run_tag: str):
+def create_all_files(non_faulty_algorithm:NonFaultyAlgorithm, faulty_algorithm:FaultyAlgorithm, run_tag: str, n_robots: int = 20, number_of_test_runs: int = 50):
     file_paths = []
     for random_seed in range(1,number_of_test_runs+1):
         for faulty_count in range(0, int(n_robots/2 + 1)):
@@ -53,14 +54,24 @@ def main():
     #                         create_all_files(number_of_test_runs=50, n_robots=n_robots, algorithm="repeated640"),
     #                         create_all_files(number_of_test_runs=50, n_robots=n_robots, algorithm="repeated1000")]
     #                     )
-    run_tag = "repeated"
-    file_paths = create_all_files(number_of_test_runs=50, n_robots=n_robots, non_faulty_algorithm=AlgoMatching(is_commited=False, repeate_interval=1), faulty_algorithm=VirtualForcesWalkAway(), run_tag=run_tag) + \
-                create_all_files(number_of_test_runs=50, n_robots=n_robots, non_faulty_algorithm=AlgoMatching(is_commited=False, repeate_interval=1), faulty_algorithm=AlgoMatchingWalkAway(), run_tag=run_tag) + \
-                create_all_files(number_of_test_runs=50, n_robots=n_robots, non_faulty_algorithm=AlgoMatching(is_commited=False, repeate_interval=1), faulty_algorithm=Crash(), run_tag=run_tag) +\
-                create_all_files(number_of_test_runs=50, n_robots=n_robots, non_faulty_algorithm=AlgoMatching(is_commited=False, repeate_interval=1), faulty_algorithm=KeepDistance(), run_tag=run_tag)
-                # create_all_files(number_of_test_runs=50, n_robots=n_robots, non_faulty_algorithm=AlgoMatching(is_commited=True), faulty_algorithm=VirtualForcesWalkAway(), run_tag=run_tag) +\
-                # create_all_files(number_of_test_runs=50, n_robots=n_robots, non_faulty_algorithm=AlgoMatching(is_commited=True), faulty_algorithm=AlgoMatchingWalkAway(), run_tag=run_tag) 
-    for tmp_file_path in file_paths:
+    run_tag = "unlimited_visibilty"
+
+    non_faulty_algorithms = [
+        AlgoMatching(is_commited=False, repeate_interval=1),
+        AlgoMatching(is_commited=True),
+        VirtualForces()
+    ]
+    faulty_algorithms = [
+        VirtualForcesWalkAway(),
+        AlgoMatchingWalkAway(),
+        Crash(),
+        KeepDistance()
+    ]
+    file_pathes = []
+    for nf_algo, f_algo in product(non_faulty_algorithms, faulty_algorithms):
+        file_pathes += create_all_files(non_faulty_algorithm=nf_algo, faulty_algorithm=f_algo, run_tag=run_tag)
+    
+    for tmp_file_path in file_pathes:
         tp.apply_async(work, (tmp_file_path,))
 
     tp.close()

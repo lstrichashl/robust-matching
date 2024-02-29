@@ -16,7 +16,6 @@ class CAdverserialVirtualForces: public CVirtualForces {
 public:
     CAdverserialVirtualForces();
     virtual ~CAdverserialVirtualForces() {}
-    virtual void ControlStep();
     virtual void Reset();
     virtual CVector2 FlockingVector();
 

@@ -23,8 +23,7 @@ void CPrintExperimentFunctions::Destroy(){
     robot_types.pop_back();
     robot_types += "]";
 
-    Clusters pairs = GetRobotPairs(GetNFRobots());
-    write_to_log(pairs);
+    add_log();
 
     std::string all_log = "[";
     for(unsigned i = 0; i < m_logs.size(); i++){
@@ -40,6 +39,7 @@ void CPrintExperimentFunctions::Destroy(){
 
 void CPrintExperimentFunctions::PreStep(){
     CBasicLoopFunctions::PreStep();
+    add_log();
     // std::vector<std::pair<int,int>> matching = GetRobotPairs(m_robots);
     // std::vector<std::pair<int, CVector2>> positions = GetPositions(m_robots);
     // std::string matcing_string = "\"matching\":\"["; 
@@ -52,16 +52,5 @@ void CPrintExperimentFunctions::PreStep(){
     // matcing_string += "]\"";
     // std::cout << matcing_string << std::endl;
 }
-
-void CPrintExperimentFunctions::write_to_log(Clusters pairs){
-    std::string tick_string = "\"tick\":"+to_string(GetSpace().GetSimulationClock());
-    // double nf_matching_cost = GetMatchingCost(Get_nf_matching(result), result._cost);
-    // double nf_half_matching_cost = GetMatchingCost(Get_nf_half_matching(result), result._cost);
-    std::string matcing_string = "\"pairs\":" + pairs.ToString();
-    std::string log =  "{" + matcing_string + "," + tick_string + "}";
-
-    m_logs.push_back(log);
-}
-
 
 REGISTER_LOOP_FUNCTIONS(CPrintExperimentFunctions, "print_experiment_loop_fuctions")

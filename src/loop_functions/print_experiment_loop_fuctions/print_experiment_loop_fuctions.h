@@ -18,8 +18,6 @@ public:
    virtual void Destroy();
    virtual void PreStep();
 
-protected:
-   virtual void write_to_log(Clusters pairs);
 };
 
 #endif

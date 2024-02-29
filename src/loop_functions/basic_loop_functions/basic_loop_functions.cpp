@@ -65,14 +65,15 @@ vector<CVector2> CBasicLoopFunctions::GetPositions(vector<CEPuck2Entity*> robots
 }
 
 vector<CEPuck2Entity*> CBasicLoopFunctions::GetNFRobots(){
-    vector<CEPuck2Entity*> nf_robots;
-    for(unsigned i = 0; i < m_robots.size(); i++){
-        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
-        if(cController1.GetType() == "non_faulty"){
-            nf_robots.push_back(m_robots[i]);
+    if(m_nf_robots.size() == 0){
+        for(unsigned i = 0; i < m_robots.size(); i++){
+            BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
+            if(cController1.GetType() == "non_faulty"){
+                m_nf_robots.push_back(m_robots[i]);
+            }
         }
     }
-    return nf_robots;
+    return m_nf_robots;
 }
 
 
@@ -116,6 +117,7 @@ void CBasicLoopFunctions::PreStep(){
         m_last_positions = m_new_positions;
         m_new_positions = GetPositions(GetNFRobots());
     }
+    add_log();
 }
 
 bool CBasicLoopFunctions::IsExperimentFinished() {
@@ -146,4 +148,12 @@ void CBasicLoopFunctions::PostExperiment(){
     // Clusters nf_pairs = GetRobotPairs(GetNFRobots());
     // std::cout << "all pairs: (" << all_pairs.size() << ") " << all_pairs.ToString() << std::endl;
     // std::cout << "nf pairs: (" << nf_pairs.size() << ") " << nf_pairs.ToString() << std::endl;
+}
+
+void CBasicLoopFunctions::add_log(){
+    std::string tick_string = "\"tick\":\""+to_string(GetSpace().GetSimulationClock())+"\"";
+    Clusters pairs = GetRobotPairs(m_robots);
+    std::string matcing_string = "\"pairs\":" + pairs.ToString();
+    std::string log =  "{" + matcing_string + "," + tick_string + "}";
+    m_logs.push_back(log);
 }

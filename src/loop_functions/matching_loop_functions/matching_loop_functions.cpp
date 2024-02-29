@@ -49,6 +49,7 @@ void CMatchingLoopFunctions::Destroy(){
 
 void CMatchingLoopFunctions::PreStep(){
     CBasicLoopFunctions::PreStep();
+    add_log();
     UInt32 time = GetSpace().GetSimulationClock();
     if(m_solution.second == -1 || (time % m_repeat_interval == 0 && !m_isCommited)) {
         MatchingResult result = GetBestMatching(m_robots, m_range);
@@ -87,18 +88,6 @@ void CMatchingLoopFunctions::PreStep(){
     double nf_half_matching_cost = 0;
     for(vector<int>::iterator it = nf_half_matchig.begin(); it != nf_half_matchig.end(); it++)
 		nf_half_matching_cost += m_costs[*it];
-}
-
-void CMatchingLoopFunctions::add_log(){
-    // std::string cost_string = "\"cost\":\""+to_string(solution.second) + "\"";
-    std::string tick_string = "\"tick\":\""+to_string(GetSpace().GetSimulationClock())+"\"";
-    // std::string nf_matching_cost_string = "\"nf_matching_cost\":\""+to_string(nf_matching_cost)+"\"";
-    // std::string nf_half_matching_cost_string = "\"nf_half_matching_cost\":\""+to_string(nf_half_matching_cost)+"\"";
-    Clusters pairs = GetRobotPairs(GetNFRobots());
-    std::string matcing_string = "\"pairs\":" + pairs.ToString();
-    std::string log =  "{" + matcing_string + "," + tick_string + "}";
-
-    m_logs.push_back(log);
 }
 
 REGISTER_LOOP_FUNCTIONS(CMatchingLoopFunctions, "matching_loop_functions")
