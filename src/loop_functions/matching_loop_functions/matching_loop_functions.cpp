@@ -22,7 +22,8 @@ CMatchingLoopFunctions::CMatchingLoopFunctions():
     m_costs(0),
     // m_logs(0),
     m_isCommited(false),
-    m_repeat_interval(1)
+    m_repeat_interval(1),
+    m_range(0)
     {}
 
 void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
@@ -33,6 +34,7 @@ void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
         GetNodeAttribute(paramsNode, "is_commited", is_commited);
         m_isCommited = is_commited;
         GetNodeAttribute(paramsNode, "repeat_interval", m_repeat_interval);
+        GetNodeAttribute(paramsNode, "range", m_range);
     }
     catch(...){
         cout << "error with loading params tag in CMatchingLoopFunctions class" << endl;
@@ -49,7 +51,7 @@ void CMatchingLoopFunctions::PreStep(){
     CBasicLoopFunctions::PreStep();
     UInt32 time = GetSpace().GetSimulationClock();
     if(m_solution.second == -1 || (time % m_repeat_interval == 0 && !m_isCommited)) {
-        MatchingResult result = GetBestMatching(m_robots);
+        MatchingResult result = GetBestMatching(m_robots, m_range);
         m_solution = result._solution;
         m_costs = result._cost;
         m_robotGraph = result._graph;
@@ -92,7 +94,7 @@ void CMatchingLoopFunctions::add_log(){
     std::string tick_string = "\"tick\":\""+to_string(GetSpace().GetSimulationClock())+"\"";
     // std::string nf_matching_cost_string = "\"nf_matching_cost\":\""+to_string(nf_matching_cost)+"\"";
     // std::string nf_half_matching_cost_string = "\"nf_half_matching_cost\":\""+to_string(nf_half_matching_cost)+"\"";
-    Clusters pairs = GetRobotPairs(m_robots);
+    Clusters pairs = GetRobotPairs(GetNFRobots());
     std::string matcing_string = "\"pairs\":" + pairs.ToString();
     std::string log =  "{" + matcing_string + "," + tick_string + "}";
 

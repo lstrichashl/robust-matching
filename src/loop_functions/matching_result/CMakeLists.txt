@@ -1,4 +1,4 @@
-add_library(matching_result SHARED matching_result.h)
+add_library(matching_result SHARED matching_result.h matching_result.cpp)
 
 target_link_libraries(matching_result
   minimum_cost_perfect_matching

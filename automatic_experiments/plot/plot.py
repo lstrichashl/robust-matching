@@ -102,61 +102,85 @@ def get_time_to_stable(results):
         
 
 
-def plot_pairs():
+def plot_pairs(data):
     f_range = range(0,10+1)
     number_of_robots = 20
-    # expected_commited = get_expected_faulty_pairs_in_system_of_n_robots(n = number_of_robots, f_range=f_range)
-
+    expected_commited = get_expected_faulty_pairs_in_system_of_n_robots(n = number_of_robots, f_range=f_range)
     best_case = [(number_of_robots-f)/2 for f in f_range]
     worst_case = [number_of_robots/2-f for f in f_range]
-
-    results_commited = stat_all(
-        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/AlgoMatching"
-    )
-    results_virtual_forces = stat_all(
-        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/VirtualForces",
-        from_cache=False
-    )
-    means_commited, stds_commited = get_number_of_pairs(results_commited)
-    means_forces, stds_forces = get_number_of_pairs(results_virtual_forces)
-    plt.plot(f_range, np.array(worst_case), "--", label="matching worst", color="red", alpha=0.3)
-    plt.plot(f_range, np.array(best_case), "--", label="best", color="green", alpha=0.3)
-    plt.errorbar(list(means_commited.keys()), list(means_commited.values()), list(stds_commited.values()), fmt="o", label="commited", capsize=5)
-    plt.errorbar(list(means_forces.keys()), list(means_forces.values()), list(stds_forces.values()), fmt="o", label="Virtual Forces", capsize=5)
-    
-    plt.grid(linestyle = ':')
-    plt.xlabel("f")
-    plt.legend()
-    plt.xticks(f_range)
-    plt.yticks(range(0,11))
-    plt.ylabel("number of pairs")
+    fig, axs = plt.subplots(nrows=2, ncols=2, layout=None)
+    axss = axs.flat
+    for i in range(len(data)):
+        for result in data[i]:
+            stats = stat_all(results_path = result["dir"])
+            means,stds = get_number_of_pairs(stats)
+            axss[i].errorbar(list(means.keys()), list(means.values()), list(stds.values()), fmt="o", label=result["label"], capsize=5)
+        axss[i].plot(f_range, np.array(worst_case), "--", label="worst", color="red", alpha=0.3)
+        axss[i].plot(f_range, np.array(best_case), "--", label="best", color="green", alpha=0.3)
+        axss[i].plot(f_range, np.array(expected_commited), "--", label="expected", color="gray", alpha=0.3)
+        axss[i].grid(linestyle = ':')
+        # axss[i].xlabel("f")
+        axss[i].legend()
+        # axss[i].xticks(f_range)
+        # axss[i].yticks(range(0,11))
+        # axss[i].ylabel("number of pairs")
     plt.show() 
 
 
-def plot_time():
+def plot_time(data):
     f_range = range(0,10+1)
     number_of_robots = 20
-
-    results_commited = stat_all(
-        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/AlgoMatching"
-    )
-    results_virtual_forces = stat_all(
-        results_path="/Users/lior.strichash/private/robust-matching/automatic_experiments/results/VirtualForces",
-        from_cache=False
-    )
-    means_commited, stds_commited = get_time_to_stable(results_commited)
-    means_forces, stds_forces = get_time_to_stable(results_virtual_forces)
-    plt.errorbar(list(means_commited.keys()), list(means_commited.values()), list(stds_commited.values()), fmt="o", label="commited", capsize=5)
-    plt.errorbar(list(means_forces.keys()), list(means_forces.values()), list(stds_forces.values()), fmt="o", label="Virtual Forces", capsize=5)
-    
-    plt.grid(linestyle = ':')
-    plt.xlabel("f")
-    plt.legend()
-    plt.xticks(f_range)
-    plt.ylabel("time to be stable")
+    fig, axs = plt.subplots(nrows=2, ncols=2, layout=None)
+    axss = axs.flat
+    for i in range(len(data)):
+        for result in data[i]:
+            stats = stat_all(results_path = result["dir"])
+            means,stds = get_time_to_stable(stats)
+            axss[i].errorbar(list(means.keys()), list(means.values()), list(stds.values()), fmt="o", label=result["label"], capsize=5)
+        axss[i].grid(linestyle = ':')
+        # plt.xlabel("f")
+        axss[i].legend()
+        # plt.xticks(f_range)
+        # plt.ylabel("time to be stable")
     plt.show() 
 
 
 if __name__ == "__main__":
-    plot_time()
-    # plot_pairs()
+    base_dir = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/virtual_forces_gazi"
+    base_dir3 = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/repeated"
+    data = [[{
+        "dir": f"{base_dir}/AlgoMatching_KeepDistance",
+        "label": "commited KeepDistance"
+    },{
+        "dir": f"{base_dir3}/AlgoMatching_KeepDistance",
+        "label": "repeated KeepDistance"
+    },{
+        "dir": f"{base_dir}/VirtualForces_KeepDistance",
+        "label": "virtual_forces KeepDistance"
+    }],[{
+        "dir": f"{base_dir}/AlgoMatching_Crash",
+        "label": "commited Crash"
+    },{
+        "dir": f"{base_dir3}/AlgoMatching_Crash",
+        "label": "repeated Crash"
+    },{
+        "dir": f"{base_dir}/VirtualForces_Crash",
+        "label": "virtual_forces Crash"
+    }],[{
+        "dir": f"{base_dir}/AlgoMatching_AlgoMatchingWalkAway",
+        "label": "commited AlgoMatchingWalkAway"
+    },{
+        "dir": f"{base_dir3}/AlgoMatching_AlgoMatchingWalkAway",
+        "label": "repeated AlgoMatchingWalkAway"
+    }],[{
+        "dir": f"{base_dir}/AlgoMatching_VirtualForcesWalkAway",
+        "label": "commited VirtualForcesWalkAway"
+    },{
+        "dir": f"{base_dir3}/AlgoMatching_VirtualForcesWalkAway",
+        "label": "repeated VirtualForcesWalkAway"
+    },{
+        "dir": f"{base_dir}/VirtualForces_VirtualForcesWalkAway",
+        "label": "virtual_forces VirtualForcesWalkAway"
+    }]]
+    # plot_time(data)
+    plot_pairs(data)

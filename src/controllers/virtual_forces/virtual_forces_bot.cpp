@@ -46,74 +46,26 @@ void CVirtualForces::Paired(){
     m_pcWheels->SetLinearVelocity(0, 0);
 }
 
-bool CVirtualForces::ShouldTransitionToAlone(){
-    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
-    bool has_near_robot = false;
-    if(! tMsgs.empty()) {
-        for(size_t i = 0; i < tMsgs.size(); ++i) {
-            if(tMsgs[i].Range/100 < PAIRING_THRESHOLD){
-                has_near_robot = true;
-            }
-        }
-    }
-    return !has_near_robot;
-}
-
-bool CVirtualForces::ShouldTransitionToPaired(){
-    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
-    if(! tMsgs.empty()) {
-        for(size_t i = 0; i < tMsgs.size(); ++i) {
-            if(tMsgs[i].Range/100 < PAIRING_THRESHOLD && tMsgs[i].Data[0] == STATE_ALONE){
-                return true;
-            }
-        }
-    }
-    return false;
-}
 
 
 CVector2 CVirtualForces::FlockingVector() {
-    /* Get RAB messages from nearby eye-bots */
     const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
-    /* Go through them to calculate the flocking interaction vector */
     if(! tMsgs.empty()) {
-        /* This will contain the final interaction vector */
-        CVector2 cAccum;
-        /* Used to calculate the vector length of each neighbor's contribution */
-        Real fLJ;
-        /* A counter for the neighbors in state flock */
-        UInt32 unPeers = 0;
+        CVector2 localAttractionForce;
+        CVector2 gaziForce;
         for(size_t i = 0; i < tMsgs.size(); ++i) {
-            /*
-            * We consider only the neighbors in state flock
-            */
             if(tMsgs[i].Data[0] == STATE_ALONE) {
-                fLJ = ElectricalForce(tMsgs[i].Range);
-                cAccum += CVector2(fLJ,
-                            tMsgs[i].HorizontalBearing);
+                Real fLJ = ElectricalForce(tMsgs[i].Range);
+                localAttractionForce += CVector2(fLJ, tMsgs[i].HorizontalBearing);
             }
             else {
-                if(tMsgs[i].Range/100 < PAIRING_THRESHOLD * 3){
-                    Real force = -0.05 * ElectricalForce(tMsgs[i].Range);
-                    cAccum += CVector2(force,
-                                tMsgs[i].HorizontalBearing);
-                }
+                Real force = GaziForce(tMsgs[i].Range);
+                gaziForce += CVector2(force, tMsgs[i].HorizontalBearing);
             }
         }
-    //   if(unPeers > 0) {
-    //      /* Divide the accumulator by the number of flocking neighbors */
-    //      cAccum /= unPeers;
-    //      /* Limit the interaction force */
-    //      if(cAccum.Length() > m_sFlockingParams.MaxInteraction) {
-    //         cAccum.Normalize();
-    //         cAccum *= m_sFlockingParams.MaxInteraction;
-    //      }
-    //   }
-        /* All done */
-        return cAccum * 250;
+        return localAttractionForce + gaziForce;
     }
     else {
-        /* No messages received, no interaction */
         return CVector2();
     }
 }

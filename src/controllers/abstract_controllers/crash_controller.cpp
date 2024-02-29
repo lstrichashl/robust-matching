@@ -9,4 +9,14 @@ void CCrashController::Reset(){
     m_pcRABAct->SetData(0, m_eState);
 }
 
+void CCrashController::ControlStep(){
+    if(ShouldTransitionToPaired()){
+        m_eState = STATE_PAIRED;
+    }
+    else if(ShouldTransitionToAlone()){
+        m_eState = STATE_ALONE;
+    }
+    m_pcRABAct->SetData(0, m_eState);
+}
+
 REGISTER_CONTROLLER(CCrashController, "crash_controller")

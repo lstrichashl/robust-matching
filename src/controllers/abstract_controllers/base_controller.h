@@ -24,6 +24,8 @@ public:
    virtual void Init(TConfigurationNode& t_node);
    virtual void Reset();
    virtual void SetWheelSpeedsFromVector(const CVector2& c_heading);
+   virtual bool ShouldTransitionToPaired();
+   virtual bool ShouldTransitionToAlone();
    virtual std::string GetType(){
       return m_typename;
    }

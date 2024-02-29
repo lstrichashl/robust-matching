@@ -83,7 +83,7 @@ pair< Graph, vector<double> > ReadWeightedGraph(string filename)
 	ss >> m;
 
 	Graph G(n);
-	vector<double> cost(m);
+	vector<double> cost(n*n);
 	for(int i = 0; i < m; i++)
 	{
 		getline(file, s);
@@ -101,6 +101,36 @@ pair< Graph, vector<double> > ReadWeightedGraph(string filename)
 	return make_pair(G, cost);
 }
 
+
+void add_edge(int node1, int node2, Graph& g, vector<double>& cost){
+	if(!g.AdjMat()[node1][node2]){
+		g.AddEdge(node1, node2);
+		cost[g.GetEdgeIndex(node1, node2)] = 5;
+	}
+}
+
+void AddHopToGraph(Graph& g, vector<double>& cost){
+	int init_edges_num = g.GetNumEdges();
+    for(unsigned i = 0; i < init_edges_num; i++){
+        pair<int, int> first_edge = g.GetEdge(i);
+        for(unsigned j = 0; j < init_edges_num; j++){
+            if(i == j){
+                continue;
+            }
+            pair<int, int> second_edge = g.GetEdge(j);
+            if(first_edge.first == second_edge.first && first_edge.second < second_edge.second){
+                add_edge(first_edge.second, second_edge.second, g, cost);
+            }
+            else if(first_edge.first == second_edge.second && first_edge.second < second_edge.first){
+                add_edge(first_edge.second, second_edge.first, g, cost);
+            }
+            else if(first_edge.second == second_edge.second && first_edge.first < second_edge.first){
+                add_edge(first_edge.first, second_edge.first, g, cost);
+            }
+        }
+    }	
+}
+
 void MinimumCostPerfectMatchingExample(string filename)
 {
 	Graph G;
@@ -112,8 +142,30 @@ void MinimumCostPerfectMatchingExample(string filename)
 	G = p.first;
 	cost = p.second;
 
+
+	//add hops
+	AddHopToGraph(G, cost);
+
 	//Create a Matching instance passing the graph
 	Matching M(G);
+
+
+	cout << G.GetNumEdges() << endl;
+	cout << cost.size() << endl;
+	// vector< vector<bool> > matrix = G.AdjMat();
+	// int rows = matrix.size();
+
+    // // Print the matrix
+    // for (int i = 0; i < rows; i++) {
+    //     for (int j = 0; j < matrix[i].size(); j++) {
+    //         std::cout << matrix[i][j] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+	// for(int i = 0 ; i < cost.size(); i++){
+	// 	cout << cost[i] << endl;
+	// }
 
 	//Pass the costs to solve the problem
 	pair< list<int>, double > solution = M.SolveMinimumCostPerfectMatching(cost);
@@ -167,25 +219,25 @@ int main(int argc, char* argv[])
 		i++;
 	}
 
-	if(filename == "" || algorithm == "")
-	{
-		cout << "usage: ./example -f <filename> <--minweight | --max>" << endl;
-		cout << "--minweight for minimum weight perfect matching" << endl;
-		cout << "--max for maximum cardinality matching" << endl;
-		cout << "file format:" << endl;
-		cout << "the first two lines give n (number of vertices) and m (number of edges)," << endl;
-		cout << "followed by m lines, each with a tuple (u, v [, c]) representing the edges," << endl;
-	   	cout << "where u and v are the endpoints (0-based indexing) of the edge and c is its cost" << endl;	
-		cout << "the cost is optional if --max is specified" << endl;
-		return 1;
-	}
+	// if(filename == "" || algorithm == "")
+	// {
+	// 	cout << "usage: ./example -f <filename> <--minweight | --max>" << endl;
+	// 	cout << "--minweight for minimum weight perfect matching" << endl;
+	// 	cout << "--max for maximum cardinality matching" << endl;
+	// 	cout << "file format:" << endl;
+	// 	cout << "the first two lines give n (number of vertices) and m (number of edges)," << endl;
+	// 	cout << "followed by m lines, each with a tuple (u, v [, c]) representing the edges," << endl;
+	//    	cout << "where u and v are the endpoints (0-based indexing) of the edge and c is its cost" << endl;	
+	// 	cout << "the cost is optional if --max is specified" << endl;
+	// 	return 1;
+	// }
 
 	try
 	{
-		if(algorithm == "minweight")
+		// if(algorithm == "minweight")
 			MinimumCostPerfectMatchingExample(filename);
-		else
-			MaximumMatchingExample(filename);
+		// else
+			// MaximumMatchingExample(filename);
 	}
 	catch(const char * msg)
 	{

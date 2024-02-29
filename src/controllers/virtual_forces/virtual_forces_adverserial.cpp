@@ -16,64 +16,18 @@ void CAdverserialVirtualForces::Reset() {
     m_pcLedAct->SetAllRedLeds(true);
 }
 
-void CAdverserialVirtualForces::ControlStep() {
-    switch (m_eState)
-    {
-    case STATE_ALONE:
-        Alone();
-        break;
-    case STATE_PAIRED:
-        Paired();
-    default:
-        break;
-    }
-}
-
-bool CAdverserialVirtualForces::ShouldTransitionToPaired(){
-    return CVirtualForces::ShouldTransitionToPaired();
-}
-
 CVector2 CAdverserialVirtualForces::FlockingVector() {
-    /* Get RAB messages from nearby eye-bots */
     const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
-    /* Go through them to calculate the flocking interaction vector */
     if(! tMsgs.empty()) {
-        /* This will contain the final interaction vector */
         CVector2 cAccum;
-        /* Used to calculate the vector length of each neighbor's contribution */
         Real fLJ;
-        /* A counter for the neighbors in state flock */
-        UInt32 unPeers = 0;
         for(size_t i = 0; i < tMsgs.size(); ++i) {
-            /*
-            * We consider only the neighbors in state flock
-            */
-            fLJ = ElectricalForce(tMsgs[i].Range);
-            if(tMsgs[i].Data[0] == STATE_ALONE) {
-                cAccum += CVector2(fLJ,
-                            tMsgs[i].HorizontalBearing + tMsgs[i].HorizontalBearing.PI);
-            }
-            else {
-                if(tMsgs[i].Range/100 < PAIRING_THRESHOLD * 3){ 
-                    cAccum += CVector2(0.05 * fLJ,
-                                tMsgs[i].HorizontalBearing + tMsgs[i].HorizontalBearing.PI);
-                }
-            }
+            fLJ = -ElectricalForce(tMsgs[i].Range);
+            cAccum += CVector2(fLJ, tMsgs[i].HorizontalBearing);
         }
-    //   if(unPeers > 0) {
-    //      /* Divide the accumulator by the number of flocking neighbors */
-    //      cAccum /= unPeers;
-    //      /* Limit the interaction force */
-    //      if(cAccum.Length() > m_sFlockingParams.MaxInteraction) {
-    //         cAccum.Normalize();
-    //         cAccum *= m_sFlockingParams.MaxInteraction;
-    //      }
-    //   }
-        /* All done */
-        return cAccum * 250;
+        return cAccum;
     }
     else {
-        /* No messages received, no interaction */
         return CVector2();
     }
 }

@@ -2,7 +2,7 @@
 #include <argos3/core/simulator/simulator.h>
 #include <argos3/plugins/robots/e-puck2/simulator/epuck2_entity.h>
 #include <list>
-#include "src/controllers/virtual_forces/virtual_forces_bot.h"
+#include "src/controllers/abstract_controllers/base_controller.h"
 #include <iostream>
 #include <fstream>
 
@@ -17,14 +17,13 @@ void CPrintExperimentFunctions::Destroy(){
     std::ofstream os(m_log_file_path);
     std::string robot_types = "[";
     for (unsigned i=0; i<m_robots.size(); i++){
-        CVirtualForces& cController1 = dynamic_cast<CVirtualForces&>(m_robots[i]->GetControllableEntity().GetController());
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
         robot_types += "{\"robot_id\":\""+std::to_string(i)+"\",\"type\":\""+cController1.GetType()+"\"},";
     }
     robot_types.pop_back();
     robot_types += "]";
 
-    MatchingResult result = GetBestMatching(m_robots);
-    Clusters pairs = GetRobotPairs(m_robots);
+    Clusters pairs = GetRobotPairs(GetNFRobots());
     write_to_log(pairs);
 
     std::string all_log = "[";

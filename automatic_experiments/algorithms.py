@@ -14,7 +14,7 @@ class Algorithm:
         raise NotImplemented()
 
 class NonFaultyAlgorithm(Algorithm):
-    def __init__(self, name, template_file_path) -> None:
+    def __init__(self, name: str, template_file_path: str) -> None:
         super().__init__(name)
         self.template_file_path = template_file_path
 
@@ -30,17 +30,20 @@ class VirtualForces(NonFaultyAlgorithm):
         }
 
 class AlgoMatching(NonFaultyAlgorithm):
-    def __init__(self, is_commited, repeate_interval = 100000000) -> None:
+    def __init__(self, is_commited: bool, repeate_interval: int = 100000000, range: float = 5) -> None:
+        # name = "algo_matching" if is_commited else f"repeated_{repeate_interval}"
         super().__init__(name="algo_matching", template_file_path=f'{base_dir}/templates/matching.argos')
         self.is_commited = is_commited
         self.repeate_interval = repeate_interval
         if is_commited and self.repeate_interval < 100000000:
             raise "is_commited has to be with very large interval"
+        self.range = range
         
     def get_loop_functions_params(self):
         dict = {
             "@is_commited": "true" if self.is_commited else "false",
-            "@repeat_interval": self.repeate_interval
+            "@repeat_interval": self.repeate_interval,
+            "@range": self.range
         }
         return {**super().get_loop_functions_params(), **dict}
     
@@ -62,21 +65,28 @@ class VirtualForcesWalkAway(FaultyAlgorithm):
 class AlgoMatchingWalkAway(FaultyAlgorithm):
     def __init__(self) -> None:
         super().__init__(name="algo_matching_walk_away")
+class KeepDistance(FaultyAlgorithm):
+    def __init__(self) -> None:
+        super().__init__(name="keep_distance")
 
 def algorithmFactory(name) -> Algorithm:
     if name == "virtual_forces":
         return VirtualForces()
     elif name == "commited":
         return AlgoMatching(is_commited=True)
+    elif name == "repeated":
+        return AlgoMatching(is_commited=False, repeate_interval=1)
     elif name == "crash":
         return Crash()
     elif name == "virtual_forces_walk_away":
         return VirtualForcesWalkAway()
     elif name == "algo_matching_walk_away":
         return AlgoMatchingWalkAway()
+    elif name == "keep_distance":
+        return KeepDistance()
 
 class Experiment:
-    def __init__(self, non_faulty_count: int, faulty_count: int, non_faulty_algorithm: NonFaultyAlgorithm, faulty_algorithm: FaultyAlgorithm, random_seed: int, length = 500,visualization = False) -> None:
+    def __init__(self, non_faulty_count: int, faulty_count: int, non_faulty_algorithm: NonFaultyAlgorithm, faulty_algorithm: FaultyAlgorithm, random_seed: int, run_tag:str, length = 500,visualization = False) -> None:
         self.faulty_count = faulty_count
         self.non_faulty_count = non_faulty_count
         self.non_faulty_algorithm = non_faulty_algorithm
@@ -85,7 +95,7 @@ class Experiment:
         self.length = length
         self.visualization = visualization
 
-        self.argos_file_path = tmp_file_path = f'{base_dir}/results/{non_faulty_algorithm.__class__.__name__}/faulty{faulty_count}/random_seed{random_seed}.argos'
+        self.argos_file_path = tmp_file_path = f'{base_dir}/results/{run_tag}/{non_faulty_algorithm.__class__.__name__}_{faulty_algorithm.__class__.__name__}/faulty{faulty_count}/random_seed{random_seed}.argos'
         self.log_file = f"{tmp_file_path}.log"
     
     def get_loop_functions_params(self):

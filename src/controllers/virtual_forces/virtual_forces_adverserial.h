@@ -18,8 +18,13 @@ public:
     virtual ~CAdverserialVirtualForces() {}
     virtual void ControlStep();
     virtual void Reset();
-    virtual bool ShouldTransitionToPaired();
     virtual CVector2 FlockingVector();
+
+    virtual Real LennardJonesPotential(double distance){
+      double epsilon = 10;
+      double theta = 15;
+      return  -epsilon * (::pow(theta/distance, 4) - ::pow(theta/distance, 2));
+   }
 };
 
 #endif

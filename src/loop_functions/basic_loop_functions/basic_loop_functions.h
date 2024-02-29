@@ -17,6 +17,7 @@ public:
    virtual void PreStep();
    virtual void Init(TConfigurationNode& t_tree);
    virtual bool IsExperimentFinished();
+   virtual void PostExperiment();
    virtual void Reset();
    virtual vector<CEPuck2Entity*> GetRobots(){
       return m_robots;
@@ -36,7 +37,6 @@ protected:
 private:
     vector<CVector2> m_last_positions;
     vector<CVector2> m_new_positions;
-    int number_of_rounds_no_change_postions;
 };
 
 #endif

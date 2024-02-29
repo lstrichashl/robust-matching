@@ -31,6 +31,8 @@ void BaseConrtoller::SetWheelSpeedsFromVector(const CVector2& c_heading) {
    CRadians cHeadingAngle = c_heading.Angle().SignedNormalize();
    Real fHeadingLength = c_heading.Length();
    Real fBaseAngularWheelSpeed = Min<Real>(fHeadingLength, m_sWheelTurningParams.MaxSpeed);
+    // std::cout << fBaseAngularWheelSpeed << std::endl;
+
    if(m_sWheelTurningParams.TurningMechanism == SWheelTurningParams::HARD_TURN) {
       if(Abs(cHeadingAngle) <= m_sWheelTurningParams.SoftTurnOnAngleThreshold) {
          m_sWheelTurningParams.TurningMechanism = SWheelTurningParams::SOFT_TURN;
@@ -107,4 +109,30 @@ void BaseConrtoller::SWheelTurningParams::Init(TConfigurationNode& t_node) {
     catch(CARGoSException& ex) {
         THROW_ARGOSEXCEPTION_NESTED("Error initializing controller wheel turning parameters.", ex);
     }
+}
+
+
+bool BaseConrtoller::ShouldTransitionToAlone(){
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+    bool has_near_robot = false;
+    if(! tMsgs.empty()) {
+        for(size_t i = 0; i < tMsgs.size(); ++i) {
+            if(tMsgs[i].Range/100 < PAIRING_THRESHOLD){
+                has_near_robot = true;
+            }
+        }
+    }
+    return !has_near_robot;
+}
+
+bool BaseConrtoller::ShouldTransitionToPaired(){
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+    if(! tMsgs.empty()) {
+        for(size_t i = 0; i < tMsgs.size(); ++i) {
+            if(tMsgs[i].Range/100 < PAIRING_THRESHOLD && tMsgs[i].Data[0] == STATE_ALONE){
+                return true;
+            }
+        }
+    }
+    return false;
 }

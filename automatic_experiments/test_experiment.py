@@ -27,7 +27,8 @@ if __name__ == "__main__":
                 faulty_algorithm=faulty_algorithm,
                 random_seed=options.random_seed,
                 length=options.length,
-                visualization=options.visualization
+                visualization=options.visualization,
+                run_tag="test"
     )
     file = experiment.generate_argos_file()
     work(file)
