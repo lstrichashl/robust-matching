@@ -8,3 +8,4 @@ build/
 .python-version
 
 cache.json
+**/results

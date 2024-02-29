@@ -6,12 +6,24 @@ template_file_path = f'{base_dir}/templates/virtual_forces.argos'
 class Algorithm:
     def __init__(self, name) -> None:
         self.name = name
+        self.controller_type = name
      
     def get_loop_functions_params(self):
         return {}
     
     def get_loop_functions(self):
         raise NotImplemented()
+
+    def get_controller_params(self):
+        return {}
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "controller_type": self.controller_type,
+            "loop_function_params": self.get_loop_functions_params(),
+            "controller_params": self.get_controller_params()
+        }
 
 class NonFaultyAlgorithm(Algorithm):
     def __init__(self, name: str, template_file_path: str) -> None:
@@ -30,9 +42,10 @@ class VirtualForces(NonFaultyAlgorithm):
         }
 
 class AlgoMatching(NonFaultyAlgorithm):
-    def __init__(self, is_commited: bool, repeate_interval: int = 100000000, range: float = 5) -> None:
+    def __init__(self, is_commited: bool, name="algo_matching", repeate_interval: int = 100000000, range: float = 5) -> None:
         # name = "algo_matching" if is_commited else f"repeated_{repeate_interval}"
-        super().__init__(name="algo_matching", template_file_path=f'{base_dir}/templates/matching.argos')
+        super().__init__(name=name, template_file_path=f'{base_dir}/templates/matching.argos')
+        self.controller_type = "algo_matching"
         self.is_commited = is_commited
         self.repeate_interval = repeate_interval
         if is_commited and self.repeate_interval < 100000000:
@@ -75,7 +88,7 @@ def algorithmFactory(name) -> Algorithm:
     elif name == "commited":
         return AlgoMatching(is_commited=True)
     elif name == "repeated":
-        return AlgoMatching(is_commited=False, repeate_interval=1)
+        return AlgoMatching(is_commited=False, name="repeated", repeate_interval=1)
     elif name == "crash":
         return Crash()
     elif name == "virtual_forces_walk_away":
@@ -86,7 +99,9 @@ def algorithmFactory(name) -> Algorithm:
         return KeepDistance()
 
 class Experiment:
-    def __init__(self, non_faulty_count: int, faulty_count: int, non_faulty_algorithm: NonFaultyAlgorithm, faulty_algorithm: FaultyAlgorithm, random_seed: int, run_tag:str, length = 500,visualization = False) -> None:
+    def __init__(self, non_faulty_count: int, faulty_count: int, non_faulty_algorithm: NonFaultyAlgorithm, faulty_algorithm: FaultyAlgorithm, random_seed: int, run_tag:str, length = 500,visualization = False, file_path:str = None) -> None:
+        if file_path is None:
+            file_path = f'{base_dir}/results/{run_tag}/{non_faulty_algorithm.name}_{faulty_algorithm.name}/faulty{faulty_count}/random_seed{random_seed}.argos'
         self.faulty_count = faulty_count
         self.non_faulty_count = non_faulty_count
         self.non_faulty_algorithm = non_faulty_algorithm
@@ -94,9 +109,8 @@ class Experiment:
         self.random_seed = random_seed
         self.length = length
         self.visualization = visualization
-
-        self.argos_file_path = tmp_file_path = f'{base_dir}/results/{run_tag}/{non_faulty_algorithm.__class__.__name__}_{faulty_algorithm.__class__.__name__}/faulty{faulty_count}/random_seed{random_seed}.argos'
-        self.log_file = f"{tmp_file_path}.log"
+        self.argos_file_path = file_path
+        self.log_file = f"{self.argos_file_path}.log"
     
     def get_loop_functions_params(self):
         dict = {
@@ -118,11 +132,10 @@ class Experiment:
         doc['argos-configuration']['framework']['experiment']['@length'] = self.length
         doc['argos-configuration']['arena']['distribute'][0]['entity']['@quantity'] = self.non_faulty_count
         doc['argos-configuration']['arena']['distribute'][1]['entity']['@quantity'] = self.faulty_count
-        doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['controller']['@config'] = self.non_faulty_algorithm.name
-        doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.name
+        doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['controller']['@config'] = self.non_faulty_algorithm.controller_type
+        doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.controller_type
         doc['argos-configuration']['visualization'] = doc['argos-configuration']['visualization'] if self.visualization else {}
         doc['argos-configuration']['loop_functions'] = self.get_loop_functions()
-        # doc['argos-configuration']['loop_functions']['params'] = self.get_loop_functions_params()
         to_save_string = xmltodict.unparse(doc)
 
         with open(self.argos_file_path, 'w') as f:

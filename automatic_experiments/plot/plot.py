@@ -28,13 +28,27 @@ def parse(data):
         
     return robot_types, expariment_logs
 
+def filter_faulty_pairs(pairing, robottypes):
+    robot_types = {}
+    for type in robottypes:
+        if type["type"] not in robot_types:
+            robot_types[type["type"]] = []
+        robot_types[type["type"]].append(int(type["robot_id"]))
+    nf_pairing = []
+    for pair in pairing:
+        if pair[0] in robot_types['non_faulty'] and pair[1] in robot_types['non_faulty']:
+            nf_pairing.append(pair)
+    return nf_pairing
+
+
 def stat_experiment(
     file_path
 ):
     a = open_file(file_path)
     last_pairing = a["logs"][-1]["pairs"]
+    nf_pairing = filter_faulty_pairs(last_pairing, a["robot_types"])
     experiment_length = int(a["logs"][-1]["tick"])
-    return len(last_pairing), experiment_length
+    return len(nf_pairing), experiment_length
 
 
 def stat_experiment_set(
@@ -110,9 +124,10 @@ def plot_pairs(data):
     worst_case = [number_of_robots/2-f for f in f_range]
     fig, axs = plt.subplots(nrows=2, ncols=2, layout=None)
     axss = axs.flat
-    for i in range(len(data)):
-        for result in data[i]:
-            stats = stat_all(results_path = result["dir"])
+    i = 0
+    for k, v in data.items():
+        for result in v["data"]:
+            stats = stat_all(results_path = result["dir"], from_cache=False)
             means,stds = get_number_of_pairs(stats)
             axss[i].errorbar(list(means.keys()), list(means.values()), list(stds.values()), fmt="o", label=result["label"], capsize=5)
         axss[i].plot(f_range, np.array(worst_case), "--", label="worst", color="red", alpha=0.3)
@@ -121,9 +136,11 @@ def plot_pairs(data):
         axss[i].grid(linestyle = ':')
         # axss[i].xlabel("f")
         axss[i].legend()
+        axss[i].set_title(k)
         # axss[i].xticks(f_range)
         # axss[i].yticks(range(0,11))
         # axss[i].ylabel("number of pairs")
+        i += 1
     plt.show() 
 
 
@@ -145,42 +162,64 @@ def plot_time(data):
     plt.show() 
 
 
+def plot_runtag(run_tag: str):
+    dir = f"/Users/lior.strichash/private/robust-matching/automatic_experiments/results/{run_tag}"
+    algorithms_directories = [f for f in pathlib.Path(dir).iterdir() if f.is_dir()]
+    plots = {}
+    for algorithm_directory in algorithms_directories:
+        with open(f"{algorithm_directory}/metadata.json") as f:
+            metadata = json.load(f)
+            if metadata["faulty_algorithm"]['name'] not in plots:
+                plots[metadata["faulty_algorithm"]['name']] = {
+                    "title": metadata["faulty_algorithm"]['name'],
+                    "data": []
+                }
+            plots[metadata["faulty_algorithm"]['name']]["data"].append({
+                "dir": algorithm_directory,
+                "label": metadata["non_faulty_algorithm"]['name']
+            })
+    plot_pairs(plots)
+
+
 if __name__ == "__main__":
     base_dir = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/virtual_forces_gazi"
     base_dir3 = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/repeated"
-    data = [[{
-        "dir": f"{base_dir}/AlgoMatching_KeepDistance",
-        "label": "commited KeepDistance"
-    },{
-        "dir": f"{base_dir3}/AlgoMatching_KeepDistance",
-        "label": "repeated KeepDistance"
-    },{
-        "dir": f"{base_dir}/VirtualForces_KeepDistance",
-        "label": "virtual_forces KeepDistance"
-    }],[{
-        "dir": f"{base_dir}/AlgoMatching_Crash",
-        "label": "commited Crash"
-    },{
-        "dir": f"{base_dir3}/AlgoMatching_Crash",
-        "label": "repeated Crash"
-    },{
-        "dir": f"{base_dir}/VirtualForces_Crash",
-        "label": "virtual_forces Crash"
-    }],[{
-        "dir": f"{base_dir}/AlgoMatching_AlgoMatchingWalkAway",
-        "label": "commited AlgoMatchingWalkAway"
-    },{
-        "dir": f"{base_dir3}/AlgoMatching_AlgoMatchingWalkAway",
-        "label": "repeated AlgoMatchingWalkAway"
-    }],[{
-        "dir": f"{base_dir}/AlgoMatching_VirtualForcesWalkAway",
-        "label": "commited VirtualForcesWalkAway"
-    },{
-        "dir": f"{base_dir3}/AlgoMatching_VirtualForcesWalkAway",
-        "label": "repeated VirtualForcesWalkAway"
-    },{
-        "dir": f"{base_dir}/VirtualForces_VirtualForcesWalkAway",
-        "label": "virtual_forces VirtualForcesWalkAway"
-    }]]
+
+    run_tag = "unlimited_visibilty"
+    plot_runtag(run_tag)
+    # data = [[{
+    #     "dir": f"{base_dir}/AlgoMatching_KeepDistance",
+    #     "label": "commited KeepDistance"
+    # },{
+    #     "dir": f"{base_dir3}/AlgoMatching_KeepDistance",
+    #     "label": "repeated KeepDistance"
+    # },{
+    #     "dir": f"{base_dir}/VirtualForces_KeepDistance",
+    #     "label": "virtual_forces KeepDistance"
+    # }],[{
+    #     "dir": f"{base_dir}/AlgoMatching_Crash",
+    #     "label": "commited Crash"
+    # },{
+    #     "dir": f"{base_dir3}/AlgoMatching_Crash",
+    #     "label": "repeated Crash"
+    # },{
+    #     "dir": f"{base_dir}/VirtualForces_Crash",
+    #     "label": "virtual_forces Crash"
+    # }],[{
+    #     "dir": f"{base_dir}/AlgoMatching_AlgoMatchingWalkAway",
+    #     "label": "commited AlgoMatchingWalkAway"
+    # },{
+    #     "dir": f"{base_dir3}/AlgoMatching_AlgoMatchingWalkAway",
+    #     "label": "repeated AlgoMatchingWalkAway"
+    # }],[{
+    #     "dir": f"{base_dir}/AlgoMatching_VirtualForcesWalkAway",
+    #     "label": "commited VirtualForcesWalkAway"
+    # },{
+    #     "dir": f"{base_dir3}/AlgoMatching_VirtualForcesWalkAway",
+    #     "label": "repeated VirtualForcesWalkAway"
+    # },{
+    #     "dir": f"{base_dir}/VirtualForces_VirtualForcesWalkAway",
+    #     "label": "virtual_forces VirtualForcesWalkAway"
+    # }]]
     # plot_time(data)
-    plot_pairs(data)
+    # plot_pairs(data)
