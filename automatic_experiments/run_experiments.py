@@ -56,22 +56,23 @@ def main():
     tp = ThreadPool(num)
     n_robots = 20
     build()
-    run_tag = "unlimited_visibilty"
+    run_tag = "unlimited_visibility"
+    range = 0.5
 
     non_faulty_algorithms = [
-        AlgoMatching(is_commited=False, name="repeated", repeate_interval=1),
-        AlgoMatching(is_commited=True),
-        VirtualForces()
+        AlgoMatching(is_commited=False, name="repeated", repeate_interval=1, range=range),
+        AlgoMatching(is_commited=True, range=range),
+        VirtualForces(range=range)
     ]
     faulty_algorithms = [
-        VirtualForcesWalkAway(),
-        Crash(),
-        KeepDistance(),
-        AlgoMatchingWalkAway(),
+        VirtualForcesWalkAway(range=range),
+        Crash(range=range),
+        KeepDistance(range=range),
+        AlgoMatchingWalkAway(range=range),
     ]
     file_pathes = []
     for nf_algo, f_algo in product(non_faulty_algorithms, faulty_algorithms):
-        file_pathes += create_all_files(number_of_test_runs=1, n_robots=n_robots,non_faulty_algorithm=nf_algo, faulty_algorithm=f_algo, run_tag=run_tag)
+        file_pathes += create_all_files(number_of_test_runs=10, n_robots=n_robots,non_faulty_algorithm=nf_algo, faulty_algorithm=f_algo, run_tag=run_tag)
     
     for tmp_file_path in file_pathes:
         tp.apply_async(work, (tmp_file_path,))

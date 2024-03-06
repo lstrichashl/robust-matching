@@ -57,10 +57,10 @@ MatchingResult GetMatchingResult(vector<CEPuck2Entity*> robots, double range) {
                 CVector2 distance_vector1 = (positions[i].second - positions[j].second);
 
                 Real angle_distance = 1 - (abs(cZAngle1.GetValue() - cZAngle2.GetValue()) / 3.141592);
-                // if(distance_vector1.Length() < range){
+                if(distance_vector1.Length() < range){
                     G.AddEdge(i, j);
                     cost[G.GetEdgeIndex(i,j)] = distance_vector1.Length();
-                // }
+                }
                 // cost[G.GetEdgeIndex(i,j)] += + 0.00605 * angle_distance;
                 // cost[G.GetEdgeIndex(i,j)] += + 0.01 * angle_distance;
             }

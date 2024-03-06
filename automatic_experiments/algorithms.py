@@ -4,9 +4,10 @@ import xmltodict
 base_dir = '/Users/lior.strichash/private/robust-matching/automatic_experiments'
 template_file_path = f'{base_dir}/templates/virtual_forces.argos'
 class Algorithm:
-    def __init__(self, name) -> None:
+    def __init__(self, name: str, range: int) -> None:
         self.name = name
         self.controller_type = name
+        self.range = range
      
     def get_loop_functions_params(self):
         return {}
@@ -26,13 +27,13 @@ class Algorithm:
         }
 
 class NonFaultyAlgorithm(Algorithm):
-    def __init__(self, name: str, template_file_path: str) -> None:
-        super().__init__(name)
+    def __init__(self, name: str, range: int, template_file_path: str) -> None:
+        super().__init__(name, range=range)
         self.template_file_path = template_file_path
 
 class VirtualForces(NonFaultyAlgorithm):
-    def __init__(self) -> None:
-        super().__init__(name="virtual_forces",template_file_path=f'{base_dir}/templates/virtual_forces.argos')
+    def __init__(self, range: int) -> None:
+        super().__init__(name="virtual_forces",template_file_path=f'{base_dir}/templates/virtual_forces.argos', range=range)
     
     def get_loop_functions(self):
         return {
@@ -42,15 +43,14 @@ class VirtualForces(NonFaultyAlgorithm):
         }
 
 class AlgoMatching(NonFaultyAlgorithm):
-    def __init__(self, is_commited: bool, name="algo_matching", repeate_interval: int = 100000000, range: float = 5) -> None:
+    def __init__(self, is_commited: bool, range: int, name="algo_matching", repeate_interval: int = 100000000) -> None:
         # name = "algo_matching" if is_commited else f"repeated_{repeate_interval}"
-        super().__init__(name=name, template_file_path=f'{base_dir}/templates/matching.argos')
+        super().__init__(name=name, template_file_path=f'{base_dir}/templates/matching.argos', range=range)
         self.controller_type = "algo_matching"
         self.is_commited = is_commited
         self.repeate_interval = repeate_interval
         if is_commited and self.repeate_interval < 100000000:
             raise "is_commited has to be with very large interval"
-        self.range = range
         
     def get_loop_functions_params(self):
         dict = {
@@ -70,33 +70,33 @@ class AlgoMatching(NonFaultyAlgorithm):
 class FaultyAlgorithm(Algorithm):
     pass
 class Crash(FaultyAlgorithm):
-    def __init__(self) -> None:
-        super().__init__(name="crash")
+    def __init__(self, range: int) -> None:
+        super().__init__(name="crash",range=range)
 class VirtualForcesWalkAway(FaultyAlgorithm):
-    def __init__(self) -> None:
-        super().__init__(name="virtual_forces_walk_away")
+    def __init__(self, range: int) -> None:
+        super().__init__(name="virtual_forces_walk_away", range=range),
 class AlgoMatchingWalkAway(FaultyAlgorithm):
-    def __init__(self) -> None:
-        super().__init__(name="algo_matching_walk_away")
+    def __init__(self, range: int) -> None:
+        super().__init__(name="algo_matching_walk_away", range=range)
 class KeepDistance(FaultyAlgorithm):
-    def __init__(self) -> None:
-        super().__init__(name="keep_distance")
+    def __init__(self, range: int) -> None:
+        super().__init__(name="keep_distance", range=range)
 
-def algorithmFactory(name) -> Algorithm:
+def algorithmFactory(name, range) -> Algorithm:
     if name == "virtual_forces":
-        return VirtualForces()
+        return VirtualForces(range=range)
     elif name == "commited":
-        return AlgoMatching(is_commited=True)
+        return AlgoMatching(is_commited=True,range=range)
     elif name == "repeated":
-        return AlgoMatching(is_commited=False, name="repeated", repeate_interval=1)
+        return AlgoMatching(is_commited=False, name="repeated", repeate_interval=1,range=range)
     elif name == "crash":
-        return Crash()
+        return Crash(range=range)
     elif name == "virtual_forces_walk_away":
-        return VirtualForcesWalkAway()
+        return VirtualForcesWalkAway(range=range)
     elif name == "algo_matching_walk_away":
-        return AlgoMatchingWalkAway()
+        return AlgoMatchingWalkAway(range=range)
     elif name == "keep_distance":
-        return KeepDistance()
+        return KeepDistance(range=range)
 
 class Experiment:
     def __init__(self, non_faulty_count: int, faulty_count: int, non_faulty_algorithm: NonFaultyAlgorithm, faulty_algorithm: FaultyAlgorithm, random_seed: int, run_tag:str, length = 500,visualization = False, file_path:str = None) -> None:
@@ -133,7 +133,9 @@ class Experiment:
         doc['argos-configuration']['arena']['distribute'][0]['entity']['@quantity'] = self.non_faulty_count
         doc['argos-configuration']['arena']['distribute'][1]['entity']['@quantity'] = self.faulty_count
         doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['controller']['@config'] = self.non_faulty_algorithm.controller_type
+        doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['@rab_range'] = self.non_faulty_algorithm.range
         doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.controller_type
+        doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['@rab_range'] = self.faulty_algorithm.range
         doc['argos-configuration']['visualization'] = doc['argos-configuration']['visualization'] if self.visualization else {}
         doc['argos-configuration']['loop_functions'] = self.get_loop_functions()
         to_save_string = xmltodict.unparse(doc)

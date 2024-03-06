@@ -18,8 +18,8 @@ def parse_options() -> Namespace:
 if __name__ == "__main__":
     options = parse_options()
     build()
-    non_faulty_algorithm = algorithmFactory(options.algorithm)
-    faulty_algorithm = algorithmFactory(options.faulty_algorithm)
+    non_faulty_algorithm = algorithmFactory(options.algorithm, range=0.5)
+    faulty_algorithm = algorithmFactory(options.faulty_algorithm, range=0.5)
     experiment = Experiment(
                 non_faulty_count=options.non_faulty,
                 faulty_count=options.faulty,

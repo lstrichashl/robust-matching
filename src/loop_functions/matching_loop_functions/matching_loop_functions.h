@@ -39,8 +39,6 @@ private:
 
    UInt32 m_repeat_interval;
 
-   double m_range;
-
 };
 
 #endif

@@ -26,6 +26,8 @@ public:
    vector<CVector2> GetPositions(vector<CEPuck2Entity*> robots);
    Clusters GetRobotPairs(vector<CEPuck2Entity*> robots);
    virtual void add_log();
+   virtual void PlaceCluster(TConfigurationNode& entityNode);
+   virtual void RemoveAll(vector<CEntity*> entites);
 
 protected:
    vector<CEPuck2Entity*> m_robots;
@@ -33,6 +35,7 @@ protected:
    vector<string> m_logs;
 
    string m_log_file_path;
+   double m_range;
 
    virtual void write_all_logs(vector<string> logs, string params_string);
 

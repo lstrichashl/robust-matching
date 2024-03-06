@@ -23,7 +23,7 @@ CMatchingLoopFunctions::CMatchingLoopFunctions():
     // m_logs(0),
     m_isCommited(false),
     m_repeat_interval(1),
-    m_range(0)
+    CBasicLoopFunctions()
     {}
 
 void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
