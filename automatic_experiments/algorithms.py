@@ -3,6 +3,8 @@ import xmltodict
 
 base_dir = '/Users/lior.strichash/private/robust-matching/automatic_experiments'
 template_file_path = f'{base_dir}/templates/virtual_forces.argos'
+
+
 class Algorithm:
     def __init__(self, name: str, range: int) -> None:
         self.name = name
@@ -98,6 +100,8 @@ def algorithmFactory(name, range) -> Algorithm:
     elif name == "keep_distance":
         return KeepDistance(range=range)
 
+
+
 class Experiment:
     def __init__(self, non_faulty_count: int, faulty_count: int, non_faulty_algorithm: NonFaultyAlgorithm, faulty_algorithm: FaultyAlgorithm, random_seed: int, run_tag:str, length = 500,visualization = False, file_path:str = None) -> None:
         if file_path is None:
@@ -130,17 +134,44 @@ class Experiment:
 
         doc['argos-configuration']['framework']['experiment']['@random_seed'] = self.random_seed
         doc['argos-configuration']['framework']['experiment']['@length'] = self.length
-        doc['argos-configuration']['arena']['distribute'][0]['entity']['@quantity'] = self.non_faulty_count
-        doc['argos-configuration']['arena']['distribute'][1]['entity']['@quantity'] = self.faulty_count
-        doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['controller']['@config'] = self.non_faulty_algorithm.controller_type
-        doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['@rab_range'] = self.non_faulty_algorithm.range
-        doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.controller_type
-        doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['@rab_range'] = self.faulty_algorithm.range
+        # doc['argos-configuration']['arena']['distribute'][0]['entity']['@quantity'] = self.non_faulty_count
+        # doc['argos-configuration']['arena']['distribute'][1]['entity']['@quantity'] = self.faulty_count
+        # doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['controller']['@config'] = self.non_faulty_algorithm.controller_type
+        # doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['@rab_range'] = self.non_faulty_algorithm.range
+        # doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.controller_type
+        # doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['@rab_range'] = self.faulty_algorithm.range
         doc['argos-configuration']['visualization'] = doc['argos-configuration']['visualization'] if self.visualization else {}
         doc['argos-configuration']['loop_functions'] = self.get_loop_functions()
+        doc['argos-configuration']['loop_functions']['distribute_max_range'] = distribute_max_range(experiment=self)
         to_save_string = xmltodict.unparse(doc)
 
         with open(self.argos_file_path, 'w') as f:
             f.write(to_save_string)
 
         return self.argos_file_path
+    
+
+
+
+def distribute_max_range(experiment: Experiment):
+    return {
+        '@range': experiment.non_faulty_algorithm.range,
+        '@arena_size': '2.0', 
+        'robot': [{
+            '@quantity': experiment.non_faulty_count, 
+            'e-puck2': {
+                '@id': 'non_faulty', 
+                '@rab_range': experiment.non_faulty_algorithm.range, 
+                '@rab_data_size': '3', 
+                'controller': {'@config': experiment.non_faulty_algorithm.controller_type}
+            }
+        },{
+            '@quantity': experiment.faulty_count, 
+            'e-puck2': {
+                '@id': 'faulty', 
+                '@rab_range': experiment.faulty_algorithm.range, 
+                '@rab_data_size': '3', 
+                'controller': {'@config': experiment.faulty_algorithm.controller_type}
+            }
+        }]
+    }

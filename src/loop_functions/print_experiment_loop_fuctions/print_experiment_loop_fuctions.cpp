@@ -37,20 +37,5 @@ void CPrintExperimentFunctions::Destroy(){
     os.close();
 }
 
-void CPrintExperimentFunctions::PreStep(){
-    CBasicLoopFunctions::PreStep();
-    add_log();
-    // std::vector<std::pair<int,int>> matching = GetRobotPairs(m_robots);
-    // std::vector<std::pair<int, CVector2>> positions = GetPositions(m_robots);
-    // std::string matcing_string = "\"matching\":\"["; 
-    // for(unsigned i = 0; i < matching.size(); i++){
-    //     matcing_string += "(" + to_string(matching[i].first) + "," + to_string(matching[i].second) + "),";
-    // }
-    // if(matching.size() != 0){
-    //     matcing_string.pop_back();
-    // }
-    // matcing_string += "]\"";
-    // std::cout << matcing_string << std::endl;
-}
 
 REGISTER_LOOP_FUNCTIONS(CPrintExperimentFunctions, "print_experiment_loop_fuctions")

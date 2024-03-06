@@ -16,7 +16,6 @@ public:
    virtual ~CPrintExperimentFunctions() {}
    virtual void Init(TConfigurationNode& t_tree);
    virtual void Destroy();
-   virtual void PreStep();
 
 };
 

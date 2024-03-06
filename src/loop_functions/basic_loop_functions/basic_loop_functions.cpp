@@ -30,14 +30,13 @@ void CBasicLoopFunctions::Init(TConfigurationNode& t_tree) {
         CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
         m_robots.push_back(robot);
     }
-    // TConfigurationNode& paramsNode = GetNode(t_tree, "params");
-    // try{
-    //     GetNodeAttribute(paramsNode, "log_file_path", m_log_file_path);
-    // }
-    // catch(...){
-    //     std::cout << "error with loading params tag in CPrintExperimentFunctions class" << std::endl;
-    // }
-    m_log_file_path = "/Users/lior.strichash/private/robust-matching/tmplog.json";
+    TConfigurationNode& paramsNode = GetNode(t_tree, "params");
+    try{
+        GetNodeAttribute(paramsNode, "log_file_path", m_log_file_path);
+    }
+    catch(...){
+        std::cout << "error with loading params tag in CPrintExperimentFunctions class" << std::endl;
+    }
     Reset();
 }
 
@@ -225,10 +224,6 @@ CVector3 GetRandomPosition(CRandom::CRNG* pcRNG, Real robot_range, const vector<
 }
 
 bool is_connected_graph(vector<CVector2> positions, Real robot_range){
-    // cout << robot_range << endl;
-    // for(unsigned i = 0; i < positions.size(); i++){
-    //     cout << (positions[6] - positions[i]).Length() << endl;
-    // }
     for(unsigned i = 0; i < positions.size(); i++){
         bool is_connected = false;
         for(unsigned j = 0; j < positions.size(); j++){
@@ -268,7 +263,7 @@ void CBasicLoopFunctions::PlaceCluster(TConfigurationNode& tDestributionTree) {
         GetNodeAttribute(tDestributionTree, "range", robot_range);
         Real arena_size;
         GetNodeAttribute(tDestributionTree, "arena_size", arena_size);
-        CRange<Real> arena_range(-2*arena_size, 2*arena_size);
+        CRange<Real> arena_range(-arena_size/2, arena_size/2);
 
         UInt32 unMaxTrials = 100;
         vector<CVector2> all_positions = {c_center};
@@ -290,79 +285,55 @@ void CBasicLoopFunctions::PlaceCluster(TConfigurationNode& tDestributionTree) {
             RemoveAll(entites);
             all_positions = {c_center};
             entites = {};
-            arena_range = CRange<Real>(arena_range.GetMin()/1.5, arena_range.GetMax()/1.5);
-            cout << arena_range.GetMin() << endl;
             for(int c = 0; c < configs.size(); c++){
                 UInt32 unQuantity = configs[c].unQuantity;
                 TConfigurationNode tEntityTree = configs[c].robot_config;
-            for(size_t i = 0; i < unQuantity; ++i) {
-                /* Set progressive ID */
-                string entity_id = ToString(base_id+i);
-                cout << entity_id << endl;
-                SetNodeAttribute(tEntityTree, "id", entity_id);
-                /* Go on until the entity is placed with no collisions or
-                    the max number of trials has been exceeded */
-                UInt32 unTrials = 0;
-                bool bDone = false;
-                bool bRetry = false;
-                do {
-                    /* Choose a random position */
-                    ++unTrials;
-                    /* Create the robot in the origin and add it to ARGoS space */
-                    CEntity* p = CFactory<CEntity>::New(tEntityTree.Value());
-                    /* Assume the entity is embodied */
-                    /* If the tree does not have a 'body' node, create a new one */
-                    if(!NodeExists(tEntityTree, "body")) {
-                        TConfigurationNode tBodyNode("body");
-                        AddChildNode(tEntityTree, tBodyNode);
-                    }
-                    /* Get 'body' node */
-                    TConfigurationNode& tBodyNode = GetNode(tEntityTree, "body");
-                    CVector3 pos = GetRandomPosition(pcRNG, robot_range, all_positions, arena_range);
-                    CVector3 orientation(pcRNG->Uniform(CRange<Real>(0, 360)), 0,0);
-
-
-                    SetNodeAttribute(tBodyNode, "position", pos);
-                    /* Set the orientation */
-                    SetNodeAttribute(tBodyNode, "orientation", CVector3(0,0,0));
-                    /* Init the entity (this also creates the components, if pcEntity is a composable) */
-                    p->Init(tEntityTree);
-                    AddEntity(*p);
-                    /* Check whether the entity is indeed embodied */
-                    CEmbodiedEntity* pcEmbodiedEntity = GetEmbodiedEntity(p);
-                    if(pcEmbodiedEntity->IsCollidingWithSomething()) {
-                        // cout << "colision" << endl;
-                        /* Set retry to true */
-                        bRetry = true;
-                        /* Get rid of the entity */
-                        RemoveEntity(*p);
-                        // CallEntityOperation<CSpaceOperationRemoveEntity, CSpace, void>(*this, *pcEntity);
-                        /* Increase the trial count */
+                for(size_t i = 0; i < unQuantity; ++i) {
+                    string entity_id = ToString(base_id+i);
+                    SetNodeAttribute(tEntityTree, "id", entity_id);
+                    UInt32 unTrials = 0;
+                    bool bDone = false;
+                    bool bRetry = false;
+                    do {
                         ++unTrials;
-                        /* Too many trials? */
-                        if(unTrials > unMaxTrials) {
-                            /* Yes, bomb out */
-                            THROW_ARGOSEXCEPTION("Exceeded max trials when trying to distribute objects of type " <<
-                                                tEntityTree.Value() << " with base id \"" <<
-                                                entity_id << "\". I managed to place only " << i << " objects.");
+                        CEntity* p = CFactory<CEntity>::New(tEntityTree.Value());
+                        if(!NodeExists(tEntityTree, "body")) {
+                            TConfigurationNode tBodyNode("body");
+                            AddChildNode(tEntityTree, tBodyNode);
                         }
-                    /* Retry with a new position */
+                        TConfigurationNode& tBodyNode = GetNode(tEntityTree, "body");
+                        CVector3 pos = GetRandomPosition(pcRNG, robot_range, all_positions, arena_range);
+                        CVector3 orientation(pcRNG->Uniform(CRange<Real>(0, 360)), 0,0);
+                        SetNodeAttribute(tBodyNode, "position", pos);
+                        SetNodeAttribute(tBodyNode, "orientation", CVector3(0,0,0));
+                        p->Init(tEntityTree);
+                        AddEntity(*p);
+                        CEmbodiedEntity* pcEmbodiedEntity = GetEmbodiedEntity(p);
+                        if(pcEmbodiedEntity->IsCollidingWithSomething()) {
+                            bRetry = true;
+                            RemoveEntity(*p);
+                            ++unTrials;
+                            if(unTrials > unMaxTrials) {
+                                /* Yes, bomb out */
+                                THROW_ARGOSEXCEPTION("Exceeded max trials when trying to distribute objects of type " <<
+                                                    tEntityTree.Value() << " with base id \"" <<
+                                                    entity_id << "\". I managed to place only " << i << " objects.");
+                            }
+                        }
+                        else {
+                            bDone = true;
+                            CVector2 vector2_pos;
+                            all_positions.push_back(pos.ProjectOntoXY(vector2_pos));
+                            entites.push_back(p);
+                        }
+                    } while(!bDone);
+                    if(!bDone) {
+                        THROW_ARGOSEXCEPTION("Can't place robot" << entity_id);
                     }
-                    else {
-                    /* No collision, we're done with this entity */
-                        bDone = true;
-                        CVector2 vector2_pos;
-                        all_positions.push_back(pos.ProjectOntoXY(vector2_pos));
-                        entites.push_back(p);
-                    }
-                } while(!bDone);
-                if(!bDone) {
-                    THROW_ARGOSEXCEPTION("Can't place robot" << entity_id);
                 }
+                base_id += unQuantity;
             }
-            base_id += unQuantity;
-            }
-
+            arena_range = CRange<Real>(arena_range.GetMin()/1.5, arena_range.GetMax()/1.5);
         }
     }
    catch(CARGoSException& ex) {
