@@ -11,16 +11,12 @@ using namespace std;
 
 struct MatchingResult{
     Graph _graph;
-    Matching _matching;
-    vector<double> _cost;
-    pair< list<int>, double > _solution;
+    vector<int> _matching;
     vector<CEPuck2Entity*> _robots;
 
-    MatchingResult(Graph graph, Matching matching, vector<double> cost, pair< list<int>, double > solution, vector<CEPuck2Entity*> robots):
+    MatchingResult(Graph graph, vector<int> matching, vector<CEPuck2Entity*> robots):
         _graph(graph),
         _matching(matching),
-        _cost(cost),
-        _solution(solution),
         _robots(robots)
     {}
 };
@@ -58,4 +54,5 @@ class Clusters{
 
 CRadians GetZAngleOrientation(CQuaternion orientation);
 MatchingResult GetMatchingResult(vector<CEPuck2Entity*> robots, double range);
-MatchingResult GetBestMatching(vector<CEPuck2Entity*> robots, double range);
+// MatchingResult GetBestMatching(vector<CEPuck2Entity*> robots, double range);
+list<int> SolveMinimumCostPerfectMatching(Graph& graph);

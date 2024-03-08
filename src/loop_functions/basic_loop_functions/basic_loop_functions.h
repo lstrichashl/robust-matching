@@ -28,6 +28,7 @@ public:
    virtual void add_log();
    virtual void PlaceCluster(TConfigurationNode& entityNode);
    virtual void RemoveAll(vector<CEntity*> entites);
+   virtual bool _is_connected_graph(vector<CVector2> positions, Real robot_range);
 
 protected:
    vector<CEPuck2Entity*> m_robots;

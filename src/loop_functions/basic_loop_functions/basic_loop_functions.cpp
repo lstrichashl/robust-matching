@@ -132,10 +132,13 @@ void CBasicLoopFunctions::PreStep(){
         m_last_positions = m_new_positions;
         m_new_positions = GetPositions(GetNFRobots());
     }
-    add_log();
+    if(time % 50 == 0){
+        add_log();
+    }
 }
 
 bool CBasicLoopFunctions::IsExperimentFinished() {
+    return false;
     bool all_robots_are_paired = true;
     vector<CEPuck2Entity*> nf_robots = GetNFRobots();
     for(unsigned i = 0; i < nf_robots.size(); i++){
@@ -223,7 +226,7 @@ CVector3 GetRandomPosition(CRandom::CRNG* pcRNG, Real robot_range, const vector<
     return pos;
 }
 
-bool is_connected_graph(vector<CVector2> positions, Real robot_range){
+bool CBasicLoopFunctions::_is_connected_graph(vector<CVector2> positions, Real robot_range){
     for(unsigned i = 0; i < positions.size(); i++){
         bool is_connected = false;
         for(unsigned j = 0; j < positions.size(); j++){
@@ -281,7 +284,7 @@ void CBasicLoopFunctions::PlaceCluster(TConfigurationNode& tDestributionTree) {
         /* Create a RNG (it is automatically disposed of by ARGoS) */
         CRandom::CRNG* pcRNG = CRandom::CreateRNG("argos");
         UInt32 base_id = 0;
-        while(all_positions.size() == 1 || !is_connected_graph(all_positions, robot_range)){
+        while(all_positions.size() == 1 || !_is_connected_graph(all_positions, robot_range)){
             RemoveAll(entites);
             all_positions = {c_center};
             entites = {};

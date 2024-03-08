@@ -98,13 +98,13 @@
         <params 
             is_commited="false"
             log_file_path="tmp"
-            repeat_interval="10000"
+            repeat_interval="1"
             range="0.5"
         />
-        <distribute_max_range range="0.5" arena_size="1.0">
+        <distribute_max_range range="0.5" arena_size="2.0">
             <robot quantity="10">
                 <e-puck2 id="non_faulty" rab_range="0.5" rab_data_size="3">
-                    <controller config="virtual_forces"></controller>
+                    <controller config="algo_matching"></controller>
                 </e-puck2>
             </robot>
             <robot quantity="10">
@@ -157,8 +157,11 @@
     <visualization>
         <qt-opengl>
 
-            <user_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/basic_loop_functions/libbasic_loop_functions"
-                  label="basic_qt_user_functions" />
+            <!-- <user_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/basic_loop_functions/libbasic_loop_functions"
+                  label="basic_qt_user_functions" /> -->
+
+      <user_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+                  label="matching_qt_user_functions" />
             <camera>
                 <placements>
                     <placement index="0" position="0.0,-0.792159,1.51472"

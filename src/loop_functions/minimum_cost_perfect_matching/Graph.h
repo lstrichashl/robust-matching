@@ -9,7 +9,7 @@ class Graph
 public:
 	//n is the number of vertices
 	//edges is a list of pairs representing the edges (default = empty list)
-	Graph(int n, const list< pair<int, int> > & edges = list< pair<int, int> >());
+	Graph(int n, const vector< pair<int, int> > & edges = vector< pair<int, int> >());
 
 	//Default constructor creates an empty graph
 	Graph(): n(0), m(0) {};
@@ -27,13 +27,21 @@ public:
 	//Adds a new vertex to the graph
 	void AddVertex();
 	//Adds a new edge to the graph
-	void AddEdge(int u, int v);
+	void AddEdge(int u, int v, double cost = 0);
 
 	//Returns the adjacency list of a vertex
 	const list<int> & AdjList(int v) const;
 
 	//Returns the graph's adjacency matrix
 	const vector< vector<bool> > & AdjMat() const;
+
+	double GetCost(int u, int v);
+
+	virtual vector<vector<int> > findConnectedComponents(unordered_map<int, int>& vertexMap);
+	virtual void DFS(int v, vector<bool>& visited, vector<int>& component);
+	//Array of edges
+	vector< pair<int, int> > edges;
+	vector<double> costs;
 private:
 	//Number of vertices
 	int n;
@@ -46,9 +54,7 @@ private:
 	//Adjacency lists
 	vector< list<int> > adjList;
 
-	//Array of edges
-	vector< pair<int, int> > edges;
-
 	//Indices of the edges
 	vector< vector<int> > edgeIndex;
+
 };

@@ -23,8 +23,8 @@ public:
    virtual Graph GetGraph(){
       return m_robotGraph;
    }
-   virtual pair< list<int>, double > GetMatching(){
-      return m_solution;
+   virtual vector<int> GetMatching(){
+      return m_matching;
    }
    virtual vector<CEPuck2Entity*> GetRobotsInMatching(){
       return m_robots_in_matching;
@@ -32,13 +32,12 @@ public:
 
 private:
    Graph m_robotGraph;
-   pair< list<int>, double > m_solution;
+   vector<int> m_matching;
    vector<double> m_costs;
    vector<CEPuck2Entity*> m_robots_in_matching;
    bool m_isCommited;
 
    UInt32 m_repeat_interval;
-
 };
 
 #endif

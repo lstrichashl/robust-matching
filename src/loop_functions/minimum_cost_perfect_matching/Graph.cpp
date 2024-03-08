@@ -1,17 +1,18 @@
 #include "Graph.h"
 
-Graph::Graph(int n, const list< pair<int, int> > & edges):
+Graph::Graph(int n, const vector< pair<int, int> > & edges):
 	n(n),
 	m(edges.size()),
 	adjMat(n, vector<bool>(n, false)),
 	adjList(n),
 	edges(),
-	edgeIndex(n, vector<int>(n, -1))
+	edgeIndex(n, vector<int>(n, -1)),
+	costs(n*n)
 {
-	for(list< pair<int, int> >::const_iterator it = edges.begin(); it != edges.end(); it++)
+	for(int i = 0; i < edges.size(); i++)
 	{
-		int u = (*it).first;
-		int v = (*it).second;
+		int u = edges[i].first;
+		int v = edges[i].second;
 
 		AddEdge(u, v);
 	}
@@ -23,6 +24,10 @@ pair<int, int> Graph::GetEdge(int e) const
 		throw "Error: edge does not exist";
 
 	return edges[e];
+}
+
+double Graph::GetCost(int u, int v){
+	return costs[GetEdgeIndex(u,v)];
 }
 
 int Graph::GetEdgeIndex(int u, int v) const
@@ -50,7 +55,7 @@ void Graph::AddVertex()
 	adjList.push_back( list<int>() );
 }
 
-void Graph::AddEdge(int u, int v)
+void Graph::AddEdge(int u, int v, double cost)
 {
 	if( u > n or
 		v > n )
@@ -64,6 +69,7 @@ void Graph::AddEdge(int u, int v)
 
 	edges.push_back(pair<int, int>(u, v));
 	edgeIndex[u][v] = edgeIndex[v][u] = m++;
+	costs[edgeIndex[u][v]] = cost;
 }
 
 const list<int> & Graph::AdjList(int v) const
@@ -79,3 +85,35 @@ const vector< vector<bool> > & Graph::AdjMat() const
 	return adjMat;
 }
 
+
+    // Depth First Search (DFS) algorithm
+void Graph::DFS(int v, vector<bool>& visited, vector<int>& component) {
+	visited[v] = true;
+	component.push_back(v);
+
+	// Visit all adjacent vertices of v
+	for (int neighbor : adjList[v]) {
+		if (!visited[neighbor])
+			DFS(neighbor, visited, component);
+	}
+}
+
+ // Function to find connected components
+vector<vector<int> > Graph::findConnectedComponents(unordered_map<int, int>& vertexMap) {
+	vector<bool> visited(n, false);
+	vector<vector<int> > comps;
+	// unordered_map<int, int> vertexMap; // Map to store old vertex IDs to new vertex IDs for each component
+
+	for (int v = 0; v < n; ++v) {
+		if (!visited[v]) {
+			vector<int> component;
+			DFS(v, visited, component);
+			comps.push_back(component);
+			// Create a mapping from old vertex IDs to new vertex IDs for this component
+			for (size_t i = 0; i < component.size(); ++i) {
+				vertexMap[component[i]] = i;
+			}
+		}
+	}
+	return comps;
+}

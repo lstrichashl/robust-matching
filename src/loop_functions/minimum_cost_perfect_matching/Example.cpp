@@ -3,7 +3,6 @@
 #include "Graph.h"
 #include <cstdlib>
 #include <iostream>
-#include <string>
 #include <sstream>
 using namespace std;
 
@@ -92,7 +91,6 @@ pair< Graph, vector<double> > ReadWeightedGraph(string filename)
 		int u, v;
 		double c;
 		ss >> u >> v >> c;
-
 		G.AddEdge(u, v);
 		cost[G.GetEdgeIndex(u, v)] = c;
 	}
@@ -102,14 +100,14 @@ pair< Graph, vector<double> > ReadWeightedGraph(string filename)
 }
 
 
-void add_edge(int node1, int node2, Graph& g, vector<double>& cost){
+void add_edge(int node1, int node2, Graph& g){
 	if(!g.AdjMat()[node1][node2]){
 		g.AddEdge(node1, node2);
-		cost[g.GetEdgeIndex(node1, node2)] = 5;
+		g.costs[g.GetEdgeIndex(node1, node2)] = 5;
 	}
 }
 
-void AddHopToGraph(Graph& g, vector<double>& cost){
+void AddHopToGraph(Graph& g){
 	int init_edges_num = g.GetNumEdges();
     for(unsigned i = 0; i < init_edges_num; i++){
         pair<int, int> first_edge = g.GetEdge(i);
@@ -119,16 +117,130 @@ void AddHopToGraph(Graph& g, vector<double>& cost){
             }
             pair<int, int> second_edge = g.GetEdge(j);
             if(first_edge.first == second_edge.first && first_edge.second < second_edge.second){
-                add_edge(first_edge.second, second_edge.second, g, cost);
+                add_edge(first_edge.second, second_edge.second, g);
             }
             else if(first_edge.first == second_edge.second && first_edge.second < second_edge.first){
-                add_edge(first_edge.second, second_edge.first, g, cost);
+                add_edge(first_edge.second, second_edge.first, g);
             }
             else if(first_edge.second == second_edge.second && first_edge.first < second_edge.first){
-                add_edge(first_edge.first, second_edge.first, g, cost);
+                add_edge(first_edge.first, second_edge.first, g);
             }
         }
     }	
+}
+
+Graph remove_node(Graph& graph, int v){
+	vector<pair<int,int> > edges;
+	Graph new_graph(graph.GetNumVertices()-1);
+	for(int j = 0; j < graph.edges.size(); j++){
+		pair<int,int> edge = graph.edges[j];
+		if(edge.first != v && edge.second != v && edge.first < edge.second){
+			int first_node = edge.first, second_node = edge.second;
+			if(first_node > v){
+				first_node--;
+			}
+			if(second_node > v){
+				second_node--;
+			}
+			new_graph.AddEdge(first_node, second_node, graph.GetCost(edge.first, edge.second));
+		}
+	}
+	return new_graph;
+}
+
+void print_graph(Graph g){
+	for (int v = 0; v < g.GetNumVertices(); ++v) {
+		cout << "Vertex " << v << ": ";
+		for (int neighbor : g.AdjList(v))
+			cout << neighbor << " ";
+		cout << endl;
+	}
+}
+
+pair< list<int>, double > MinimumMatchingSubgraph(Graph graph){
+	double minimum_cost = 1000000000;
+	list<int> minimum_matching;
+	int minimum_index = -1;
+	Graph min_subgraph;
+    for(int i = 0; i < graph.GetNumVertices(); i++){
+		Graph subgraph = remove_node(graph, i);
+		Matching M(subgraph);
+		try{
+			pair< list<int>, double > solution = M.SolveMinimumCostPerfectMatching(subgraph.costs);
+
+			list<int> matching = solution.first;
+			double obj = solution.second;
+
+			if(minimum_cost > solution.second){
+				minimum_matching = solution.first;
+				minimum_cost = solution.second;
+				minimum_index = i;
+				min_subgraph = subgraph;
+			}
+
+		}catch(const char * msg){
+			if(strcmp(msg,"Error: The graph does not have a perfect matching") != 0){
+				throw msg;
+			}
+			cout << "error" << endl;
+		}
+	}
+	if(minimum_cost == 1000000000){
+		throw "Error: The graph does not have a perfect matching 2";
+	}
+	list<int> minimum_matching2;
+	for(list<int>::iterator it = minimum_matching.begin(); it != minimum_matching.end(); it++){
+		pair<int, int> edge = min_subgraph.GetEdge( *it );
+		int first_node = edge.first, second_node = edge.second;
+		if(first_node >= minimum_index){
+			first_node++;
+		}
+		if(second_node >= minimum_index){
+			second_node++;
+		}
+		minimum_matching2.push_back(graph.GetEdgeIndex(first_node, second_node));
+	}
+	pair< list<int>, double > solution = pair< list<int>, double >(minimum_matching2, minimum_cost);
+	return solution;
+}
+
+list<int> MatchingForComponents(Graph& graph, vector<Graph>& components, vector<vector<int> >& comp_vertecies){
+	list<int> matching;
+	for(int i = 0; i < components.size(); i++){
+		pair< list<int>, double > solution;
+		if(components[i].GetNumVertices() % 2 == 0){
+			Matching M(components[i]);
+			solution = M.SolveMinimumCostPerfectMatching(components[i].costs);
+		}else{
+			solution = MinimumMatchingSubgraph(components[i]);
+		}
+		cout << solution.second << endl;
+		for(list<int>::iterator it = solution.first.begin(); it != solution.first.end(); it++){
+			pair<int, int> e = components[i].GetEdge( *it );
+			matching.push_back(graph.GetEdgeIndex(comp_vertecies[i][e.first], comp_vertecies[i][e.second]));
+		}
+	}
+	return matching;
+}
+
+list<int> GetMatching(Graph& graph){
+	AddHopToGraph(graph);
+	unordered_map<int, int> vertexMap;
+	vector<vector<int> > comp_vertecies = graph.findConnectedComponents(vertexMap);
+	vector<Graph> components;
+
+	for(int i = 0; i < comp_vertecies.size(); i++) {
+		Graph component(comp_vertecies[i].size());
+		vector<double> comp_cost;
+		for (int v = 0; v < comp_vertecies[i].size(); v++) {
+            for (int neighbor : graph.AdjList(comp_vertecies[i][v])){
+				component.AddEdge(vertexMap[comp_vertecies[i][v]], vertexMap[neighbor], graph.costs[graph.GetEdgeIndex(comp_vertecies[i][v], neighbor)]);
+			}
+        }
+		components.push_back(component);
+	}
+	list<int> matching = MatchingForComponents(graph, components, comp_vertecies);
+	return matching;
 }
 
 void MinimumCostPerfectMatchingExample(string filename)
@@ -136,50 +248,20 @@ void MinimumCostPerfectMatchingExample(string filename)
 	Graph G;
 	vector<double> cost;
 	
-	//Read the graph
 	pair< Graph, vector<double> > p = ReadWeightedGraph(filename);
-	//pair< Graph, vector<double> > p = CreateRandomGraph();
 	G = p.first;
-	cost = p.second;
+	G.costs = p.second;
+	
 
-
-	//add hops
-	AddHopToGraph(G, cost);
-
-	//Create a Matching instance passing the graph
-	Matching M(G);
-
-
-	cout << G.GetNumEdges() << endl;
-	cout << cost.size() << endl;
-	// vector< vector<bool> > matrix = G.AdjMat();
-	// int rows = matrix.size();
-
-    // // Print the matrix
-    // for (int i = 0; i < rows; i++) {
-    //     for (int j = 0; j < matrix[i].size(); j++) {
-    //         std::cout << matrix[i][j] << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
-
-	// for(int i = 0 ; i < cost.size(); i++){
-	// 	cout << cost[i] << endl;
-	// }
-
-	//Pass the costs to solve the problem
-	pair< list<int>, double > solution = M.SolveMinimumCostPerfectMatching(cost);
-
-	list<int> matching = solution.first;
-	double obj = solution.second;
-
-	cout << "Optimal matching cost: " << obj << endl;
+	list<int> matching = GetMatching(G);
+	// cout << "Optimal matching cost: " << obj << endl;
 	cout << "Edges in the matching:" << endl;
 	for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
 	{
 		pair<int, int> e = G.GetEdge( *it );
+		double c = G.GetCost(e.first, e.second);
 
-		cout << e.first << " " << e.second << endl;
+		cout << e.first << " " << e.second << " " << c << endl;
 	}
 }
 

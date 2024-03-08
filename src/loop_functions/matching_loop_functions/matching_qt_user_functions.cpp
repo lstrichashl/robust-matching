@@ -11,14 +11,13 @@ CMatchingQTUserFunctions::CMatchingQTUserFunctions() :
 /****************************************/
 
 void CMatchingQTUserFunctions::DrawInWorld() {
-	list<int> matching = m_matchingLoopFunctions.GetMatching().first;
-	double matching_cost = m_matchingLoopFunctions.GetMatching().second;
+	vector<int> matching = m_matchingLoopFunctions.GetMatching();
    Graph G = m_matchingLoopFunctions.GetGraph();
-   for(list<int>::iterator it = matching.begin(); it != matching.end(); it++)
+   for(int i = 0; i < matching.size(); i++)
 	{
-		pair<int, int> edge = G.GetEdge( *it );
-      CEPuck2Entity* cFootBot1 = m_matchingLoopFunctions.GetRobotsInMatching().at(edge.first);
-      CEPuck2Entity* cFootBot2 = m_matchingLoopFunctions.GetRobotsInMatching().at(edge.second);
+		pair<int, int> edge = G.GetEdge(matching[i]);
+      CEPuck2Entity* cFootBot1 = m_matchingLoopFunctions.GetRobots().at(edge.first);
+      CEPuck2Entity* cFootBot2 = m_matchingLoopFunctions.GetRobots().at(edge.second);
 
       DrawRay(CRay3(
          cFootBot1->GetEmbodiedEntity().GetOriginAnchor().Position,
