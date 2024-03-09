@@ -5,10 +5,8 @@ COppositeDirection::COppositeDirection(){
    }
 
 void COppositeDirection::ControlStep() {
-    CVector2 to_mate = ToMateVector();
-    CRadians cZAngle = GetZAngleOrientation();
-    to_mate.Rotate(-cZAngle);
-    SetWheelSpeedsFromVector(-to_mate.Normalize());
+    m_heading = -m_heading;
+    CRobustMatching::ControlStep();
 }
 
 void COppositeDirection::Reset() {

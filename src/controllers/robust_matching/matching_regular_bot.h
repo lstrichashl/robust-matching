@@ -15,8 +15,6 @@ public:
     CRobustMatching();
     virtual ~CRobustMatching() {}
     virtual void ControlStep();
-    virtual CRadians GetZAngleOrientation();
-    virtual CVector2 ToMateVector();
     virtual void Reset();
 
 };

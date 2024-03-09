@@ -138,7 +138,6 @@ void CBasicLoopFunctions::PreStep(){
 }
 
 bool CBasicLoopFunctions::IsExperimentFinished() {
-    return false;
     bool all_robots_are_paired = true;
     vector<CEPuck2Entity*> nf_robots = GetNFRobots();
     for(unsigned i = 0; i < nf_robots.size(); i++){

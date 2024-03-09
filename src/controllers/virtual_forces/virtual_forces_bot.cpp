@@ -9,16 +9,8 @@ CVirtualForces::CVirtualForces(){
 }
 
 void CVirtualForces::ControlStep() {
-    switch (m_eState)
-    {
-    case STATE_ALONE:
-        Alone();
-        break;
-    case STATE_PAIRED:
-        Paired();
-    default:
-        break;
-    }
+    m_heading = FlockingVector();
+    BaseConrtoller::ControlStep();
 }
 
 void CVirtualForces::Alone(){

@@ -45,6 +45,22 @@ void CMatchingLoopFunctions::Destroy(){
     write_all_logs(m_logs, param_string);
 }
 
+CRadians GetZAngleOrientation(CEPuck2Entity* robot1) {
+   CRadians cZAngle, cYAngle, cXAngle;
+   robot1->GetEmbodiedEntity().GetOriginAnchor().Orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
+   return cZAngle;
+}
+
+CVector2 ToMateVector(CEPuck2Entity* robot1, CEPuck2Entity* robot2) {
+    CVector2 self_position(robot1->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
+                            robot1->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
+    CVector2 mate_position(robot2->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
+                            robot2->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
+    CVector2 to_mate = mate_position - self_position;
+    CRadians cZAngle = GetZAngleOrientation(robot1);
+    return to_mate.Rotate(-cZAngle).Normalize();
+}
+
 void CMatchingLoopFunctions::PreStep(){
     CBasicLoopFunctions::PreStep();
     try{
@@ -60,7 +76,7 @@ void CMatchingLoopFunctions::PreStep(){
         vector<int> nf_half_matchig;
         for(unsigned i = 0; i < m_robots.size(); i++) {
             BaseConrtoller& cController = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
-            cController.mate = NULL;
+            cController.m_heading = CVector2::ZERO;
         }
         for(vector<int>::iterator it = matching.begin(); it != matching.end(); it++)
         {
@@ -69,8 +85,8 @@ void CMatchingLoopFunctions::PreStep(){
             CEPuck2Entity* robot2 = m_robots[edge.second];
             BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robot1->GetControllableEntity().GetController());
             BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robot2->GetControllableEntity().GetController());
-            cController1.mate = robot2;
-            cController2.mate = robot1; 
+            cController1.m_heading = ToMateVector(robot1, robot2);
+            cController2.m_heading = ToMateVector(robot2, robot1);
         }
     }
    catch(std::exception& ex) {

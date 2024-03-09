@@ -24,6 +24,21 @@ void BaseConrtoller::Reset() {
     m_eState = STATE_ALONE;
     m_pcRABAct->SetData(0, STATE_ALONE);
     m_pcLedAct->SetAllRGBColors(CColor::GREEN);
+    m_heading = CVector2::ZERO;
+}
+
+void BaseConrtoller::ControlStep(){
+    if(ShouldTransitionToPaired()){
+        m_eState = STATE_PAIRED;
+    }
+    else if(ShouldTransitionToAlone()){
+        m_eState = STATE_ALONE;
+    }
+    m_pcRABAct->SetData(0, m_eState);
+    if(m_eState == STATE_PAIRED){
+      m_heading = CVector2::ZERO;
+    }
+   SetWheelSpeedsFromVector(m_heading);
 }
 
 

@@ -134,15 +134,15 @@ class Experiment:
 
         doc['argos-configuration']['framework']['experiment']['@random_seed'] = self.random_seed
         doc['argos-configuration']['framework']['experiment']['@length'] = self.length
-        # doc['argos-configuration']['arena']['distribute'][0]['entity']['@quantity'] = self.non_faulty_count
-        # doc['argos-configuration']['arena']['distribute'][1]['entity']['@quantity'] = self.faulty_count
-        # doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['controller']['@config'] = self.non_faulty_algorithm.controller_type
-        # doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['@rab_range'] = self.non_faulty_algorithm.range
-        # doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.controller_type
-        # doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['@rab_range'] = self.faulty_algorithm.range
+        doc['argos-configuration']['arena']['distribute'][0]['entity']['@quantity'] = self.non_faulty_count
+        doc['argos-configuration']['arena']['distribute'][1]['entity']['@quantity'] = self.faulty_count
+        doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['controller']['@config'] = self.non_faulty_algorithm.controller_type
+        doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['@rab_range'] = self.non_faulty_algorithm.range
+        doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.controller_type
+        doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['@rab_range'] = self.faulty_algorithm.range
         doc['argos-configuration']['visualization'] = doc['argos-configuration']['visualization'] if self.visualization else {}
         doc['argos-configuration']['loop_functions'] = self.get_loop_functions()
-        doc['argos-configuration']['loop_functions']['distribute_max_range'] = distribute_max_range(experiment=self)
+        # doc['argos-configuration']['loop_functions']['distribute_max_range'] = distribute_max_range(experiment=self)
         to_save_string = xmltodict.unparse(doc)
 
         with open(self.argos_file_path, 'w') as f:

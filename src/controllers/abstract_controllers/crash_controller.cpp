@@ -7,16 +7,12 @@ void CCrashController::Reset(){
     m_pcLedAct->SetAllRGBColors(CColor::RED);
     m_pcLedAct->SetAllRedLeds(true);
     m_pcRABAct->SetData(0, m_eState);
+    m_heading = CVector2::ZERO;
 }
 
 void CCrashController::ControlStep(){
-    if(ShouldTransitionToPaired()){
-        m_eState = STATE_PAIRED;
-    }
-    else if(ShouldTransitionToAlone()){
-        m_eState = STATE_ALONE;
-    }
-    m_pcRABAct->SetData(0, m_eState);
+    BaseConrtoller::ControlStep();
+    m_heading = CVector2::ZERO;
 }
 
 REGISTER_CONTROLLER(CCrashController, "crash_controller")

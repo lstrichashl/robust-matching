@@ -26,6 +26,7 @@ public:
    virtual void SetWheelSpeedsFromVector(const CVector2& c_heading);
    virtual bool ShouldTransitionToPaired();
    virtual bool ShouldTransitionToAlone();
+   virtual void ControlStep();
    virtual std::string GetType(){
       return m_typename;
    }
@@ -33,7 +34,7 @@ public:
       return m_eState;
    }
    double PAIRING_THRESHOLD = 0.07;
-   argos::CEPuck2Entity* mate;
+   CVector2 m_heading;
 
     struct SWheelTurningParams {
 
