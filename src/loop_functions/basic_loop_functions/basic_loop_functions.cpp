@@ -128,6 +128,13 @@ Clusters CBasicLoopFunctions::GetRobotPairs(vector<CEPuck2Entity*> robots) {
 
 void CBasicLoopFunctions::PreStep(){
     int time = GetSpace().GetSimulationClock();
+    for(CEPuck2Entity* robot : m_robots){
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robot->GetControllableEntity().GetController());
+        cController1.m_time = time;
+        cController1.m_position = CVector2(robot->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
+                                            robot->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
+        cController1.m_orientation = robot->GetEmbodiedEntity().GetOriginAnchor().Orientation;
+    }
     if(time % 100 == 0){
         m_last_positions = m_new_positions;
         m_new_positions = GetPositions(GetNFRobots());

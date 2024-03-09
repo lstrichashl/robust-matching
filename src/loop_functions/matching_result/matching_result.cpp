@@ -146,7 +146,6 @@ list<int> SolveMinimumCostPerfectMatching(Graph& graph){
         }
 		components.push_back(component);
 	}
-    cout << components.size() << endl;
 	list<int> matching = MatchingForComponents(graph, components, comp_vertecies);
 	return matching;
 }

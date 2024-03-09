@@ -14,18 +14,6 @@ CRobustMatching::CRobustMatching(){
 
 void CRobustMatching::ControlStep() {
    BaseConrtoller::ControlStep();
-   //  if(to_mate.Length() > PAIRING_THRESHOLD){
-   //       m_eState = STATE_ALONE;
-   //       SetWheelSpeedsFromVector(to_mate.Normalize());
-   //       m_pcLedAct->SetAllRGBColors(CColor::GREEN);
-   //  }
-   //  else {
-   //       m_eState = STATE_PAIRED;
-   //       m_pcWheels->SetLinearVelocity(0, 0);
-   //       m_pcLedAct->SetAllBlack();
-   //    //   m_pcLedAct->SetAllRGBColors(CColor::RED);
-   //    //   m_pcLedAct->SetAllRedLeds(true);
-   //  }
 }
 
 void CRobustMatching::Reset(){

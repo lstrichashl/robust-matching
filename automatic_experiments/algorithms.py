@@ -43,6 +43,11 @@ class VirtualForces(NonFaultyAlgorithm):
             "@label": "print_experiment_loop_fuctions",
             "params": self.get_loop_functions_params()
         }
+class VirtualForcesRandom(VirtualForces):
+    def __init__(self, range: int) -> None:
+        super().__init__(range)
+        self.name = "virtual_forces_random"
+        self.controller_type = "virtual_forces_random"
 
 class AlgoMatching(NonFaultyAlgorithm):
     def __init__(self, is_commited: bool, range: int, name="algo_matching", repeate_interval: int = 100000000) -> None:
@@ -99,6 +104,8 @@ def algorithmFactory(name, range) -> Algorithm:
         return AlgoMatchingWalkAway(range=range)
     elif name == "keep_distance":
         return KeepDistance(range=range)
+    if name == "virtual_forces_random":
+        return VirtualForcesRandom(range=range)
 
 
 

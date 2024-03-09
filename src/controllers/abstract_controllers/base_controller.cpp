@@ -3,7 +3,9 @@
 
 BaseConrtoller::BaseConrtoller():
    m_pcWheels(NULL),
-   m_pcLedAct(NULL) {}
+   m_pcLedAct(NULL) {
+      pcRNG = CRandom::CreateRNG("argos");
+   }
 
 void BaseConrtoller::Init(TConfigurationNode& t_node){
     m_pcWheels = GetActuator<CCI_DifferentialSteeringActuator>("differential_steering");
@@ -21,10 +23,11 @@ void BaseConrtoller::Init(TConfigurationNode& t_node){
 }
 
 void BaseConrtoller::Reset() {
-    m_eState = STATE_ALONE;
-    m_pcRABAct->SetData(0, STATE_ALONE);
-    m_pcLedAct->SetAllRGBColors(CColor::GREEN);
-    m_heading = CVector2::ZERO;
+   m_eState = STATE_ALONE;
+   m_pcRABAct->SetData(0, STATE_ALONE);
+   m_pcLedAct->SetAllRGBColors(CColor::GREEN);
+   m_heading = CVector2::ZERO;
+   random_destination = CVector2::ZERO;
 }
 
 void BaseConrtoller::ControlStep(){
@@ -150,4 +153,17 @@ bool BaseConrtoller::ShouldTransitionToPaired(){
         }
     }
     return false;
+}
+
+CVector2 BaseConrtoller::RandomWalk(){
+    if(m_time % 50 == 0){
+        CRadians angle = pcRNG->Uniform(CRadians::UNSIGNED_RANGE);
+        Real radius = pcRNG->Uniform(CRange<Real>(0,1));
+        random_destination = CVector2(radius * Cos(angle), radius * Sin(angle));
+    }
+    CVector2 to_point = random_destination - m_position;
+    CRadians cZAngle, cYAngle, cXAngle;
+    m_orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
+    to_point.Rotate(-cZAngle);
+    return to_point.Normalize();
 }

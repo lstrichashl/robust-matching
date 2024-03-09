@@ -7,7 +7,8 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_sensor.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_differential_steering_actuator.h>
 #include <iostream>
- 
+#include <argos3/core/simulator/simulator.h>
+
 using namespace std;
 using namespace argos;
 
@@ -35,6 +36,9 @@ public:
    }
    double PAIRING_THRESHOLD = 0.07;
    CVector2 m_heading;
+   UInt32 m_time;
+   CVector2 m_position;
+   CQuaternion m_orientation;
 
     struct SWheelTurningParams {
 
@@ -55,6 +59,7 @@ public:
 
       void Init(TConfigurationNode& t_tree);
    };
+   virtual CVector2 RandomWalk();
 
 protected:
     string m_typename;
@@ -64,6 +69,11 @@ protected:
     CCI_RangeAndBearingActuator* m_pcRABAct;
     CCI_RangeAndBearingSensor* m_pcRABSens;
     SWheelTurningParams m_sWheelTurningParams;
+
+   
+private:
+   CVector2 random_destination;
+   CRandom::CRNG* pcRNG;
 };
 
 #endif

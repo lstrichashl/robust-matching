@@ -12,8 +12,6 @@ public:
     CVirtualForces();
     virtual ~CVirtualForces() {}
     virtual void ControlStep();
-    virtual void Alone();
-    virtual void Paired();
     virtual CVector2 FlockingVector();
 
    virtual Real RepulsiveObstacle(double distance){

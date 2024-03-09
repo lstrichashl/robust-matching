@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 from multiprocessing.pool import ThreadPool
 from functools import reduce
-from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm, KeepDistance, VirtualForcesWalkAway, AlgoMatchingWalkAway
+from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm, KeepDistance, VirtualForcesWalkAway, AlgoMatchingWalkAway, VirtualForcesRandom
 import json
 import uuid
 
@@ -62,7 +62,7 @@ def main():
     non_faulty_algorithms = [
         AlgoMatching(is_commited=False, name="repeated", repeate_interval=1, range=range),
         AlgoMatching(is_commited=True, range=range),
-        VirtualForces(range=range)
+        VirtualForcesRandom(range=range)
     ]
     faulty_algorithms = [
         VirtualForcesWalkAway(range=range),

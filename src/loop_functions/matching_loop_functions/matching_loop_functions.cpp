@@ -61,8 +61,11 @@ CVector2 ToMateVector(CEPuck2Entity* robot1, CEPuck2Entity* robot2) {
     return to_mate.Rotate(-cZAngle).Normalize();
 }
 
+
 void CMatchingLoopFunctions::PreStep(){
     CBasicLoopFunctions::PreStep();
+    vector<int> robots_in_matching;
+    vector<CEPuck2Entity*> robots_not_in_matching;
     try{
         UInt32 time = GetSpace().GetSimulationClock();
         if((m_matching.size() == 0 || (time % m_repeat_interval == 0 && !m_isCommited))) {
@@ -87,6 +90,14 @@ void CMatchingLoopFunctions::PreStep(){
             BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robot2->GetControllableEntity().GetController());
             cController1.m_heading = ToMateVector(robot1, robot2);
             cController2.m_heading = ToMateVector(robot2, robot1);
+            robots_in_matching.push_back(edge.first);
+            robots_in_matching.push_back(edge.second);
+        }
+        for(int i = 0; i < m_robots.size(); i++){
+            if(find(robots_in_matching.begin(), robots_in_matching.end(), i) == robots_in_matching.end()){
+                BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
+                cController1.m_heading = cController1.RandomWalk();
+            }
         }
     }
    catch(std::exception& ex) {
