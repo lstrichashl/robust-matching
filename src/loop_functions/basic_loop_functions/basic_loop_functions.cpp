@@ -135,11 +135,9 @@ void CBasicLoopFunctions::PreStep(){
                                             robot->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
         cController1.m_orientation = robot->GetEmbodiedEntity().GetOriginAnchor().Orientation;
     }
-    if(time % 100 == 0){
+    if(time % 10 == 0){
         m_last_positions = m_new_positions;
         m_new_positions = GetPositions(GetNFRobots());
-    }
-    if(time % 50 == 0){
         add_log();
     }
 }
@@ -147,13 +145,21 @@ void CBasicLoopFunctions::PreStep(){
 bool CBasicLoopFunctions::IsExperimentFinished() {
     bool all_robots_are_paired = true;
     vector<CEPuck2Entity*> nf_robots = GetNFRobots();
+    int alone_robots_away = 0, alone_robots = 0;
     for(unsigned i = 0; i < nf_robots.size(); i++){
         BaseConrtoller& cController = dynamic_cast<BaseConrtoller&>(nf_robots[i]->GetControllableEntity().GetController());
         if(cController.GetEState() == STATE_ALONE){
             all_robots_are_paired = false;
+            alone_robots++;
+            if(cController.m_position.Length() > 1.5){
+                alone_robots_away++;
+            }
         }
     }
     if(all_robots_are_paired){
+        return true;
+    }
+    if(alone_robots_away == alone_robots || alone_robots == 1) {
         return true;
     }
     if(m_last_positions.size() != 0 && m_new_positions.size() != 0){
@@ -178,7 +184,12 @@ void CBasicLoopFunctions::add_log(){
     std::string tick_string = "\"tick\":\""+to_string(GetSpace().GetSimulationClock())+"\"";
     Clusters pairs = GetRobotPairs(m_robots);
     std::string matcing_string = "\"pairs\":" + pairs.ToString();
-    std::string log =  "{" + matcing_string + "," + tick_string + "}";
+    double nf_distance_travel = 0;
+    for(int i = 0; i < m_last_positions.size(); i++){
+        nf_distance_travel += (m_last_positions[i] - m_new_positions[i]).Length();
+    }
+    string distance_travel_string = "\"distance_travel:\":"+to_string(nf_distance_travel);
+    std::string log =  "{" + matcing_string + "," + tick_string + "," + distance_travel_string + "}";
     m_logs.push_back(log);
 }
 

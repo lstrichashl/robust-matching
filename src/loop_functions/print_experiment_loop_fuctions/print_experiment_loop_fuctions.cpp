@@ -23,7 +23,7 @@ void CPrintExperimentFunctions::Destroy(){
     robot_types.pop_back();
     robot_types += "]";
 
-    // add_log();
+    add_log();
 
     std::string all_log = "[";
     for(unsigned i = 0; i < m_logs.size(); i++){

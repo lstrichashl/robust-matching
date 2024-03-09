@@ -37,5 +37,5 @@ def get_expected_faulty_pairs_in_system_of_n_robots(n, f_range):
         probablity = get_probablity_function_of_n_robots_f_faulty(n,f)
         assert_probablity_sum_is_1(probablity, range(f+1))
         e = expected(probablity, range(f+1))
-        es.append(10-e)
+        es.append(f_range[-1]-e)
     return es

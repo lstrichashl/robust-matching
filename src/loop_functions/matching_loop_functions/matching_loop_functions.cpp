@@ -42,6 +42,7 @@ void CMatchingLoopFunctions::Init(TConfigurationNode& t_tree) {
 
 void CMatchingLoopFunctions::Destroy(){
     std::string param_string = "{\"is_commited\":\""+to_string(m_isCommited)+"\"}";
+    add_log();
     write_all_logs(m_logs, param_string);
 }
 
