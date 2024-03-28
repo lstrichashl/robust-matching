@@ -1,0 +1,1 @@
+{"run_tag": "range_100_robots_20", "number_of_robots": 20, "non_faulty_algorithm": {"name": "virtual_forces", "controller_type": "virtual_forces", "loop_function_params": {}, "controller_params": {}}, "faulty_algorithm": {"name": "algo_matching_walk_away", "controller_type": "algo_matching_walk_away", "loop_function_params": {}, "controller_params": {}}}

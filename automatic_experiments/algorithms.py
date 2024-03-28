@@ -95,7 +95,7 @@ def algorithmFactory(name, range) -> Algorithm:
     elif name == "commited":
         return AlgoMatching(is_commited=True,range=range)
     elif name == "repeated":
-        return AlgoMatching(is_commited=False, name="repeated", repeate_interval=1,range=range)
+        return AlgoMatching(is_commited=False, name="repeated", repeate_interval=10,range=range)
     elif name == "crash":
         return Crash(range=range)
     elif name == "virtual_forces_walk_away":
@@ -110,7 +110,7 @@ def algorithmFactory(name, range) -> Algorithm:
 
 
 class Experiment:
-    def __init__(self, non_faulty_count: int, faulty_count: int, non_faulty_algorithm: NonFaultyAlgorithm, faulty_algorithm: FaultyAlgorithm, random_seed: int, run_tag:str, length = 500,visualization = False, file_path:str = None) -> None:
+    def __init__(self, non_faulty_count: int, faulty_count: int, non_faulty_algorithm: NonFaultyAlgorithm, faulty_algorithm: FaultyAlgorithm, random_seed: int, run_tag:str, length = 300,visualization = False, file_path:str = None) -> None:
         if file_path is None:
             file_path = f'{base_dir}/results/{run_tag}/{non_faulty_algorithm.name}_{faulty_algorithm.name}/faulty{faulty_count}/random_seed{random_seed}.argos'
         self.faulty_count = faulty_count
@@ -141,15 +141,15 @@ class Experiment:
 
         doc['argos-configuration']['framework']['experiment']['@random_seed'] = self.random_seed
         doc['argos-configuration']['framework']['experiment']['@length'] = self.length
-        doc['argos-configuration']['arena']['distribute'][0]['entity']['@quantity'] = self.non_faulty_count
-        doc['argos-configuration']['arena']['distribute'][1]['entity']['@quantity'] = self.faulty_count
-        doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['controller']['@config'] = self.non_faulty_algorithm.controller_type
-        doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['@rab_range'] = self.non_faulty_algorithm.range
-        doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.controller_type
-        doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['@rab_range'] = self.faulty_algorithm.range
+        # doc['argos-configuration']['arena']['distribute'][0]['entity']['@quantity'] = self.non_faulty_count
+        # doc['argos-configuration']['arena']['distribute'][1]['entity']['@quantity'] = self.faulty_count
+        # doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['controller']['@config'] = self.non_faulty_algorithm.controller_type
+        # doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['@rab_range'] = self.non_faulty_algorithm.range
+        # doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.controller_type
+        # doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['@rab_range'] = self.faulty_algorithm.range
         doc['argos-configuration']['visualization'] = doc['argos-configuration']['visualization'] if self.visualization else {}
         doc['argos-configuration']['loop_functions'] = self.get_loop_functions()
-        # doc['argos-configuration']['loop_functions']['distribute_max_range'] = distribute_max_range(experiment=self)
+        doc['argos-configuration']['loop_functions']['distribute_max_range'] = distribute_max_range(experiment=self)
         to_save_string = xmltodict.unparse(doc)
 
         with open(self.argos_file_path, 'w') as f:
@@ -163,7 +163,7 @@ class Experiment:
 def distribute_max_range(experiment: Experiment):
     return {
         '@range': experiment.non_faulty_algorithm.range,
-        '@arena_size': '2.0', 
+        '@arena_size': '1.5', 
         'robot': [{
             '@quantity': experiment.non_faulty_count, 
             'e-puck2': {

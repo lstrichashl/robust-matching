@@ -37,6 +37,9 @@ public:
    }
 
    virtual Real GaziRepultion(double distance){
+      if(distance > 20){
+         return 0;
+      }
       double b = 10;
       double c = 30;
       double v = distance * (- b * ::pow(M_E, -::pow(distance,2)/c));

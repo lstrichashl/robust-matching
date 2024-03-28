@@ -2,6 +2,7 @@
 
 #include <list>
 #include <vector>
+#include <argos3/core/simulator/simulator.h>
 using namespace std;
 
 class Graph
@@ -13,6 +14,8 @@ public:
 
 	//Default constructor creates an empty graph
 	Graph(): n(0), m(0) {};
+
+	Graph(vector<argos::CVector2> positions, double range);
 
 	//Returns the number of vertices
 	int GetNumVertices() const { return n; };

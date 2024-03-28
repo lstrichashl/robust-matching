@@ -11,8 +11,8 @@ void CCrashController::Reset(){
 }
 
 void CCrashController::ControlStep(){
-    BaseConrtoller::ControlStep();
     m_heading = CVector2::ZERO;
+    BaseConrtoller::ControlStep();
 }
 
 REGISTER_CONTROLLER(CCrashController, "crash_controller")

@@ -1,10 +1,8 @@
-
-from expected_number_of_pairs_commited import get_expected_faulty_pairs_in_system_of_n_robots
 import pathlib
 import json
 import numpy as np
 from tqdm import tqdm
-import matplotlib.pyplot as plt
+from itertools import product
 
 def open_file(path):
     f = open(path, 'r')
@@ -48,23 +46,60 @@ def stat_experiment(
     last_pairing = a["logs"][-1]["pairs"]
     nf_pairing = filter_faulty_pairs(last_pairing, a["robot_types"])
     experiment_length = int(a["logs"][-1]["tick"])
-    return len(last_pairing), experiment_length
+    max_pair = -1
+    max_i = -1
+    distance_traveled = 0
+    pairs_times = {}
+    times_pairs = {}
+    for i, log in enumerate(a["logs"]):
+        distance_traveled += log["distance_travel:"]
+        num_of_pairs = len(filter_faulty_pairs(log["pairs"], a["robot_types"]))
+        if num_of_pairs > max_pair:
+            max_pair = num_of_pairs
+            pairs_times[num_of_pairs] = int(log["tick"])
+        times_pairs[int(log["tick"])] = num_of_pairs
+    return pairs_times, times_pairs
 
 
 def stat_experiment_set(
-    directory_path
+    directory_path,
+    cuttime = 5000,
 ):
     files = [f for f in pathlib.Path(directory_path).iterdir() if f.is_file() and ".log" in f.name]
     arr_time_to_pairing = []
     arr_number_of_pairs = []
+    total_pairs_times = {}
+    total_times_pairs = {}
     for file in files:
-        number_of_pairs, time_to_pairing = stat_experiment(file)
-        arr_time_to_pairing.append(time_to_pairing)
-        arr_number_of_pairs.append(number_of_pairs)
-    return arr_time_to_pairing, arr_number_of_pairs
+        pairs_times, times_pairs = stat_experiment(file)
+        max_pair = max(pairs_times.keys())
+        arr_time_to_pairing.append(pairs_times[max_pair])
+        arr_number_of_pairs.append(max(times_pairs.values()))
+        for pair, time in pairs_times.items():
+            if pair not in total_pairs_times:
+                total_pairs_times[pair] = []    
+            total_pairs_times[pair].append(time)
+        for time, pair in times_pairs.items():
+            if time < cuttime:
+                number_of_dots = max(cuttime/30, 10)
+                time2 = int(np.ceil(time/number_of_dots)*number_of_dots)
+                if time2 not in total_times_pairs:
+                    total_times_pairs[time2] = []    
+                total_times_pairs[time2].append(pair)
+    
+
+    for pair in total_pairs_times:
+        total_pairs_times[pair] = get_std_mean(total_pairs_times[pair])
+
+    for time in total_times_pairs:
+        total_times_pairs[time] = get_std_mean(total_times_pairs[time])
+    return arr_time_to_pairing, arr_number_of_pairs, total_pairs_times, total_times_pairs
 
 def get_std_mean(array):
-    nparray = np.array(array)
+    upper_quartile = np.percentile(array, 95)
+    lower_quartile = np.percentile(array, 5)
+    outliers_filtered = [item for item in array if item >= lower_quartile and item <= upper_quartile ]
+    nparray = np.array(outliers_filtered)
     return {"std": np.std(nparray), "mean": np.mean(nparray)}
 
 
@@ -80,13 +115,14 @@ def stat_all(
     experiments = [f for f in pathlib.Path(results_path).iterdir() if f.is_dir()]
     results = []
     for exp in tqdm(experiments):
-        time_to_pairing, number_of_pairs = stat_experiment_set(
+        time_to_pairing, number_of_pairs, pairs_times, _ = stat_experiment_set(
             directory_path=exp
         )
         results.append({
             "name": exp.name,
             "time_to_pairing": get_std_mean(time_to_pairing),
             "number_of_pairs":  get_std_mean(number_of_pairs),
+            "pairs_times": pairs_times
         })
         # results = sorted(results, key=lambda x: int(x["name"][6:]))
     with open(cache_file, 'w') as f:
@@ -113,61 +149,25 @@ def get_time_to_stable(results):
         stds[faulty_count] = float(nf_pairs["std"])
     return means, stds
 
-        
-
 def key_to_color(key:str):
     colors = {
-        "virtual_forces":"#ff7f0e",
-        "algo_matching": "#1f77b4",
-        "repeated": "#17b3cf"
+        # "virtual_forces_random":"#ff7f0e",
+        "Virtual Forces":"#ff7f0e",
+        "Commited": "#1f77b4",
+        "IP": "#17b3cf"
     }
-    return colors[key]
+    return colors.get(key, "#ffffff")
 
-def plot_data(data, get_metric_func):
-    f_range = range(0,10+1)
-    number_of_robots = 20
-    expected_commited = get_expected_faulty_pairs_in_system_of_n_robots(n = number_of_robots, f_range=f_range)
-    best_case = [(number_of_robots-f)/2 for f in f_range]
-    worst_case = [number_of_robots/2-f for f in f_range]
-    fig, axs = plt.subplots(nrows=2, ncols=2, layout=None)
-    axss = axs.flat
-    i = 0
-    for k, v in data.items():
-        for result in v["data"]:
-            stats = stat_all(results_path = result["dir"], from_cache=False)
-            means,stds = get_metric_func(stats)
-            axss[i].errorbar(list(means.keys()), list(means.values()), list(stds.values()), fmt="o", label=result["label"], capsize=5, color=key_to_color(result["label"]))
-        axss[i].plot(f_range, np.array(worst_case), "--", label="worst", color="red", alpha=0.3)
-        axss[i].plot(f_range, np.array(best_case), "--", label="best", color="green", alpha=0.3)
-        axss[i].plot(f_range, np.array(expected_commited), "--", label="expected", color="gray", alpha=0.3)
-        axss[i].grid(linestyle = ':')
-        axss[i].legend()
-        axss[i].set_title(k)
-        i += 1
-    plt.show() 
-
-def plot_runtag(run_tag: str):
-    dir = f"/Users/lior.strichash/private/robust-matching/automatic_experiments/results/{run_tag}"
-    algorithms_directories = [f for f in pathlib.Path(dir).iterdir() if f.is_dir()]
-    plots = {}
-    for algorithm_directory in algorithms_directories:
-        with open(f"{algorithm_directory}/metadata.json") as f:
-            metadata = json.load(f)
-            if metadata["faulty_algorithm"]['name'] not in plots:
-                plots[metadata["faulty_algorithm"]['name']] = {
-                    "title": metadata["faulty_algorithm"]['name'],
-                    "data": []
-                }
-            plots[metadata["faulty_algorithm"]['name']]["data"].append({
-                "dir": algorithm_directory,
-                "label": metadata["non_faulty_algorithm"]['name']
-            })
-    plot_data(plots, get_number_of_pairs)
+def algo_to_label(algo):
+    algo_to_label = {
+        "virtual_forces_random": "Virtual Forces",
+        "algo_matching": "Commited",
+        "keep_distance": "Keep Distance",
+        "algo_matching_walk_away": "Matching Walk Away",
+        "crash": "Crash",
+        "virtual_forces_walk_away": "Virtual Forces Walk Away",
+        "repeated": "IP"
+    }
+    return algo_to_label.get(algo, algo)
 
 
-if __name__ == "__main__":
-    base_dir = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/virtual_forces_gazi"
-    base_dir3 = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/repeated"
-
-    run_tag = "range05"
-    plot_runtag(run_tag)

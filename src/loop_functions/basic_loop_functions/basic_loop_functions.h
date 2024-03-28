@@ -9,12 +9,23 @@
 
 using namespace argos;
 
+struct DistributeConfig{
+    TConfigurationNode robot_config;
+    UInt32 unQuantity;
+
+    DistributeConfig(TConfigurationNode& _robot_config, UInt32 _unQuantity){
+        robot_config = _robot_config;
+        unQuantity = _unQuantity;
+    }
+};
+
 class CBasicLoopFunctions : public CLoopFunctions {
 
 public:
    CBasicLoopFunctions();
    virtual ~CBasicLoopFunctions() {}
    virtual void PreStep();
+   virtual void PostStep();
    virtual void Init(TConfigurationNode& t_tree);
    virtual bool IsExperimentFinished();
    virtual void PostExperiment();
@@ -27,8 +38,10 @@ public:
    Clusters GetRobotPairs(vector<CEPuck2Entity*> robots);
    virtual void add_log();
    virtual void PlaceCluster(TConfigurationNode& entityNode);
+   virtual void PlaceCluster(vector<DistributeConfig> configs,Real robot_range, CRange<Real> arena_range, int base_id,vector<CEPuck2Entity*> seed_entites={});
    virtual void RemoveAll(vector<CEntity*> entites);
    virtual bool _is_connected_graph(vector<CVector2> positions, Real robot_range);
+   virtual void remove_robots();
 
 protected:
    vector<CEPuck2Entity*> m_robots;

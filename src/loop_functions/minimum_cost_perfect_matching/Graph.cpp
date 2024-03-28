@@ -18,6 +18,21 @@ Graph::Graph(int n, const vector< pair<int, int> > & edges):
 	}
 }
 
+Graph::Graph(vector<argos::CVector2> positions, double range):
+	Graph(positions.size())
+{
+	for(unsigned i=0; i<positions.size(); i++){
+		for(unsigned j=0;j<positions.size();j++){
+			if(i != j) {
+				argos::CVector2 distance_vector1 = (positions[i] - positions[j]);
+				if(distance_vector1.Length() < range){
+					AddEdge(i, j, distance_vector1.Length());
+				}
+			}
+		}
+	}
+}
+
 pair<int, int> Graph::GetEdge(int e) const
 {
 	if(e > (int)edges.size())
@@ -97,6 +112,7 @@ void Graph::DFS(int v, vector<bool>& visited, vector<int>& component) {
 			DFS(neighbor, visited, component);
 	}
 }
+
 
  // Function to find connected components
 vector<vector<int> > Graph::findConnectedComponents(unordered_map<int, int>& vertexMap) {

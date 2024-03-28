@@ -29,7 +29,7 @@ def create_all_files(non_faulty_algorithm:NonFaultyAlgorithm, faulty_algorithm:F
     id = uuid.uuid4()
     experiments_folder = f'{base_dir}/results/{run_tag}/{non_faulty_algorithm.name}_{faulty_algorithm.name}'
     for random_seed in range(1,number_of_test_runs+1):
-        for faulty_count in range(0, int(n_robots/2 + 1)):
+        for faulty_count in range(1, int(n_robots/2 + 1)):
             experiment = Experiment(
                 non_faulty_count=n_robots-faulty_count,
                 faulty_count=faulty_count,
@@ -56,37 +56,39 @@ def create_all_files(non_faulty_algorithm:NonFaultyAlgorithm, faulty_algorithm:F
 def main():
     num = 16  # set to the number of workers you want (the default is the cpu count of your machine)
     build()
-    n_robots = 6
-    range = 100
-    # all_robots = [20 ,10 ,40]
-    # all_range = [100, 0.5, 0.3]
-    # for n_robots, range in tqdm(product(all_robots,all_range)):
-    tp = ThreadPool(num)
-    run_tag = f"range_{range}_robots_{n_robots}"
+    # n_robots = 6
+    # range = 100
+    all_robots = [20]
+    all_range = [0.5,0.3,1] + [0.2,0.4,0.6,0.7,0.8,0.9]
+    # all_range = [0.3,0.5,1]
+    for n_robots, range in tqdm(product(all_robots,all_range)):
+        tp = ThreadPool(num)
+        run_tag = f"virtual_forces_gazi_attraction/connected/range_{range}_robots_{n_robots}"
 
-    non_faulty_algorithms = [
-        AlgoMatching(is_commited=True, range=range),
-        # AlgoMatching(is_commited=False, name="repeated", repeate_interval=1, range=range),
-        VirtualForcesRandom(range=range)
-    ]
-    faulty_algorithms = [
-        AlgoMatchingWalkAway(range=range),
-        Crash(range=range),
-        KeepDistance(range=range),
-        VirtualForcesWalkAway(range=range),
-    ]
-    file_pathes = []
-    for nf_algo, f_algo in product(non_faulty_algorithms, faulty_algorithms):
-        file_pathes += create_all_files(number_of_test_runs=50, n_robots=n_robots,non_faulty_algorithm=nf_algo, faulty_algorithm=f_algo, run_tag=run_tag)
-    
-    ts_start = time.time()
-    # file_pathes = [0,"/Users/lior.strichash/private/robust-matching/automatic_experiments/results/unlimited_visibility/repeated_virtual_forces_walk_away/faulty0/random_seed1.argos",0]
-    # ["/Users/lior.strichash/private/robust-matching/automatic_experiments/results/range_100_robots_6/algo_matching_virtual_forces_walk_away/faulty3/random_seed31.argos"]
-    for tmp_file_path in file_pathes:
-        tp.apply_async(work, (tmp_file_path,))
+        non_faulty_algorithms = [
+            # AlgoMatching(is_commited=True, range=range),
+            # AlgoMatching(is_commited=False, name="repeated", repeate_interval=10, range=range),
+            VirtualForcesRandom(range=range),
+            # VirtualForces(range=range)
+        ]
+        faulty_algorithms = [
+            AlgoMatchingWalkAway(range=range),
+            Crash(range=range),
+            KeepDistance(range=range),
+            VirtualForcesWalkAway(range=range),
+        ]
+        file_pathes = []
+        for nf_algo, f_algo in product(non_faulty_algorithms, faulty_algorithms):
+            file_pathes += create_all_files(number_of_test_runs=50, n_robots=n_robots,non_faulty_algorithm=nf_algo, faulty_algorithm=f_algo, run_tag=run_tag)
+        
+        ts_start = time.time()
+        # file_pathes = [0,"/Users/lior.strichash/private/robust-matching/automatic_experiments/results/unlimited_visibility/repeated_virtual_forces_walk_away/faulty0/random_seed1.argos",0]
+        # ["/Users/lior.strichash/private/robust-matching/automatic_experiments/results/range_100_robots_6/algo_matching_virtual_forces_walk_away/faulty3/random_seed31.argos"]
+        for tmp_file_path in file_pathes:
+            tp.apply_async(work, (tmp_file_path,))
 
-    tp.close()
-    tp.join()
+        tp.close()
+        tp.join()
 
     print(time.time()-ts_start)
 if __name__ == "__main__":

@@ -28,7 +28,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="10" />
+                       max_speed="1" />
       </params>
     </virtual_forces_bot_controller>
     <virtual_forces_random_controller id="virtual_forces_random" library="build/src/controllers/virtual_forces/libvirtual_forces.dylib">
@@ -46,7 +46,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="10" />
+                       max_speed="1" />
       </params>
     </virtual_forces_random_controller>
     <virtual_forces_adverserial_controller id="virtual_forces_walk_away" library="build/src/controllers/virtual_forces/libvirtual_forces.dylib">
@@ -64,7 +64,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="10" />
+                       max_speed="1" />
       </params>
     </virtual_forces_adverserial_controller>
     <keep_distance_controller id="keep_distance" library="build/src/controllers/virtual_forces/libvirtual_forces.dylib">
@@ -100,7 +100,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="10" />
+                       max_speed="1" />
       </params>
     </crash_controller>
     <robust_matching_controller id="algo_matching" library="build/src/controllers/robust_matching/librobust_matching.dylib">
@@ -118,7 +118,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="10" />
+                       max_speed="1" />
       </params>
     </robust_matching_controller>
     <adverserial_opposite_direction_controller id="algo_matching_walk_away" library="build/src/controllers/robust_matching/librobust_matching.dylib">
@@ -136,7 +136,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="10" />
+                       max_speed="1" />
       </params>
     </adverserial_opposite_direction_controller>
   </controllers>
@@ -146,7 +146,7 @@
         <params
           log_file_path="tmp"
         />
-        <!-- <distribute_max_range range="0.5" arena_size="10.0">
+        <distribute_max_range range="0.5" arena_size="2.0">
           <robot quantity="10">
               <e-puck2 id="non_faulty" rab_range="0.5" rab_data_size="3">
                   <controller config="virtual_forces"></controller>
@@ -157,14 +157,14 @@
                   <controller config="virtual_forces_walk_away"></controller>
               </e-puck2>
           </robot>
-      </distribute_max_range> -->
+      </distribute_max_range>
   </loop_functions>
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
     <arena size="6.0,6.0,1.0" center="0.0,0.0,0.5">
-		 <distribute>
+		 <!-- <distribute>
 		   <position method="uniform" min="-0.75,-0.75,0" max="0.75,0.75,0" />
 		   <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
 		   <entity quantity="8" max_trials="100">
@@ -181,7 +181,7 @@
               <controller config="virtual_forces_walk_away" />
           </e-puck2>
 		   </entity>
-		 </distribute>
+		 </distribute> -->
 
     <box id="wall_north" size="6,0.1,0.2" movable="false">
       <body position="0,3,0" orientation="0,0,0" />

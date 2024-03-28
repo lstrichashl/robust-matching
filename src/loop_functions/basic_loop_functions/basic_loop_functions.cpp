@@ -25,11 +25,6 @@ void CBasicLoopFunctions::Init(TConfigurationNode& t_tree) {
             }
     }
 
-    CSpace::TMapPerType& m_cRobots = GetSpace().GetEntitiesByType("e-puck2");
-    for(CSpace::TMapPerType::iterator it = m_cRobots.begin(); it != m_cRobots.end(); ++it) {
-        CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
-        m_robots.push_back(robot);
-    }
     TConfigurationNode& paramsNode = GetNode(t_tree, "params");
     try{
         GetNodeAttribute(paramsNode, "log_file_path", m_log_file_path);
@@ -41,8 +36,14 @@ void CBasicLoopFunctions::Init(TConfigurationNode& t_tree) {
 }
 
 void CBasicLoopFunctions::Reset(){
+    CSpace::TMapPerType& m_cRobots = GetSpace().GetEntitiesByType("e-puck2");
+    for(CSpace::TMapPerType::iterator it = m_cRobots.begin(); it != m_cRobots.end(); ++it) {
+        CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
+        m_robots.push_back(robot);
+    }
     m_last_positions = GetPositions(m_robots);
-    m_new_positions = vector<CVector2>();
+    m_new_positions = m_last_positions;
+    add_log();
 }
 
 void CBasicLoopFunctions::write_all_logs(vector<string> logs, string params_string){
@@ -80,14 +81,15 @@ vector<CVector2> CBasicLoopFunctions::GetPositions(vector<CEPuck2Entity*> robots
 }
 
 vector<CEPuck2Entity*> CBasicLoopFunctions::GetNFRobots(){
-    if(m_nf_robots.size() == 0){
+    // if(m_nf_robots.size() == 0){
+    m_nf_robots = vector<CEPuck2Entity*>();
         for(unsigned i = 0; i < m_robots.size(); i++){
             BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
             if(cController1.GetType() == "non_faulty"){
                 m_nf_robots.push_back(m_robots[i]);
             }
         }
-    }
+    // }
     return m_nf_robots;
 }
 
@@ -97,7 +99,7 @@ Clusters CBasicLoopFunctions::GetRobotPairs(vector<CEPuck2Entity*> robots) {
     vector<CVector2> positions = GetPositions(robots);
     vector<vector<int>> possible_robots_in_aggregarion_radios;
     Clusters robot_pairs;
-    for (unsigned i = 0; i < positions.size(); i++){
+    for (unsigned i = 0; i < robots.size(); i++){
         vector<int> robots_in_radios;
         BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robots[i]->GetControllableEntity().GetController());
         for (unsigned j = 0; j < positions.size(); j++){
@@ -135,6 +137,11 @@ void CBasicLoopFunctions::PreStep(){
                                             robot->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
         cController1.m_orientation = robot->GetEmbodiedEntity().GetOriginAnchor().Orientation;
     }
+
+    if(time == 1){
+        m_last_positions = m_new_positions;
+        m_new_positions = GetPositions(GetNFRobots());
+    }
     if(time % 10 == 0){
         m_last_positions = m_new_positions;
         m_new_positions = GetPositions(GetNFRobots());
@@ -142,7 +149,42 @@ void CBasicLoopFunctions::PreStep(){
     }
 }
 
+void CBasicLoopFunctions::PostStep(){
+    // int time = GetSpace().GetSimulationClock();
+    // if(time % 50 == 0){
+    //     remove_robots();
+    // }
+}
+
+void CBasicLoopFunctions::remove_robots(){
+    // for(unsigned i = m_robots.size()-1; i < m_robots.size(); i++){
+    //     RemoveEntity(*m_robots[i]);
+    // }
+    // cout << m_robots[0]->GetControllableEntity().GetId() << endl;
+    // vector<CEPuck2Entity*>robots;
+    // CSpace::TMapPerType& m_cRobots = GetSpace().GetEntitiesByType("e-puck2");
+    // for(CSpace::TMapPerType::iterator it = m_cRobots.begin(); it != m_cRobots.end(); ++it) {
+    //     CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
+    //     robots.push_back(robot);
+    // }
+    for(unsigned i = 0 ; i < 6; i++){
+        RemoveEntity(*m_robots[i]);
+    }
+    // PlaceCluster()
+    // m_robots.erase(m_robots.begin(), m_robots.begin()+6);
+    m_robots = vector<CEPuck2Entity*>();
+    CSpace::TMapPerType& m_cRobots = GetSpace().GetEntitiesByType("e-puck2");
+    for(CSpace::TMapPerType::iterator it = m_cRobots.begin(); it != m_cRobots.end(); ++it) {
+        CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
+        m_robots.push_back(robot);
+    }
+    // RemoveEntity(*robots[1]);
+}
+
 bool CBasicLoopFunctions::IsExperimentFinished() {
+    if(GetSpace().GetSimulationClock() < 20){
+        return false;
+    }
     bool all_robots_are_paired = true;
     vector<CEPuck2Entity*> nf_robots = GetNFRobots();
     int alone_robots_away = 0, alone_robots = 0;
@@ -159,25 +201,17 @@ bool CBasicLoopFunctions::IsExperimentFinished() {
     if(all_robots_are_paired){
         return true;
     }
-    if(alone_robots_away == alone_robots || alone_robots == 1) {
-        return true;
-    }
-    if(m_last_positions.size() != 0 && m_new_positions.size() != 0){
-        for(unsigned i = 0; i < m_new_positions.size(); i++){
-            if(m_new_positions[i] != m_last_positions[i]){
-                return false;
-            }
-        }
+    if(alone_robots_away == alone_robots) {
         return true;
     }
     return false;
 }
 
 void CBasicLoopFunctions::PostExperiment(){
-    // Clusters all_pairs = GetRobotPairs(m_robots);
-    // Clusters nf_pairs = GetRobotPairs(GetNFRobots());
-    // std::cout << "all pairs: (" << all_pairs.size() << ") " << all_pairs.ToString() << std::endl;
-    // std::cout << "nf pairs: (" << nf_pairs.size() << ") " << nf_pairs.ToString() << std::endl;
+    Clusters all_pairs = GetRobotPairs(m_robots);
+    Clusters nf_pairs = GetRobotPairs(GetNFRobots());
+    std::cout << "all pairs: (" << all_pairs.size() << ") " << all_pairs.ToString() << std::endl;
+    std::cout << "nf pairs: (" << nf_pairs.size() << ") " << nf_pairs.ToString() << std::endl;
 }
 
 void CBasicLoopFunctions::add_log(){
@@ -244,19 +278,23 @@ CVector3 GetRandomPosition(CRandom::CRNG* pcRNG, Real robot_range, const vector<
 }
 
 bool CBasicLoopFunctions::_is_connected_graph(vector<CVector2> positions, Real robot_range){
-    for(unsigned i = 0; i < positions.size(); i++){
-        bool is_connected = false;
-        for(unsigned j = 0; j < positions.size(); j++){
-            if(i != j && (positions[i] - positions[j]).Length() < robot_range){
-                is_connected = true;
-                break;
-            }
-        }
-        if(!is_connected){
-            return false;
-        }
-    }
-    return true;
+    Graph g(positions, robot_range);
+	unordered_map<int, int> vertexMap;
+    vector<vector<int> > components = g.findConnectedComponents(vertexMap);
+    return components.size() == 1;
+    // for(unsigned i = 0; i < positions.size(); i++){
+    //     bool is_connected = false;
+    //     for(unsigned j = 0; j < positions.size(); j++){
+    //         if(i != j && (positions[i] - positions[j]).Length() < robot_range){
+    //             is_connected = true;
+    //             break;
+    //         }
+    //     }
+    //     if(!is_connected){
+    //         return false;
+    //     }
+    // }
+    // return true;
 }
 
 void CBasicLoopFunctions::RemoveAll(vector<CEntity*> entites){
@@ -265,28 +303,80 @@ void CBasicLoopFunctions::RemoveAll(vector<CEntity*> entites){
     }
 }
 
-struct DistributeConfig{
-    TConfigurationNode robot_config;
-    UInt32 unQuantity;
-
-    DistributeConfig(TConfigurationNode& _robot_config, UInt32 _unQuantity){
-        robot_config = _robot_config;
-        unQuantity = _unQuantity;
+void CBasicLoopFunctions::PlaceCluster(vector<DistributeConfig> configs,Real robot_range, CRange<Real> arena_range, int base_id,vector<CEPuck2Entity*> seed_entites){
+    vector<CEntity*> spawn_entites, entites;
+    cout << "spawn en" << endl;
+    UInt32 unMaxTrials = 100;
+    /* Create a RNG (it is automatically disposed of by ARGoS) */
+    CRandom::CRNG* pcRNG = CRandom::CreateRNG("argos");
+    CVector2 c_center(0,0);
+    vector<CVector2> all_positions = GetPositions(seed_entites);
+    all_positions.push_back(c_center);
+    while(all_positions.size() == 1 || !_is_connected_graph(all_positions, robot_range)){
+        RemoveAll(spawn_entites);
+        all_positions = {c_center};
+        spawn_entites = {};
+        for(int c = 0; c < configs.size(); c++){
+            UInt32 unQuantity = configs[c].unQuantity;
+            TConfigurationNode tEntityTree = configs[c].robot_config;
+            for(size_t i = 0; i < unQuantity; ++i) {
+                string entity_id = ToString(base_id+i);
+                SetNodeAttribute(tEntityTree, "id", entity_id);
+                UInt32 unTrials = 0;
+                bool bDone = false;
+                bool bRetry = false;
+                do {
+                    ++unTrials;
+                    CEntity* p = CFactory<CEntity>::New(tEntityTree.Value());
+                    if(!NodeExists(tEntityTree, "body")) {
+                        TConfigurationNode tBodyNode("body");
+                        AddChildNode(tEntityTree, tBodyNode);
+                    }
+                    TConfigurationNode& tBodyNode = GetNode(tEntityTree, "body");
+                    CVector3 pos = GetRandomPosition(pcRNG, robot_range, all_positions, arena_range);
+                    CVector3 orientation(pcRNG->Uniform(CRange<Real>(0, 360)), 0,0);
+                    SetNodeAttribute(tBodyNode, "position", pos);
+                    SetNodeAttribute(tBodyNode, "orientation", orientation);
+                    p->Init(tEntityTree);
+                    AddEntity(*p);
+                    CEmbodiedEntity* pcEmbodiedEntity = GetEmbodiedEntity(p);
+                    if(pcEmbodiedEntity->IsCollidingWithSomething()) {
+                        bRetry = true;
+                        RemoveEntity(*p);
+                        ++unTrials;
+                        if(unTrials > unMaxTrials) {
+                            /* Yes, bomb out */
+                            THROW_ARGOSEXCEPTION("Exceeded max trials when trying to distribute objects of type " <<
+                                                tEntityTree.Value() << " with base id \"" <<
+                                                entity_id << "\". I managed to place only " << i << " objects.");
+                        }
+                    }
+                    else {
+                        bDone = true;
+                        CVector2 vector2_pos;
+                        all_positions.push_back(pos.ProjectOntoXY(vector2_pos));
+                        spawn_entites.push_back(p);
+                    }
+                } while(!bDone);
+                if(!bDone) {
+                    THROW_ARGOSEXCEPTION("Can't place robot" << entity_id);
+                }
+            }
+            base_id += unQuantity;
+        }
+        cout << _is_connected_graph(all_positions, robot_range) << endl;
+        arena_range = CRange<Real>(arena_range.GetMin()+0.1, arena_range.GetMax()-0.1);
     }
-};
+}
 
 void CBasicLoopFunctions::PlaceCluster(TConfigurationNode& tDestributionTree) {
     try {
-        vector<CEntity*> entites;
-        CVector2 c_center(0,0);
         Real robot_range;
         GetNodeAttribute(tDestributionTree, "range", robot_range);
         Real arena_size;
         GetNodeAttribute(tDestributionTree, "arena_size", arena_size);
         CRange<Real> arena_range(-arena_size/2, arena_size/2);
 
-        UInt32 unMaxTrials = 100;
-        vector<CVector2> all_positions = {c_center};
         TConfigurationNodeIterator itDistr;
         vector<DistributeConfig> configs;
         for(itDistr = itDistr.begin(&tDestributionTree);
@@ -298,63 +388,8 @@ void CBasicLoopFunctions::PlaceCluster(TConfigurationNode& tDestributionTree) {
                 configs.push_back(DistributeConfig(GetNode(*itDistr, "e-puck2"), unQuantity));
             }
           }
-        /* Create a RNG (it is automatically disposed of by ARGoS) */
-        CRandom::CRNG* pcRNG = CRandom::CreateRNG("argos");
         UInt32 base_id = 0;
-        while(all_positions.size() == 1 || !_is_connected_graph(all_positions, robot_range)){
-            RemoveAll(entites);
-            all_positions = {c_center};
-            entites = {};
-            for(int c = 0; c < configs.size(); c++){
-                UInt32 unQuantity = configs[c].unQuantity;
-                TConfigurationNode tEntityTree = configs[c].robot_config;
-                for(size_t i = 0; i < unQuantity; ++i) {
-                    string entity_id = ToString(base_id+i);
-                    SetNodeAttribute(tEntityTree, "id", entity_id);
-                    UInt32 unTrials = 0;
-                    bool bDone = false;
-                    bool bRetry = false;
-                    do {
-                        ++unTrials;
-                        CEntity* p = CFactory<CEntity>::New(tEntityTree.Value());
-                        if(!NodeExists(tEntityTree, "body")) {
-                            TConfigurationNode tBodyNode("body");
-                            AddChildNode(tEntityTree, tBodyNode);
-                        }
-                        TConfigurationNode& tBodyNode = GetNode(tEntityTree, "body");
-                        CVector3 pos = GetRandomPosition(pcRNG, robot_range, all_positions, arena_range);
-                        CVector3 orientation(pcRNG->Uniform(CRange<Real>(0, 360)), 0,0);
-                        SetNodeAttribute(tBodyNode, "position", pos);
-                        SetNodeAttribute(tBodyNode, "orientation", CVector3(0,0,0));
-                        p->Init(tEntityTree);
-                        AddEntity(*p);
-                        CEmbodiedEntity* pcEmbodiedEntity = GetEmbodiedEntity(p);
-                        if(pcEmbodiedEntity->IsCollidingWithSomething()) {
-                            bRetry = true;
-                            RemoveEntity(*p);
-                            ++unTrials;
-                            if(unTrials > unMaxTrials) {
-                                /* Yes, bomb out */
-                                THROW_ARGOSEXCEPTION("Exceeded max trials when trying to distribute objects of type " <<
-                                                    tEntityTree.Value() << " with base id \"" <<
-                                                    entity_id << "\". I managed to place only " << i << " objects.");
-                            }
-                        }
-                        else {
-                            bDone = true;
-                            CVector2 vector2_pos;
-                            all_positions.push_back(pos.ProjectOntoXY(vector2_pos));
-                            entites.push_back(p);
-                        }
-                    } while(!bDone);
-                    if(!bDone) {
-                        THROW_ARGOSEXCEPTION("Can't place robot" << entity_id);
-                    }
-                }
-                base_id += unQuantity;
-            }
-            arena_range = CRange<Real>(arena_range.GetMin()/1.5, arena_range.GetMax()/1.5);
-        }
+        PlaceCluster(configs, robot_range, arena_range, base_id);        
     }
    catch(CARGoSException& ex) {
       THROW_ARGOSEXCEPTION_NESTED("While placing robots in a cluster", ex);

@@ -2,10 +2,11 @@
 
 COppositeDirection::COppositeDirection(){
     m_typename = "COppositeDirection";
+    m_heading = CVector2(0,0);
    }
 
 void COppositeDirection::ControlStep() {
-    m_heading = -m_heading;
+    m_heading = -m_heading.Normalize();
     CRobustMatching::ControlStep();
 }
 

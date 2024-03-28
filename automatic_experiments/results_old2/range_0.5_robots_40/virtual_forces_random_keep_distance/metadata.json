@@ -1,0 +1,1 @@
+{"run_tag": "range_0.5_robots_40", "number_of_robots": 40, "non_faulty_algorithm": {"name": "virtual_forces_random", "controller_type": "virtual_forces_random", "loop_function_params": {}, "controller_params": {}}, "faulty_algorithm": {"name": "keep_distance", "controller_type": "keep_distance", "loop_function_params": {}, "controller_params": {}}}

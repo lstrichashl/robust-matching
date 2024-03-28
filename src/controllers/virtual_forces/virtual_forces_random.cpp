@@ -25,10 +25,11 @@ CVector2 CVirtualForcesRandom::FlockingVector() {
         double alpha = ((double)m_time) / 3000;
         if(alpha > 1)
             alpha = 1;
-        return random * alpha + gaziForceAttraction * (1-alpha) + localAttractionForce + gaziForceRepulsion;
+        CVector2 force = random + localAttractionForce + gaziForceRepulsion;
+        return force.Normalize();
     }
     else{
-        return RandomWalk();
+        return RandomWalk().Normalize();
     }
 }
 

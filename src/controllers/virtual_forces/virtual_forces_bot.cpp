@@ -29,7 +29,8 @@ CVector2 CVirtualForces::FlockingVector() {
                 gaziForce += CVector2(force, tMsgs[i].HorizontalBearing);
             }
         }
-        return localAttractionForce + gaziForce;
+        CVector2 force = localAttractionForce + gaziForce;
+        return force.Normalize();
     }
     else {
         return CVector2();

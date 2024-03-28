@@ -41,6 +41,7 @@ void BaseConrtoller::ControlStep(){
     if(m_eState == STATE_PAIRED){
       m_heading = CVector2::ZERO;
     }
+   //  cout << m_heading << endl;
    SetWheelSpeedsFromVector(m_heading);
 }
 
@@ -49,7 +50,7 @@ void BaseConrtoller::SetWheelSpeedsFromVector(const CVector2& c_heading) {
    CRadians cHeadingAngle = c_heading.Angle().SignedNormalize();
    Real fHeadingLength = c_heading.Length();
    Real fBaseAngularWheelSpeed = Min<Real>(fHeadingLength, m_sWheelTurningParams.MaxSpeed);
-    // std::cout << fBaseAngularWheelSpeed << std::endl;
+   //  std::cout << fBaseAngularWheelSpeed << std::endl;
 
    if(m_sWheelTurningParams.TurningMechanism == SWheelTurningParams::HARD_TURN) {
       if(Abs(cHeadingAngle) <= m_sWheelTurningParams.SoftTurnOnAngleThreshold) {
@@ -108,6 +109,7 @@ void BaseConrtoller::SetWheelSpeedsFromVector(const CVector2& c_heading) {
       fRightWheelSpeed = fSpeed1;
    }
    /* Finally, set the wheel speeds */
+
    m_pcWheels->SetLinearVelocity(fLeftWheelSpeed, fRightWheelSpeed);
 }
 
