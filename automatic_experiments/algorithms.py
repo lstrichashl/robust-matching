@@ -75,7 +75,9 @@ class AlgoMatching(NonFaultyAlgorithm):
         }
 
 class FaultyAlgorithm(Algorithm):
-    pass
+    def __init__(self, name: str, range: int) -> None:
+        super().__init__(name, range)
+        
 class Crash(FaultyAlgorithm):
     def __init__(self, range: int) -> None:
         super().__init__(name="crash",range=range)
@@ -88,6 +90,19 @@ class AlgoMatchingWalkAway(FaultyAlgorithm):
 class KeepDistance(FaultyAlgorithm):
     def __init__(self, range: int) -> None:
         super().__init__(name="keep_distance", range=range)
+class VirtualForcesRandomCrash(FaultyAlgorithm):
+    def __init__(self, range: int, start_crash_time: int, end_crash_time) -> None:
+        super().__init__(name=f"crash_{start_crash_time}_{end_crash_time}", range=range)
+        self.controller_type = "virtual_forces_random_crash"
+        self.start_crash_time = start_crash_time
+        self.end_crash_time = end_crash_time
+class AlgoMatchingCrash(FaultyAlgorithm):
+    def __init__(self, range: int, start_crash_time: int, end_crash_time) -> None:
+        super().__init__(name=f"crash_{start_crash_time}_{end_crash_time}", range=range)
+        self.controller_type = "algo_matching_crash"
+        self.start_crash_time = start_crash_time
+        self.end_crash_time = end_crash_time
+        
 
 def algorithmFactory(name, range) -> Algorithm:
     if name == "virtual_forces":
@@ -104,9 +119,18 @@ def algorithmFactory(name, range) -> Algorithm:
         return AlgoMatchingWalkAway(range=range)
     elif name == "keep_distance":
         return KeepDistance(range=range)
-    if name == "virtual_forces_random":
+    elif name == "virtual_forces_random":
         return VirtualForcesRandom(range=range)
-
+    elif "virtual_forces_random_crash" in name:
+        times = name.split("-")[1]
+        start_time = times.split("_")[0]
+        end_time = times.split("_")[1]
+        return VirtualForcesRandomCrash(range=range, start_crash_time=start_time,end_crash_time=end_time)
+    elif "algo_matching_crash" in name:
+        times = name.split("-")[1]
+        start_time = times.split("_")[0]
+        end_time = times.split("_")[1]
+        return AlgoMatchingCrash(range=range, start_crash_time=start_time,end_crash_time=end_time)
 
 
 class Experiment:
@@ -150,6 +174,12 @@ class Experiment:
         doc['argos-configuration']['visualization'] = doc['argos-configuration']['visualization'] if self.visualization else {}
         doc['argos-configuration']['loop_functions'] = self.get_loop_functions()
         doc['argos-configuration']['loop_functions']['distribute_max_range'] = distribute_max_range(experiment=self)
+
+        if self.faulty_algorithm.controller_type in ["algo_matching_crash", "virtual_forces_random_crash"]:
+            doc['argos-configuration']['controllers']['virtual_forces_random_crash_controller']['params']['crash']['@start_time'] = self.faulty_algorithm.start_crash_time
+            doc['argos-configuration']['controllers']['virtual_forces_random_crash_controller']['params']['crash']['@end_time'] = self.faulty_algorithm.end_crash_time
+            doc['argos-configuration']['controllers']['robust_matching_crash_controller']['params']['crash']['@start_time'] = self.faulty_algorithm.start_crash_time
+            doc['argos-configuration']['controllers']['robust_matching_crash_controller']['params']['crash']['@end_time'] = self.faulty_algorithm.end_crash_time
         to_save_string = xmltodict.unparse(doc)
 
         with open(self.argos_file_path, 'w') as f:
@@ -163,7 +193,7 @@ class Experiment:
 def distribute_max_range(experiment: Experiment):
     return {
         '@range': experiment.non_faulty_algorithm.range,
-        '@arena_size': '1.5', 
+        '@arena_size': '1.5',
         'robot': [{
             '@quantity': experiment.non_faulty_count, 
             'e-puck2': {

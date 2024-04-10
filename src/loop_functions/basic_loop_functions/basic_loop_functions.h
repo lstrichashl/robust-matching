@@ -53,6 +53,8 @@ protected:
 
    virtual void write_all_logs(vector<string> logs, string params_string);
 
+    vector<CVector2> m_init_positions;
+    
 private:
     vector<CVector2> m_last_positions;
     vector<CVector2> m_new_positions;

@@ -32,7 +32,14 @@ void CPrintExperimentFunctions::Destroy(){
     all_log.pop_back();
     all_log += "]";
 
-    std::string filecontent = "{\"robot_types\":"+robot_types+",\"logs\":"+all_log+"}";
+    std::string init_positions = "[";
+    for(unsigned i=0; i<m_init_positions.size();i++){
+        init_positions += "["+to_string(m_init_positions[i].GetX())+","+to_string(m_init_positions[i].GetY())+"],";
+    }
+    init_positions.pop_back();
+    init_positions += "]";
+
+    std::string filecontent = "{\"robot_types\":"+robot_types+",\"init_positions\":"+init_positions+",\"logs\":"+all_log+"}";
     os << filecontent << std::endl;
     os.close();
 }

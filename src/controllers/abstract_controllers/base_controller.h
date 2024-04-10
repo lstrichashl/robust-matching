@@ -39,7 +39,10 @@ public:
    UInt32 m_time;
    CVector2 m_position;
    CQuaternion m_orientation;
-
+   bool m_is_crash;
+   int m_crash_starttime = 100000000;
+   int m_crash_endtime = 100000000;
+   int m_crash_time;
     struct SWheelTurningParams {
 
       enum ETurningMechanism

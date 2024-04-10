@@ -97,7 +97,6 @@ void CMatchingLoopFunctions::PreStep(){
         for(int i = 0; i < m_robots.size(); i++){
             if(find(robots_in_matching.begin(), robots_in_matching.end(), i) == robots_in_matching.end()){
                 BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
-                cout << cController1.GetType() << endl;
                 cController1.m_heading = cController1.RandomWalk();
             }
         }

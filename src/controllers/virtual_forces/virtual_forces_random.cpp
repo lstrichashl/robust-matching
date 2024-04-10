@@ -21,7 +21,7 @@ CVector2 CVirtualForcesRandom::FlockingVector() {
                 gaziForceRepulsion += CVector2(GaziRepultion(tMsgs[i].Range), tMsgs[i].HorizontalBearing);
             }
         }
-        random = RandomWalk();
+        random = RandomWalk()/5;
         double alpha = ((double)m_time) / 3000;
         if(alpha > 1)
             alpha = 1;
@@ -34,3 +34,4 @@ CVector2 CVirtualForcesRandom::FlockingVector() {
 }
 
 REGISTER_CONTROLLER(CVirtualForcesRandom, "virtual_forces_random_controller")
+REGISTER_CONTROLLER(CVirtualForcesRandomCrash, "virtual_forces_random_crash_controller")

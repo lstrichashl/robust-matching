@@ -46,6 +46,21 @@ def stat_experiment(
     last_pairing = a["logs"][-1]["pairs"]
     nf_pairing = filter_faulty_pairs(last_pairing, a["robot_types"])
     experiment_length = int(a["logs"][-1]["tick"])
+    density = 1
+    avg_distance = 1
+    diameter = 1
+    if "init_positions" in a:
+        positions = np.array(a["init_positions"])
+        diameter = 0
+        avg_distance = 0 
+        for i,pos1 in enumerate(positions):
+            for j,pos2 in enumerate(positions):
+                distance = np.linalg.norm(pos1-pos2)
+                if distance > diameter:
+                    diameter = distance
+                avg_distance += distance
+        avg_distance /= len(positions)
+        density = len(a["robot_types"]) / diameter
     max_pair = -1
     max_i = -1
     distance_traveled = 0
@@ -57,43 +72,59 @@ def stat_experiment(
         if num_of_pairs > max_pair:
             max_pair = num_of_pairs
             pairs_times[num_of_pairs] = int(log["tick"])
-        times_pairs[int(log["tick"])] = num_of_pairs
-    return pairs_times, times_pairs
+        times_pairs[int(log["tick"])] = max_pair
+    return pairs_times, times_pairs, diameter
 
 
 def stat_experiment_set(
     directory_path,
     cuttime = 5000,
+    normalize_by_diameter = True
 ):
     files = [f for f in pathlib.Path(directory_path).iterdir() if f.is_file() and ".log" in f.name]
     arr_time_to_pairing = []
     arr_number_of_pairs = []
     total_pairs_times = {}
     total_times_pairs = {}
-    for file in files:
-        pairs_times, times_pairs = stat_experiment(file)
+    step = int(max(cuttime/30, 10))
+    for i, file in enumerate(files):
+        pairs_times, times_pairs, diameter = stat_experiment(file)
+        mv = list(times_pairs.values())
+        # assert all(mv[i+1] - mv[i] > -0.01 for i in range(len(mv)-1)), f"element {i}"
         max_pair = max(pairs_times.keys())
-        arr_time_to_pairing.append(pairs_times[max_pair])
+        arr_time_to_pairing.append(pairs_times[max_pair]/diameter if normalize_by_diameter else pairs_times[max_pair])
         arr_number_of_pairs.append(max(times_pairs.values()))
         for pair, time in pairs_times.items():
             if pair not in total_pairs_times:
                 total_pairs_times[pair] = []    
             total_pairs_times[pair].append(time)
         for time, pair in times_pairs.items():
-            if time < cuttime:
-                number_of_dots = max(cuttime/30, 10)
-                time2 = int(np.ceil(time/number_of_dots)*number_of_dots)
-                if time2 not in total_times_pairs:
-                    total_times_pairs[time2] = []    
-                total_times_pairs[time2].append(pair)
+            if time < cuttime and time % 10 == 0:
+                if time not in total_times_pairs:
+                    total_times_pairs[time] = []    
+                total_times_pairs[time].append(pair)
+        log_step = 10
+        experiment_end_time = int(np.ceil((max(times_pairs.keys())+1)/log_step)*log_step)
+        for time in range(experiment_end_time, cuttime+log_step, log_step):
+            if time not in total_times_pairs:
+                total_times_pairs[time] = []    
+            total_times_pairs[time].append(max_pair)
     
-
+    a = 1
+    new_total_times_pairs = {}
     for pair in total_pairs_times:
         total_pairs_times[pair] = get_std_mean(total_pairs_times[pair])
 
     for time in total_times_pairs:
-        total_times_pairs[time] = get_std_mean(total_times_pairs[time])
-    return arr_time_to_pairing, arr_number_of_pairs, total_pairs_times, total_times_pairs
+        time2 = int(np.ceil(time/step)*step)
+        if time2 not in new_total_times_pairs:
+            new_total_times_pairs[time2] = []
+        new_total_times_pairs[time2].extend(total_times_pairs[time])
+
+    for pair in new_total_times_pairs:
+        new_total_times_pairs[pair] = get_std_mean(new_total_times_pairs[pair])
+
+    return arr_time_to_pairing, arr_number_of_pairs, total_pairs_times, new_total_times_pairs
 
 def get_std_mean(array):
     upper_quartile = np.percentile(array, 95)
@@ -153,7 +184,7 @@ def key_to_color(key:str):
     colors = {
         # "virtual_forces_random":"#ff7f0e",
         "Virtual Forces":"#ff7f0e",
-        "Commited": "#1f77b4",
+        "Committed": "#1f77b4",
         "IP": "#17b3cf"
     }
     return colors.get(key, "#ffffff")
@@ -161,7 +192,7 @@ def key_to_color(key:str):
 def algo_to_label(algo):
     algo_to_label = {
         "virtual_forces_random": "Virtual Forces",
-        "algo_matching": "Commited",
+        "algo_matching": "Committed",
         "keep_distance": "Keep Distance",
         "algo_matching_walk_away": "Matching Walk Away",
         "crash": "Crash",
@@ -171,3 +202,5 @@ def algo_to_label(algo):
     return algo_to_label.get(algo, algo)
 
 
+if __name__ == "__main__":
+    stat_experiment("/Users/lior.strichash/private/robust-matching/automatic_experiments/results/test/algo_matching_algo_matching_walk_away/faulty0/random_seed38.argos.log")

@@ -56,6 +56,13 @@ void CBasicLoopFunctions::write_all_logs(vector<string> logs, string params_stri
     robot_types.pop_back();
     robot_types += "]";
 
+    std::string init_positions = "[";
+    for(unsigned i=0; i<m_init_positions.size();i++){
+        init_positions += "["+to_string(m_init_positions[i].GetX())+","+to_string(m_init_positions[i].GetY())+"],";
+    }
+    init_positions.pop_back();
+    init_positions += "]";
+
     std::string all_log = "[";
     for(unsigned i = 0; i < logs.size(); i++){
         all_log += logs[i] + ",";
@@ -63,7 +70,7 @@ void CBasicLoopFunctions::write_all_logs(vector<string> logs, string params_stri
     all_log.pop_back();
     all_log += "]";
 
-    std::string filecontent = "{\"params\":"+params_string+",\"robot_types\":"+robot_types+",\"logs\":"+all_log+"}";
+    std::string filecontent = "{\"params\":"+params_string+",\"robot_types\":"+robot_types+",\"init_positions\":"+init_positions+",\"logs\":"+all_log+"}";
     os << filecontent << endl;
     os.close();
 }
@@ -141,11 +148,18 @@ void CBasicLoopFunctions::PreStep(){
     if(time == 1){
         m_last_positions = m_new_positions;
         m_new_positions = GetPositions(GetNFRobots());
+        m_init_positions = m_new_positions;
     }
     if(time % 10 == 0){
         m_last_positions = m_new_positions;
         m_new_positions = GetPositions(GetNFRobots());
         add_log();
+    }
+    for(unsigned i = 0; i < m_robots.size(); i++){
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
+        if(cController1.m_crash_time < time){
+            cController1.m_is_crash = true;
+        }
     }
 }
 
@@ -198,7 +212,7 @@ bool CBasicLoopFunctions::IsExperimentFinished() {
             }
         }
     }
-    if(all_robots_are_paired){
+    if(all_robots_are_paired || alone_robots == 1){
         return true;
     }
     if(alone_robots_away == alone_robots) {

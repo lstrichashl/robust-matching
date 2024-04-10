@@ -8,10 +8,11 @@ BaseConrtoller::BaseConrtoller():
    }
 
 void BaseConrtoller::Init(TConfigurationNode& t_node){
+    m_crash_time = pcRNG->Uniform(CRange<Real>(m_crash_starttime, m_crash_endtime));
     m_pcWheels = GetActuator<CCI_DifferentialSteeringActuator>("differential_steering");
     m_pcLedAct = GetActuator<CCI_EPuck2LEDsActuator>("epuck2_leds");
-    m_pcRABAct    = GetActuator<CCI_RangeAndBearingActuator  >("range_and_bearing" );
-    m_pcRABSens   = GetSensor  <CCI_RangeAndBearingSensor    >("range_and_bearing" );
+    m_pcRABAct = GetActuator<CCI_RangeAndBearingActuator  >("range_and_bearing" );
+    m_pcRABSens = GetSensor  <CCI_RangeAndBearingSensor    >("range_and_bearing" );
     try {
       m_sWheelTurningParams.Init(GetNode(t_node, "wheel_turning"));
     }
@@ -41,6 +42,11 @@ void BaseConrtoller::ControlStep(){
     if(m_eState == STATE_PAIRED){
       m_heading = CVector2::ZERO;
     }
+   if(m_is_crash){
+      m_heading = CVector2::ZERO;
+      m_pcLedAct->SetAllRGBColors(CColor::RED);
+      m_pcLedAct->SetAllRedLeds(true);
+   }
    //  cout << m_heading << endl;
    SetWheelSpeedsFromVector(m_heading);
 }

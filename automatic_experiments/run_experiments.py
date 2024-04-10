@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 from multiprocessing.pool import ThreadPool
 from functools import reduce
-from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm, KeepDistance, VirtualForcesWalkAway, AlgoMatchingWalkAway, VirtualForcesRandom
+from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm, KeepDistance, VirtualForcesWalkAway, AlgoMatchingWalkAway, VirtualForcesRandom, VirtualForcesRandomCrash, AlgoMatchingCrash
 import json
 import uuid
 from tqdm import tqdm
@@ -29,7 +29,7 @@ def create_all_files(non_faulty_algorithm:NonFaultyAlgorithm, faulty_algorithm:F
     id = uuid.uuid4()
     experiments_folder = f'{base_dir}/results/{run_tag}/{non_faulty_algorithm.name}_{faulty_algorithm.name}'
     for random_seed in range(1,number_of_test_runs+1):
-        for faulty_count in range(1, int(n_robots/2 + 1)):
+        for faulty_count in range(0,1):
             experiment = Experiment(
                 non_faulty_count=n_robots-faulty_count,
                 faulty_count=faulty_count,
@@ -58,24 +58,42 @@ def main():
     build()
     # n_robots = 6
     # range = 100
-    all_robots = [20]
-    all_range = [0.5,0.3,1] + [0.2,0.4,0.6,0.7,0.8,0.9]
-    # all_range = [0.3,0.5,1]
+    all_robots = [15]
+    # all_range = [0.5,0.3] + [0.2,0.4,0.6,0.7,0.8,0.9,1]
+    # all_range = [1,1.5,2]
+    all_range = [0.5]
     for n_robots, range in tqdm(product(all_robots,all_range)):
+        print(f"{n_robots=} {range=}")
         tp = ThreadPool(num)
-        run_tag = f"virtual_forces_gazi_attraction/connected/range_{range}_robots_{n_robots}"
+        run_tag = f"fixed_velocity_random_orientation_randomCommitedMovement/connected/range_{range}_robots_{n_robots}"
 
         non_faulty_algorithms = [
-            # AlgoMatching(is_commited=True, range=range),
-            # AlgoMatching(is_commited=False, name="repeated", repeate_interval=10, range=range),
-            VirtualForcesRandom(range=range),
-            # VirtualForces(range=range)
+            AlgoMatching(is_commited=True, range=range),
+            AlgoMatching(is_commited=False, name="repeated", repeate_interval=10, range=range),
+            VirtualForcesRandom(range=range)
         ]
+        # faulty_algorithms = [
+        #     VirtualForcesRandomCrash(range=range, start_crash_time=0,end_crash_time=50),
+        #     VirtualForcesRandomCrash(range=range, start_crash_time=50,end_crash_time=100),
+        #     VirtualForcesRandomCrash(range=range, start_crash_time=100,end_crash_time=150),
+        #     VirtualForcesRandomCrash(range=range, start_crash_time=150,end_crash_time=200),
+        #     VirtualForcesRandomCrash(range=range, start_crash_time=200,end_crash_time=250),
+        #     VirtualForcesRandomCrash(range=range, start_crash_time=250,end_crash_time=300)
+        # ]
+
+        # faulty_algorithms = [
+        #     AlgoMatchingCrash(range=range, start_crash_time=0,end_crash_time=50),
+        #     AlgoMatchingCrash(range=range, start_crash_time=50,end_crash_time=100),
+        #     AlgoMatchingCrash(range=range, start_crash_time=100,end_crash_time=150),
+        #     AlgoMatchingCrash(range=range, start_crash_time=150,end_crash_time=200),
+        #     AlgoMatchingCrash(range=range, start_crash_time=200,end_crash_time=250),
+        #     AlgoMatchingCrash(range=range, start_crash_time=250,end_crash_time=300)
+        # ]
         faulty_algorithms = [
-            AlgoMatchingWalkAway(range=range),
-            Crash(range=range),
-            KeepDistance(range=range),
-            VirtualForcesWalkAway(range=range),
+        #     AlgoMatchingWalkAway(range=range),
+              Crash(range=range),
+        #     KeepDistance(range=range),
+        #     VirtualForcesWalkAway(range=range),
         ]
         file_pathes = []
         for nf_algo, f_algo in product(non_faulty_algorithms, faulty_algorithms):
