@@ -13,37 +13,41 @@
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <robust_matching_controller id="non_faulty" library="/Users/lior.strichash/private/robust-matching/build/src/controllers/robust_matching/librobust_matching">
+    <robust_matching_controller id="algo_matching" library="build/src/controllers/robust_matching/librobust_matching.dylib">
       <actuators>
         <differential_steering implementation="default" />
         <epuck2_leds implementation="default" medium="leds" />
+        <range_and_bearing implementation="default" />
       </actuators>
       <sensors>
       	<epuck2_encoder implementation="default" />
         <epuck2_battery implementation="default"/>
+        <range_and_bearing implementation="medium" medium="rab" show_rays="false" />
       </sensors>
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
-                       soft_turn_angle_threshold="10"
-                       no_turn_angle_threshold="3"
-                       max_speed="10" />
+                       soft_turn_angle_threshold="70"
+                       no_turn_angle_threshold="10"
+                       max_speed="1" />
       </params>
     </robust_matching_controller>
 
-    <adverserial_opposite_direction_controller id="faulty" library="/Users/lior.strichash//private/robust-matching/build/src/controllers/adverserial/opposite_direction/libopposite_direction">
+    <adverserial_opposite_direction_controller id="algo_matching_walk_away" library="build/src/controllers/robust_matching/librobust_matching.dylib">
       <actuators>
         <differential_steering implementation="default" />
         <epuck2_leds implementation="default" medium="leds" />
+        <range_and_bearing implementation="default" />
       </actuators>
       <sensors>
       	<epuck2_encoder implementation="default" />
         <epuck2_battery implementation="default"/>
+        <range_and_bearing implementation="medium" medium="rab" show_rays="false" />
       </sensors>
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
-                       soft_turn_angle_threshold="10"
-                       no_turn_angle_threshold="3"
-                       max_speed="10" />
+                       soft_turn_angle_threshold="70"
+                       no_turn_angle_threshold="10"
+                       max_speed="1" />
       </params>
     </adverserial_opposite_direction_controller>
   </controllers>
@@ -52,7 +56,9 @@
                   label="matching_loop_functions">
         <params 
           is_commited="false"
+          repeat_interval="1"
           log_file_path="tmp"
+          range="1000"
         />
   </loop_functions>
 
@@ -60,31 +66,56 @@
   <!-- * Arena configuration * -->
   <!-- *********************** -->
     <arena size="4.0,4.0,1.0" center="0.0,0.0,0.5">
-        <e-puck2 id="nf1" rab_range="5" rab_data_size="3">
+        <e-puck2 id="0" rab_range="5" rab_data_size="3">
             <body position="1,0,0" orientation="0,0,0" />
-            <controller config="non_faulty" />
+            <controller config="algo_matching_walk_away" />
         </e-puck2>
-        <e-puck2 id="nf2" rab_range="5" rab_data_size="3">
+        <e-puck2 id="1" rab_range="5" rab_data_size="3">
             <body position="0.5,0.866,0" orientation="0,0,0" />
-            <controller config="non_faulty" />
+            <controller config="algo_matching" />
         </e-puck2>
-        <e-puck2 id="nf3" rab_range="5" rab_data_size="3">
+        <e-puck2 id="2" rab_range="5" rab_data_size="3">
             <body position="-0.5,0.866,0" orientation="0,0,0" />
-            <controller config="faulty" />
+            <controller config="algo_matching" />
         </e-puck2>
-        <e-puck2 id="nf4" rab_range="5" rab_data_size="3">
+        <e-puck2 id="3" rab_range="5" rab_data_size="3">
             <body position="-1,0,0" orientation="0,0,0" />
-            <controller config="faulty" />
+            <controller config="algo_matching_walk_away" />
         </e-puck2>
-        <e-puck2 id="nf5" rab_range="5" rab_data_size="3">
+        <e-puck2 id="4" rab_range="5" rab_data_size="3">
             <body position="-0.5,-0.866,0" orientation="0,0,0" />
-            <controller config="faulty" />
+            <controller config="algo_matching_walk_away" />
         </e-puck2>
-        <e-puck2 id="nf6" rab_range="5" rab_data_size="3">
+        <e-puck2 id="5" rab_range="5" rab_data_size="3">
             <body position="0.5,-0.866,0" orientation="0,0,0" />
-            <controller config="faulty" />
+            <controller config="algo_matching_walk_away" />
         </e-puck2>
 
+
+      <!-- <e-puck2 id="nf1" rab_range="5" rab_data_size="3">
+          <body position="-1,0,0" orientation="0,0,0" />
+          <controller config="algo_matching_walk_away" />
+      </e-puck2>
+      <e-puck2 id="nf2" rab_range="5" rab_data_size="3">
+          <body position="-0.5,0,0" orientation="0,0,0" />
+          <controller config="algo_matching_walk_away" />
+      </e-puck2>
+      <e-puck2 id="nf3" rab_range="5" rab_data_size="3">
+          <body position="0,0,0" orientation="180,0,0" />
+          <controller config="algo_matching" />
+      </e-puck2>
+      <e-puck2 id="nf4" rab_range="5" rab_data_size="3">
+          <body position="0.5,0,0" orientation="0,0,0" />
+          <controller config="algo_matching" />
+      </e-puck2>
+      <e-puck2 id="nf5" rab_range="5" rab_data_size="3">
+          <body position="1,0,0" orientation="180,0,0" />
+          <controller config="algo_matching_walk_away" />
+      </e-puck2>
+      <e-puck2 id="nf6" rab_range="5" rab_data_size="3">
+          <body position="1.5,0,0" orientation="0,0,0" />
+          <controller config="algo_matching_walk_away" />
+      </e-puck2> -->
 
 
     <!-- <box id="wall_north" size="2,0.1,0.2" movable="false">

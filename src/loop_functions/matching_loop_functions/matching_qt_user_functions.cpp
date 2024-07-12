@@ -24,6 +24,12 @@ void CMatchingQTUserFunctions::DrawInWorld() {
          cFootBot2->GetEmbodiedEntity().GetOriginAnchor().Position
       ));
    }
+
+   vector<CVector2> positions = m_matchingLoopFunctions.GetPositions(m_matchingLoopFunctions.GetRobots());
+   for(unsigned i = 0; i < positions.size(); i++) {
+      CVector3 draw_text_position( positions[i].GetX()-0.05,positions[i].GetY()+0.05, 0.01);
+      DrawText(draw_text_position, to_string(i));
+   }
 }
 
 REGISTER_QTOPENGL_USER_FUNCTIONS(CMatchingQTUserFunctions, "matching_qt_user_functions")
