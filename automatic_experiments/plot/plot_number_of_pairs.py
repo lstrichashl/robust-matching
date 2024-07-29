@@ -7,7 +7,7 @@ import pathlib
 import json
 from scipy import stats
 
-base_dir = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/fixed_velocity_random_orientation_randomCommitedMovement/connected"
+base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/fixed_velocity_random_orientation_randomCommitedMovement/connected"
 
 def plot_data(data, number_of_robots):
     max_faulty_num = (int)(number_of_robots/2+1)
@@ -52,8 +52,8 @@ def plot_compare_faulty_algorithms(number_of_robots: int, range):
     # fig, axs = plt.subplots(1)
     k = list(plots.keys())[2]
     plot_data({k:plots[k]}, number_of_robots)
-    plt.savefig(f"/Users/lior.strichash/private/thesis/images/experiments/plot_compare_faults_range{range}_robots{number_of_robots}_{k}.png", bbox_inches='tight')
-    # plt.show() 
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/plot_compare_faults_range{range}_robots{number_of_robots}_{k}.png", bbox_inches='tight')
+    plt.show() 
 
 def plot_compare_range(number_of_robots):
     nf_algorithm = ["virtual_forces_random", "algo_matching"]

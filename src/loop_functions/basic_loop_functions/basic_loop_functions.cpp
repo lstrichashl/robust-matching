@@ -293,7 +293,7 @@ CVector3 GetRandomPosition(CRandom::CRNG* pcRNG, Real robot_range, const vector<
 
 bool CBasicLoopFunctions::_is_connected_graph(vector<CVector2> positions, Real robot_range){
     Graph g(positions, robot_range);
-	unordered_map<int, int> vertexMap;
+	map<int, int> vertexMap;
     vector<vector<int> > components = g.findConnectedComponents(vertexMap);
     return components.size() == 1;
     // for(unsigned i = 0; i < positions.size(); i++){
