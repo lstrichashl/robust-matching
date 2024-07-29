@@ -203,4 +203,4 @@ def algo_to_label(algo):
 
 
 if __name__ == "__main__":
-    stat_experiment("/Users/lior.strichash/private/robust-matching/automatic_experiments/results/test/algo_matching_algo_matching_walk_away/faulty0/random_seed38.argos.log")
+    stat_experiment("/home/lior/workspace/robust-matching/automatic_experiments/results/test/algo_matching_algo_matching_walk_away/faulty0/random_seed38.argos.log")

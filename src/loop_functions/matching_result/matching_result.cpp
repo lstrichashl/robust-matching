@@ -132,7 +132,7 @@ list<int> MatchingForComponents(Graph& graph, vector<Graph>& components, vector<
 }
 
 list<int> SolveMinimumCostPerfectMatching(Graph& graph){
-	unordered_map<int, int> vertexMap;
+	map<int, int> vertexMap;
 	vector<vector<int> > comp_vertecies = graph.findConnectedComponents(vertexMap);
 	vector<Graph> components;
 

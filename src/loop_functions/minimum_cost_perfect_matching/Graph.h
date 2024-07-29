@@ -40,7 +40,7 @@ public:
 
 	double GetCost(int u, int v);
 
-	virtual vector<vector<int> > findConnectedComponents(unordered_map<int, int>& vertexMap);
+	virtual vector<vector<int> > findConnectedComponents(map<int, int>& vertexMap);
 	virtual void DFS(int v, vector<bool>& visited, vector<int>& component);
 	//Array of edges
 	vector< pair<int, int> > edges;

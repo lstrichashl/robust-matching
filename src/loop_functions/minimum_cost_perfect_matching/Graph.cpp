@@ -115,7 +115,7 @@ void Graph::DFS(int v, vector<bool>& visited, vector<int>& component) {
 
 
  // Function to find connected components
-vector<vector<int> > Graph::findConnectedComponents(unordered_map<int, int>& vertexMap) {
+vector<vector<int> > Graph::findConnectedComponents(map<int, int>& vertexMap) {
 	vector<bool> visited(n, false);
 	vector<vector<int> > comps;
 	// unordered_map<int, int> vertexMap; // Map to store old vertex IDs to new vertex IDs for each component

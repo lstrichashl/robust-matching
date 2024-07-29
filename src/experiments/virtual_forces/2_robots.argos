@@ -13,7 +13,7 @@
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <virtual_forces_bot_controller id="non_faulty" library="build/src/controllers/virtual_forces/libvirtual_forces.dylib">
+    <virtual_forces_bot_controller id="non_faulty" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
       <actuators>
         <differential_steering implementation="default" />
         <epuck2_leds implementation="default" medium="leds" />
@@ -31,7 +31,7 @@
                        max_speed="1" />
       </params>
     </virtual_forces_bot_controller>
-    <virtual_forces_adverserial_controller id="faulty" library="build/src/controllers/virtual_forces/libvirtual_forces.dylib">
+    <virtual_forces_adverserial_controller id="faulty" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
       <actuators>
         <differential_steering implementation="default" />
         <epuck2_leds implementation="default" medium="leds" />
@@ -51,7 +51,7 @@
     </virtual_forces_adverserial_controller>
   </controllers>
 
-  <loop_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions"
+  <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions"
                   label="print_experiment_loop_fuctions">
         <params
           log_file_path="tmp"

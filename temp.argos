@@ -6,7 +6,7 @@
     </framework>
     <controllers>
         <virtual_forces_bot_controller id="virtual_forces"
-            library="build/src/controllers/virtual_forces/libvirtual_forces.dylib">
+            library="build/src/controllers/virtual_forces/libvirtual_forces.so">
             <actuators>
                 <differential_steering implementation="default"></differential_steering>
                 <epuck2_leds implementation="default" medium="leds"></epuck2_leds>
@@ -23,7 +23,7 @@
             </params>
         </virtual_forces_bot_controller>
         <virtual_forces_adverserial_controller id="virtual_forces_walk_away"
-            library="build/src/controllers/virtual_forces/libvirtual_forces.dylib">
+            library="build/src/controllers/virtual_forces/libvirtual_forces.so">
             <actuators>
                 <differential_steering implementation="default"></differential_steering>
                 <epuck2_leds implementation="default" medium="leds"></epuck2_leds>
@@ -40,7 +40,7 @@
             </params>
         </virtual_forces_adverserial_controller>
         <crash_controller id="crash"
-            library="build/src/controllers/abstract_controllers/libabstract_controllers.dylib">
+            library="build/src/controllers/abstract_controllers/libabstract_controllers.so">
             <actuators>
                 <differential_steering implementation="default"></differential_steering>
                 <epuck2_leds implementation="default" medium="leds"></epuck2_leds>
@@ -57,7 +57,7 @@
             </params>
         </crash_controller>
         <robust_matching_controller id="algo_matching"
-            library="build/src/controllers/robust_matching/librobust_matching.dylib">
+            library="build/src/controllers/robust_matching/librobust_matching.so">
             <actuators>
                 <differential_steering implementation="default"></differential_steering>
                 <epuck2_leds implementation="default" medium="leds"></epuck2_leds>
@@ -74,7 +74,7 @@
             </params>
         </robust_matching_controller>
         <adverserial_opposite_direction_controller id="algo_matching_walk_away"
-            library="build/src/controllers/robust_matching/librobust_matching.dylib">
+            library="build/src/controllers/robust_matching/librobust_matching.so">
             <actuators>
                 <differential_steering implementation="default"></differential_steering>
                 <epuck2_leds implementation="default" medium="leds"></epuck2_leds>
@@ -93,7 +93,7 @@
     </controllers>
 
 
-    <loop_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+    <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
     label="matching_loop_functions">
         <params 
             is_commited="false"
@@ -157,10 +157,10 @@
     <visualization>
         <qt-opengl>
 
-            <!-- <user_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/basic_loop_functions/libbasic_loop_functions"
+            <!-- <user_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/basic_loop_functions/libbasic_loop_functions"
                   label="basic_qt_user_functions" /> -->
 
-      <user_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+      <user_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
                   label="matching_qt_user_functions" />
             <camera>
                 <placements>

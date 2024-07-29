@@ -225,7 +225,7 @@ list<int> MatchingForComponents(Graph& graph, vector<Graph>& components, vector<
 
 list<int> GetMatching(Graph& graph){
 	AddHopToGraph(graph);
-	unordered_map<int, int> vertexMap;
+	map<int, int> vertexMap;
 	vector<vector<int> > comp_vertecies = graph.findConnectedComponents(vertexMap);
 	vector<Graph> components;
 

@@ -1,8 +1,8 @@
 import os
 import xmltodict
 
-base_dir = '/Users/lior.strichash/private/robust-matching/automatic_experiments'
-template_file_path = f'{base_dir}/templates/virtual_forces.argos'
+base_dir = '/home/lior/workspace/robust-matching'
+template_file_path = f'{base_dir}/automatic_experiments/templates/virtual_forces.argos'
 
 
 class Algorithm:
@@ -35,11 +35,11 @@ class NonFaultyAlgorithm(Algorithm):
 
 class VirtualForces(NonFaultyAlgorithm):
     def __init__(self, range: int) -> None:
-        super().__init__(name="virtual_forces",template_file_path=f'{base_dir}/templates/virtual_forces.argos', range=range)
+        super().__init__(name="virtual_forces",template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos', range=range)
     
     def get_loop_functions(self):
         return {
-            "@library":  "/Users/lior.strichash/private/robust-matching/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions",
+            "@library":  f'{base_dir}/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions',
             "@label": "print_experiment_loop_fuctions",
             "params": self.get_loop_functions_params()
         }
@@ -52,7 +52,7 @@ class VirtualForcesRandom(VirtualForces):
 class AlgoMatching(NonFaultyAlgorithm):
     def __init__(self, is_commited: bool, range: int, name="algo_matching", repeate_interval: int = 100000000) -> None:
         # name = "algo_matching" if is_commited else f"repeated_{repeate_interval}"
-        super().__init__(name=name, template_file_path=f'{base_dir}/templates/matching.argos', range=range)
+        super().__init__(name=name, template_file_path=f'{base_dir}/automatic_experiments/templates/matching.argos', range=range)
         self.controller_type = "algo_matching"
         self.is_commited = is_commited
         self.repeate_interval = repeate_interval
@@ -69,7 +69,7 @@ class AlgoMatching(NonFaultyAlgorithm):
     
     def get_loop_functions(self):
         return {
-            "@library": "/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions",
+            "@library": f'{base_dir}/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions',
             "@label": "matching_loop_functions",
             "params": self.get_loop_functions_params()
         }
@@ -136,7 +136,7 @@ def algorithmFactory(name, range) -> Algorithm:
 class Experiment:
     def __init__(self, non_faulty_count: int, faulty_count: int, non_faulty_algorithm: NonFaultyAlgorithm, faulty_algorithm: FaultyAlgorithm, random_seed: int, run_tag:str, length = 300,visualization = False, file_path:str = None) -> None:
         if file_path is None:
-            file_path = f'{base_dir}/results/{run_tag}/{non_faulty_algorithm.name}_{faulty_algorithm.name}/faulty{faulty_count}/random_seed{random_seed}.argos'
+            file_path = f'{base_dir}/automatic_experiments/results/{run_tag}/{non_faulty_algorithm.name}_{faulty_algorithm.name}/faulty{faulty_count}/random_seed{random_seed}.argos'
         self.faulty_count = faulty_count
         self.non_faulty_count = non_faulty_count
         self.non_faulty_algorithm = non_faulty_algorithm

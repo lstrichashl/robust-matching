@@ -4,8 +4,8 @@ from itertools import product
 from plot import stat_experiment_set, algo_to_label, get_std_mean
 import numpy as np
 
-base_dir = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/fixed_velocity_random_orientation_randomCommitedMovement/connected"
-# base_dir = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/arena1.5/connected"
+base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/fixed_velocity_random_orientation_randomCommitedMovement/connected"
+# base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/arena1.5/connected"
 
 def plot_time_distributions(data, axss):
     # fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True, sharey=True, layout="constrained", figsize=(3.5,5))
@@ -65,7 +65,7 @@ def plot_compare_faults(number_of_robots, range):
     axss = axs.flat
     plot_time_distributions(plots, axss)
     plt.show()
-    # plt.savefig(f"/Users/lior.strichash/private/thesis/images/experiments/plot_compare_faults_range{range}_robots{number_of_robots}.png")
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/plot_compare_faults_range{range}_robots{number_of_robots}.png")
 
 
 def plot_compare_range(number_of_robots, f_count):
@@ -103,12 +103,12 @@ def plot_compare_range(number_of_robots, f_count):
     plt.show()
 
 
-    plt.savefig(f"/Users/lior.strichash/private/thesis/images/experiments/plot_compare_range_primerange_robots{number_of_robots}_faulty{f_count}.png")
+    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/plot_compare_range_primerange_robots{number_of_robots}_faulty{f_count}.png")
 
 def plot_number_of_robots_on_x(range, f_percent):
     nf_algorithms = ["virtual_forces_random", "algo_matching"]
     f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
-    base_dir2 = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results"
+    base_dir2 = "/home/lior/workspace/robust-matching/automatic_experiments/results"
     dirs = ["fixed_velocity_random_orientation_randomCommitedMovement/connected", "arena3/connected","arena4.5/connected"]
     numbers_of_robots = [10,20,40,80]
     f_robots = (np.array(numbers_of_robots)*f_percent).astype(int)
@@ -146,7 +146,7 @@ def plot_number_of_robots_on_x(range, f_percent):
 
 
     plt.show()
-    # plt.savefig(f"/Users/lior.strichash/private/thesis/images/experiments/pairing_time_range_on_x_robots{number_of_robots}_faulty{f_count}.png")
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_range_on_x_robots{number_of_robots}_faulty{f_count}.png")
 
 
 
@@ -185,7 +185,7 @@ def plot_compare_algoithms(number_of_robots, f_count, range):
         plt.ylabel("pairs")
         i += 1
     plt.show()
-    # plt.savefig(f"/Users/lior.strichash/private/thesis/images/experiments/number_of_pairs_by_time_algorithms_range{vis_range}_robots{number_of_robots}_faulty{f_count}_{v['title']}.png",bbox_inches='tight')
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/number_of_pairs_by_time_algorithms_range{vis_range}_robots{number_of_robots}_faulty{f_count}_{v['title']}.png",bbox_inches='tight')
 
 
 def plot_compare_algoithms_reverse(number_of_robots, f_count, range):
@@ -203,11 +203,11 @@ def plot_compare_algoithms_reverse(number_of_robots, f_count, range):
     fig, axs = plt.subplots(nrows=1, ncols=2, sharex=True, sharey=True, layout="constrained")
     plot_time_distributions(plots,axs.flat)
     plt.show()
-    # plt.savefig(f"/Users/lior.strichash/private/thesis/images/experiments/pairing_time_algorithms_revese_range{vis_range}_robots{number_of_robots}_faulty{f_count}.png")
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_algorithms_revese_range{vis_range}_robots{number_of_robots}_faulty{f_count}.png")
 
 
 def plot_range_on_x(number_of_robots, f_count):
-    # base_dir = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/arena1.5/connected"
+    # base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/arena1.5/connected"
     # f_count=4
     nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
     f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
@@ -249,7 +249,7 @@ def plot_range_on_x(number_of_robots, f_count):
         i += 1
 
     plt.show()
-    # plt.savefig(f"/Users/lior.strichash/private/thesis/images/experiments/pairing_time_range_on_x_robots{number_of_robots}_faulty{f_count}_{table['title']}.png", bbox_inches='tight')
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_range_on_x_robots{number_of_robots}_faulty{f_count}_{table['title']}.png", bbox_inches='tight')
 
 def plot_compare_crash_timing():
     nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
@@ -266,7 +266,7 @@ def plot_compare_crash_timing():
     fig, axs = plt.subplots(nrows=2, ncols=2, layout="constrained", figsize=(10,6))
     plot_time_by_pairs_distributions(plots, axs.flat)
     plt.show()
-    # plt.savefig(f"/Users/lior.strichash/private/thesis/images/experiments/number_of_pairs_by_time_algorithms_range{vis_range}_robots{number_of_robots}_faulty{f_count}.png")
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/number_of_pairs_by_time_algorithms_range{vis_range}_robots{number_of_robots}_faulty{f_count}.png")
 
 
 def plot_delay_crash(vis_range):
@@ -309,7 +309,7 @@ def plot_delay_crash(vis_range):
     i += 1
 
     plt.show()
-    # plt.savefig(f"/Users/lior.strichash/private/thesis/images/experiments/crash_delay_numberpairs_robots{number_of_robots}_range{vis_range}_faulty{f_count}.png", bbox_inches='tight')
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/crash_delay_numberpairs_robots{number_of_robots}_range{vis_range}_faulty{f_count}.png", bbox_inches='tight')
 
 def plot_convergance_time(number_of_robots, f_count, vis_range):
     nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
@@ -331,7 +331,7 @@ def plot_convergance_time(number_of_robots, f_count, vis_range):
 if __name__ == "__main__":
     # base_dir = "/Users/lior.strichash/
     # private/robust-matching/automatic_experiments/results/virtual_forces_gazi"
-    # base_dir3 = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/repeated"
+    # base_dir3 = "/home/lior/workspace/robust-matching/automatic_experiments/results/repeated"
     number_of_robots = 15
     vis_range = 0.5
     f_count = 0
@@ -345,5 +345,5 @@ if __name__ == "__main__":
     # plot_compare_algoithms_reverse(number_of_robots, f_count=f_count, range=vis_range)
     # plot_compare_algoithms(number_of_robots, f_count, vis_range)
     # plot_convergance_time(number_of_robots, f_count, vis_range)
-    # stat_all(results_path = "/Users/lior.strichash/private/robust-matching/automatic_experiments/results/range_100_robots_20/virtual_forces_random_algo_matching_walk_away", from_cache=False)
+    # stat_all(results_path = "/home/lior/workspace/robust-matching/automatic_experiments/results/range_100_robots_20/virtual_forces_random_algo_matching_walk_away", from_cache=False)
     # stat_experiment_set(directory_path="automatic_experiments/results/range_100_robots_6/algo_matching_virtual_forces_walk_away/faulty3")

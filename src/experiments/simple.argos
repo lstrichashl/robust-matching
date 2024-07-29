@@ -13,7 +13,7 @@
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <robust_matching_controller id="non_faulty" library="/Users/lior.strichash/private/robust-matching/build/src/controllers/robust_matching/librobust_matching">
+    <robust_matching_controller id="non_faulty" library="/home/lior/workspace/robust-matching/build/src/controllers/robust_matching/librobust_matching">
       <actuators>
         <differential_steering implementation="default" />
         <epuck2_leds implementation="default" medium="leds" />
@@ -48,7 +48,7 @@
     </adverserial_opposite_direction_controller>
   </controllers>
 
-  <loop_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+  <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
                   label="matching_loop_functions">
         <params 
           is_commited="false"
@@ -107,7 +107,7 @@
   <!-- ****************** -->
   <visualization>
     <qt-opengl>
-      <user_functions library="/Users/lior.strichash/private/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+      <user_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
                   label="matching_qt_user_functions" />
       <camera>
         <placements>

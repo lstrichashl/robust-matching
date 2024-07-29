@@ -12,8 +12,8 @@ import uuid
 from tqdm import tqdm
 import time
 
-base_dir = '/Users/lior.strichash/private/robust-matching/automatic_experiments'
-template_file_path = '/Users/lior.strichash/private/robust-matching/automatic_experiments/templates/template.argos'
+base_dir = '/home/lior/workspace/robust-matching'
+template_file_path = f'{base_dir}/automatic_experiments/templates/template.argos'
 
 def work(tmp_file_path):
     process = subprocess.Popen(['argos3', '-c', tmp_file_path], stdout=subprocess.DEVNULL)
@@ -22,12 +22,12 @@ def work(tmp_file_path):
     os.remove(tmp_file_path)
 
 def build():
-    os.system("cd ~/private/robust-matching/build && make")
+    os.system(f'cd {base_dir}/build && make')
 
 def create_all_files(non_faulty_algorithm:NonFaultyAlgorithm, faulty_algorithm:FaultyAlgorithm, run_tag: str, n_robots: int = 20, number_of_test_runs: int = 50):
     file_paths = []
     id = uuid.uuid4()
-    experiments_folder = f'{base_dir}/results/{run_tag}/{non_faulty_algorithm.name}_{faulty_algorithm.name}'
+    experiments_folder = f'{base_dir}/automatic_experiments/results/{run_tag}/{non_faulty_algorithm.name}_{faulty_algorithm.name}'
     for random_seed in range(1,number_of_test_runs+1):
         for faulty_count in range(0,1):
             experiment = Experiment(
@@ -100,8 +100,8 @@ def main():
             file_pathes += create_all_files(number_of_test_runs=50, n_robots=n_robots,non_faulty_algorithm=nf_algo, faulty_algorithm=f_algo, run_tag=run_tag)
         
         ts_start = time.time()
-        # file_pathes = [0,"/Users/lior.strichash/private/robust-matching/automatic_experiments/results/unlimited_visibility/repeated_virtual_forces_walk_away/faulty0/random_seed1.argos",0]
-        # ["/Users/lior.strichash/private/robust-matching/automatic_experiments/results/range_100_robots_6/algo_matching_virtual_forces_walk_away/faulty3/random_seed31.argos"]
+        # file_pathes = [0,"/home/lior/workspace/robust-matching/automatic_experiments/results/unlimited_visibility/repeated_virtual_forces_walk_away/faulty0/random_seed1.argos",0]
+        # ["/home/lior/workspace/robust-matching/automatic_experiments/results/range_100_robots_6/algo_matching_virtual_forces_walk_away/faulty3/random_seed31.argos"]
         for tmp_file_path in file_pathes:
             tp.apply_async(work, (tmp_file_path,))
 
