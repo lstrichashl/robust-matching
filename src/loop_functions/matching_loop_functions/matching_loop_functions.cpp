@@ -63,6 +63,37 @@ CVector2 ToMateVector(CEntity* robot1, CEntity* robot2) {
 }
 
 
+Graph* GenerateGraph(vector<CEntity*> robots, double range){
+    std::vector<CVector2> positions;
+    std::vector<std::pair<int, CQuaternion>> orientations;
+    int number_of_robots = robots.size();
+    for (unsigned i=0; i<number_of_robots; i++){
+        CVector2 position(GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Position.GetX(),
+                GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Position.GetY());
+        positions.push_back(position);
+        orientations.push_back(std::make_pair(i, GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Orientation));
+    }
+    Graph* G = new Graph(number_of_robots);
+    for(unsigned i=0; i<number_of_robots; i++){
+        for(unsigned j=0;j<number_of_robots;j++){
+            if(i != j) {
+                CRadians cZAngle1 = GetZAngleOrientation(orientations[i].second);
+                CRadians cZAngle2 = GetZAngleOrientation(orientations[j].second);
+                CVector2 distance_vector1 = (positions[i] - positions[j]);
+
+                Real angle_distance = 1 - (abs(cZAngle1.GetValue() - cZAngle2.GetValue()) / 3.141592);
+                if(distance_vector1.Length() < range){
+                    G->AddEdge(i, j, distance_vector1.Length());
+                }
+                // cost[G.GetEdgeIndex(i,j)] += + 0.00605 * angle_distance;
+                // cost[G.GetEdgeIndex(i,j)] += + 0.01 * angle_distance;
+            }
+        }
+    }
+    AddHopToGraph(G, positions);
+    return G;
+}
+
 void CMatchingLoopFunctions::PreStep(){
     CBasicLoopFunctions::PreStep();
     vector<int> robots_in_matching;
@@ -70,7 +101,8 @@ void CMatchingLoopFunctions::PreStep(){
     try{
         UInt32 time = GetSpace().GetSimulationClock();
         if((m_matching.size() == 0 || (time % m_repeat_interval == 0 && !m_isCommited))) {
-            MatchingResult result = GetMatchingResult(m_robots, m_range);
+            Graph* g = GenerateGraph(m_robots, m_range);
+            MatchingResult result = GetMatchingResult(g, m_robots, m_range);
             m_matching = result._matching;
             m_robotGraph = result._graph;
             m_robots_in_matching = result._robots;

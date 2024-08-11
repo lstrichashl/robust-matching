@@ -5,9 +5,7 @@ add_library(virtual_forces SHARED virtual_forces_bot.h
                                   keep_distance.h
                                   keep_distance.cpp
                                   virtual_forces_random.h
-                                  virtual_forces_random.cpp
-                                  tit_for_tat.h
-                                  tit_for_tat.cpp)
+                                  virtual_forces_random.cpp)
 target_link_libraries(virtual_forces
   abstract_controllers
   argos3core_simulator

@@ -56,7 +56,8 @@ class Clusters{
 };
 
 CRadians GetZAngleOrientation(CQuaternion orientation);
-MatchingResult GetMatchingResult(vector<CEntity*> robots, double range);
+MatchingResult GetMatchingResult(Graph* G, vector<CEntity*> robots, double range);
+void AddHopToGraph(Graph* g, vector<CVector2>& positions);
 // MatchingResult GetBestMatching(vector<CEPuck2Entity*> robots, double range);
 list<int> SolveMinimumCostPerfectMatching(Graph& graph);
 

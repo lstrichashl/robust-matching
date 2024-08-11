@@ -6,23 +6,23 @@ CRadians GetZAngleOrientation(CQuaternion orientation) {
    return cZAngle;
 }
 
-void add_edge(int node1, int node2, Graph& g, vector<CVector2>& positions){
-    if(!g.AdjMat()[node1][node2]){
+void add_edge(int node1, int node2, Graph* g, vector<CVector2>& positions){
+    if(!g->AdjMat()[node1][node2]){
         CVector2 distance_vector1 = (positions[node1] - positions[node2]);
-        g.AddEdge(node1, node2, distance_vector1.Length());
+        g->AddEdge(node1, node2, distance_vector1.Length());
     }
 }
 
-void AddHopToGraph(Graph& g, vector<CVector2>& positions){
-	int init_edges_num = g.GetNumEdges();
+void AddHopToGraph(Graph* g, vector<CVector2>& positions){
+	int init_edges_num = g->GetNumEdges();
     for(unsigned i = 0; i < init_edges_num; i++){
-        pair<int, int> first_edge = g.GetEdge(i);
+        pair<int, int> first_edge = g->GetEdge(i);
 		
         for(unsigned j = 0; j < init_edges_num; j++){
             if(i == j){
                 continue;
             }
-            pair<int, int> second_edge = g.GetEdge(j);
+            pair<int, int> second_edge = g->GetEdge(j);
             if(first_edge.first == second_edge.first && first_edge.second < second_edge.second){
                 add_edge(first_edge.second, second_edge.second, g, positions);
             }
@@ -151,47 +151,20 @@ list<int> SolveMinimumCostPerfectMatching(Graph& graph){
 }
 
 
-MatchingResult GetMatchingResult(vector<CEntity*> robots, double range) {
-    std::vector<CVector2> positions;
-    std::vector<std::pair<int, CQuaternion>> orientations;
-    int number_of_robots = robots.size();
-    for (unsigned i=0; i<number_of_robots; i++){
-        CVector2 position(GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Position.GetX(),
-                GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Position.GetY());
-        positions.push_back(position);
-        orientations.push_back(std::make_pair(i, GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Orientation));
-    }
-    Graph G(number_of_robots);
-    for(unsigned i=0; i<number_of_robots; i++){
-        for(unsigned j=0;j<number_of_robots;j++){
-            if(i != j) {
-                CRadians cZAngle1 = GetZAngleOrientation(orientations[i].second);
-                CRadians cZAngle2 = GetZAngleOrientation(orientations[j].second);
-                CVector2 distance_vector1 = (positions[i] - positions[j]);
-
-                Real angle_distance = 1 - (abs(cZAngle1.GetValue() - cZAngle2.GetValue()) / 3.141592);
-                if(distance_vector1.Length() < range){
-                    G.AddEdge(i, j, distance_vector1.Length());
-                }
-                // cost[G.GetEdgeIndex(i,j)] += + 0.00605 * angle_distance;
-                // cost[G.GetEdgeIndex(i,j)] += + 0.01 * angle_distance;
-            }
-        }
-    }
-    AddHopToGraph(G, positions);
-    list<int> matching = SolveMinimumCostPerfectMatching(G);
+MatchingResult GetMatchingResult(Graph* G, vector<CEntity*> robots, double range) {
+    list<int> matching = SolveMinimumCostPerfectMatching(*G);
     vector<int> v_matching;
     vector<CEntity*> robots_in_matching;
     for(list<int>::iterator it = matching.begin(); it != matching.end(); it++){
-		pair<int, int> e = G.GetEdge( *it );
-		double c = G.GetCost(e.first, e.second);
+		pair<int, int> e = G->GetEdge( *it );
+		double c = G->GetCost(e.first, e.second);
 
 		// cout << e.first << " " << e.second << " " << c << endl;
         v_matching.push_back(*it);
         robots_in_matching.push_back(robots[e.first]);
         robots_in_matching.push_back(robots[e.second]);
 	}
-    MatchingResult result = MatchingResult(G, v_matching, robots_in_matching);
+    MatchingResult result = MatchingResult(*G, v_matching, robots_in_matching);
     return result;
 }
 
