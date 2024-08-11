@@ -26,6 +26,8 @@ void BaseConrtoller::Init(TConfigurationNode& t_node){
 void BaseConrtoller::Reset() {
    m_eState = STATE_ALONE;
    m_pcRABAct->SetData(0, STATE_ALONE);
+   int id = stoi(GetId());
+   m_pcRABAct->SetData(1, id);
    m_pcLedAct->SetAllRGBColors(CColor::GREEN);
    m_heading = CVector2::ZERO;
    random_destination = CVector2::ZERO;
@@ -39,6 +41,8 @@ void BaseConrtoller::ControlStep(){
         m_eState = STATE_ALONE;
     }
     m_pcRABAct->SetData(0, m_eState);
+   int id = stoi(GetId());
+    m_pcRABAct->SetData(1, id);
     if(m_eState == STATE_PAIRED){
       m_heading = CVector2::ZERO;
     }
@@ -49,6 +53,9 @@ void BaseConrtoller::ControlStep(){
    }
    //  cout << m_heading << endl;
    SetWheelSpeedsFromVector(m_heading);
+   CRadians cHeadingAngle = m_heading.Angle().SignedNormalize();
+   CDegrees degrees = CDegrees(cHeadingAngle.GetValue() * cHeadingAngle.RADIANS_TO_DEGREES).SignedNormalize();
+   m_pcRABAct->SetData(2, (int)degrees.GetValue());
 }
 
 

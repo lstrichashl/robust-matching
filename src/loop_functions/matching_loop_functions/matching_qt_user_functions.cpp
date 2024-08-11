@@ -16,12 +16,12 @@ void CMatchingQTUserFunctions::DrawInWorld() {
    for(int i = 0; i < matching.size(); i++)
 	{
 		pair<int, int> edge = G.GetEdge(matching[i]);
-      CEPuck2Entity* cFootBot1 = m_matchingLoopFunctions.GetRobots().at(edge.first);
-      CEPuck2Entity* cFootBot2 = m_matchingLoopFunctions.GetRobots().at(edge.second);
+      CEntity* cFootBot1 = m_matchingLoopFunctions.GetRobots().at(edge.first);
+      CEntity* cFootBot2 = m_matchingLoopFunctions.GetRobots().at(edge.second);
 
       DrawRay(CRay3(
-         cFootBot1->GetEmbodiedEntity().GetOriginAnchor().Position,
-         cFootBot2->GetEmbodiedEntity().GetOriginAnchor().Position
+         GetEmbodiedEntity3(cFootBot1)->GetOriginAnchor().Position,
+         GetEmbodiedEntity3(cFootBot1)->GetOriginAnchor().Position
       ));
    }
 }

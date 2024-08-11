@@ -50,7 +50,7 @@ void CBasicLoopFunctions::write_all_logs(vector<string> logs, string params_stri
     ofstream os(m_log_file_path);
     std::string robot_types = "[";
     for (unsigned i=0; i<m_robots.size(); i++){
-        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
         robot_types += "{\"robot_id\":\""+to_string(i)+"\",\"type\":\""+cController1.GetType()+"\"},";
     }
     robot_types.pop_back();
@@ -75,23 +75,29 @@ void CBasicLoopFunctions::write_all_logs(vector<string> logs, string params_stri
     os.close();
 }
 
+CVector2 GetPosition(CEntity* robot) {
+    CEmbodiedEntity* embodiedEntity = GetEmbodiedEntity3(robot);
+    CVector2 position(embodiedEntity->GetOriginAnchor().Position.GetX(),
+            embodiedEntity->GetOriginAnchor().Position.GetY());
+    return position;
+}
 
-vector<CVector2> CBasicLoopFunctions::GetPositions(vector<CEPuck2Entity*> robots){
+
+vector<CVector2> CBasicLoopFunctions::GetPositions(vector<CEntity*> robots){
     vector<CVector2> positions;
     int number_of_robots = robots.size();
     for (unsigned i=0; i<number_of_robots; i++){
-        CVector2 position(robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-                robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
+        CVector2 position = GetPosition(robots[i]);
         positions.push_back(position);
     }
     return positions;
 }
 
-vector<CEPuck2Entity*> CBasicLoopFunctions::GetNFRobots(){
+vector<CEntity*> CBasicLoopFunctions::GetNFRobots(){
     // if(m_nf_robots.size() == 0){
-    m_nf_robots = vector<CEPuck2Entity*>();
+    m_nf_robots = vector<CEntity*>();
         for(unsigned i = 0; i < m_robots.size(); i++){
-            BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
+            BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
             if(cController1.GetType() == "non_faulty"){
                 m_nf_robots.push_back(m_robots[i]);
             }
@@ -102,20 +108,18 @@ vector<CEPuck2Entity*> CBasicLoopFunctions::GetNFRobots(){
 
 
 
-Clusters CBasicLoopFunctions::GetRobotPairs(vector<CEPuck2Entity*> robots) {
+Clusters CBasicLoopFunctions::GetRobotPairs(vector<CEntity*> robots) {
     vector<CVector2> positions = GetPositions(robots);
     vector<vector<int>> possible_robots_in_aggregarion_radios;
     Clusters robot_pairs;
     for (unsigned i = 0; i < robots.size(); i++){
         vector<int> robots_in_radios;
-        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robots[i]->GetControllableEntity().GetController());
         for (unsigned j = 0; j < positions.size(); j++){
-            BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robots[j]->GetControllableEntity().GetController());
             if(i == j) {
                 continue;
             }
             double distance = (positions[i] - positions[j]).Length();
-            if(distance <= cController2.PAIRING_THRESHOLD) {
+            if(distance <= 0.07) {
                 robots_in_radios.push_back(j);
             }
         }
@@ -137,12 +141,14 @@ Clusters CBasicLoopFunctions::GetRobotPairs(vector<CEPuck2Entity*> robots) {
 
 void CBasicLoopFunctions::PreStep(){
     int time = GetSpace().GetSimulationClock();
-    for(CEPuck2Entity* robot : m_robots){
-        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robot->GetControllableEntity().GetController());
+    for(CEntity* robot : m_robots){
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot)->GetController());
         cController1.m_time = time;
-        cController1.m_position = CVector2(robot->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-                                            robot->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
-        cController1.m_orientation = robot->GetEmbodiedEntity().GetOriginAnchor().Orientation;
+        CEmbodiedEntity* pcEmbodiedEntity = GetEmbodiedEntity3(robot);
+        CVector2 position(pcEmbodiedEntity->GetOriginAnchor().Position.GetX(),
+            pcEmbodiedEntity->GetOriginAnchor().Position.GetY());
+        cController1.m_position = position;
+        cController1.m_orientation = pcEmbodiedEntity->GetOriginAnchor().Orientation;
     }
 
     if(time == 1){
@@ -156,7 +162,7 @@ void CBasicLoopFunctions::PreStep(){
         add_log();
     }
     for(unsigned i = 0; i < m_robots.size(); i++){
-        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
         if(cController1.m_crash_time < time){
             cController1.m_is_crash = true;
         }
@@ -170,40 +176,15 @@ void CBasicLoopFunctions::PostStep(){
     // }
 }
 
-void CBasicLoopFunctions::remove_robots(){
-    // for(unsigned i = m_robots.size()-1; i < m_robots.size(); i++){
-    //     RemoveEntity(*m_robots[i]);
-    // }
-    // cout << m_robots[0]->GetControllableEntity().GetId() << endl;
-    // vector<CEPuck2Entity*>robots;
-    // CSpace::TMapPerType& m_cRobots = GetSpace().GetEntitiesByType("e-puck2");
-    // for(CSpace::TMapPerType::iterator it = m_cRobots.begin(); it != m_cRobots.end(); ++it) {
-    //     CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
-    //     robots.push_back(robot);
-    // }
-    for(unsigned i = 0 ; i < 6; i++){
-        RemoveEntity(*m_robots[i]);
-    }
-    // PlaceCluster()
-    // m_robots.erase(m_robots.begin(), m_robots.begin()+6);
-    m_robots = vector<CEPuck2Entity*>();
-    CSpace::TMapPerType& m_cRobots = GetSpace().GetEntitiesByType("e-puck2");
-    for(CSpace::TMapPerType::iterator it = m_cRobots.begin(); it != m_cRobots.end(); ++it) {
-        CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
-        m_robots.push_back(robot);
-    }
-    // RemoveEntity(*robots[1]);
-}
-
 bool CBasicLoopFunctions::IsExperimentFinished() {
     if(GetSpace().GetSimulationClock() < 20){
         return false;
     }
     bool all_robots_are_paired = true;
-    vector<CEPuck2Entity*> nf_robots = GetNFRobots();
+    vector<CEntity*> nf_robots = GetNFRobots();
     int alone_robots_away = 0, alone_robots = 0;
     for(unsigned i = 0; i < nf_robots.size(); i++){
-        BaseConrtoller& cController = dynamic_cast<BaseConrtoller&>(nf_robots[i]->GetControllableEntity().GetController());
+        BaseConrtoller& cController = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(nf_robots[i])->GetController());
         if(cController.GetEState() == STATE_ALONE){
             all_robots_are_paired = false;
             alone_robots++;
@@ -260,23 +241,6 @@ CPositionalEntity* GetPositionalEntity(CEntity* pc_entity) {
     return nullptr;
 }
 
-CEmbodiedEntity* GetEmbodiedEntity(CEntity* pc_entity) {
-    /* Is the entity embodied itself? */
-    auto* pcEmbodiedTest = dynamic_cast<CEmbodiedEntity*>(pc_entity);
-    if(pcEmbodiedTest != nullptr) {
-        return pcEmbodiedTest;
-    }
-    /* Is the entity composable with an embodied component? */
-    auto* pcComposableTest = dynamic_cast<CComposableEntity*>(pc_entity);
-    if(pcComposableTest != nullptr) {
-        if(pcComposableTest->HasComponent("body")) {
-        return &(pcComposableTest->GetComponent<CEmbodiedEntity>("body"));
-        }
-    }
-    /* No embodied entity found */
-    return nullptr;
-}
-
 CVector3 GetRandomPosition(CRandom::CRNG* pcRNG, Real robot_range, const vector<CVector2>& all_positions, const CRange<Real>& arenaRange){
     CVector3 pos;
     do{
@@ -317,7 +281,7 @@ void CBasicLoopFunctions::RemoveAll(vector<CEntity*> entites){
     }
 }
 
-void CBasicLoopFunctions::PlaceCluster(vector<DistributeConfig> configs,Real robot_range, CRange<Real> arena_range, int base_id,vector<CEPuck2Entity*> seed_entites){
+void CBasicLoopFunctions::PlaceCluster(vector<DistributeConfig> configs,Real robot_range, CRange<Real> arena_range, int base_id,vector<CEntity*> seed_entites){
     vector<CEntity*> spawn_entites, entites;
     cout << "spawn en" << endl;
     UInt32 unMaxTrials = 100;
@@ -353,7 +317,7 @@ void CBasicLoopFunctions::PlaceCluster(vector<DistributeConfig> configs,Real rob
                     SetNodeAttribute(tBodyNode, "orientation", orientation);
                     p->Init(tEntityTree);
                     AddEntity(*p);
-                    CEmbodiedEntity* pcEmbodiedEntity = GetEmbodiedEntity(p);
+                    CEmbodiedEntity* pcEmbodiedEntity = GetEmbodiedEntity3(p);
                     if(pcEmbodiedEntity->IsCollidingWithSomething()) {
                         bRetry = true;
                         RemoveEntity(*p);

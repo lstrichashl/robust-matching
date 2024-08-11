@@ -151,15 +151,15 @@ list<int> SolveMinimumCostPerfectMatching(Graph& graph){
 }
 
 
-MatchingResult GetMatchingResult(vector<CEPuck2Entity*> robots, double range) {
+MatchingResult GetMatchingResult(vector<CEntity*> robots, double range) {
     std::vector<CVector2> positions;
     std::vector<std::pair<int, CQuaternion>> orientations;
     int number_of_robots = robots.size();
     for (unsigned i=0; i<number_of_robots; i++){
-        CVector2 position(robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-                robots[i]->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
+        CVector2 position(GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Position.GetX(),
+                GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Position.GetY());
         positions.push_back(position);
-        orientations.push_back(std::make_pair(i, robots[i]->GetEmbodiedEntity().GetOriginAnchor().Orientation));
+        orientations.push_back(std::make_pair(i, GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Orientation));
     }
     Graph G(number_of_robots);
     for(unsigned i=0; i<number_of_robots; i++){
@@ -181,7 +181,7 @@ MatchingResult GetMatchingResult(vector<CEPuck2Entity*> robots, double range) {
     AddHopToGraph(G, positions);
     list<int> matching = SolveMinimumCostPerfectMatching(G);
     vector<int> v_matching;
-    vector<CEPuck2Entity*> robots_in_matching;
+    vector<CEntity*> robots_in_matching;
     for(list<int>::iterator it = matching.begin(); it != matching.end(); it++){
 		pair<int, int> e = G.GetEdge( *it );
 		double c = G.GetCost(e.first, e.second);
@@ -195,30 +195,39 @@ MatchingResult GetMatchingResult(vector<CEPuck2Entity*> robots, double range) {
     return result;
 }
 
-// MatchingResult GetBestMatching(vector<CEPuck2Entity*> robots, double range){
-//     if(robots.size() % 2 == 0){
-//         return GetMatchingResult(robots, range);
-//     }
-//     vector<CEPuck2Entity*> robots_clone = robots;
-//     robots_clone.erase(robots_clone.begin());
-//     MatchingResult a = GetMatchingResult(robots_clone, range);
-//     MatchingResult* b = &a;
-//     unsigned j = 0;
-//     for(unsigned i = 1; i < robots.size(); i++) {
-//         robots_clone = robots;
-//         robots_clone.erase(std::next(robots_clone.begin(), i));
-//         MatchingResult result = GetMatchingResult(robots_clone, range);
-//         if(result._solution.second < b->_solution.second) {
-//             b = &result;
-//             j = i;
-//         }
-//     }
-//     robots_clone = robots;
-//     robots_clone.erase(robots_clone.begin()+j);
-//     MatchingResult bestMatchingResult = GetMatchingResult(robots_clone, range);
-//     return bestMatchingResult;
-// }
+CEmbodiedEntity* GetEmbodiedEntity3(CEntity* pc_entity) {
+    /* Is the entity embodied itself? */
+    auto* pcEmbodiedTest = dynamic_cast<CEmbodiedEntity*>(pc_entity);
+    if(pcEmbodiedTest != nullptr) {
+        return pcEmbodiedTest;
+    }
+    /* Is the entity composable with an embodied component? */
+    auto* pcComposableTest = dynamic_cast<CComposableEntity*>(pc_entity);
+    if(pcComposableTest != nullptr) {
+        if(pcComposableTest->HasComponent("body")) {
+        return &(pcComposableTest->GetComponent<CEmbodiedEntity>("body"));
+        }
+    }
+    /* No embodied entity found */
+    return nullptr;
+}
 
+CControllableEntity* GetControllableEntity3(CEntity* pc_entity) {
+    /* Is the entity embodied itself? */
+    auto* pcControllableTest = dynamic_cast<CControllableEntity*>(pc_entity);
+    if(pcControllableTest != nullptr) {
+        return pcControllableTest;
+    }
+    /* Is the entity composable with an embodied component? */
+    auto* pcComposableTest = dynamic_cast<CComposableEntity*>(pc_entity);
+    if(pcComposableTest != nullptr) {
+        if(pcComposableTest->HasComponent("controller")) {
+        return &(pcComposableTest->GetComponent<CControllableEntity>("controller"));
+        }
+    }
+    /* No embodied entity found */
+    return nullptr;
+}
 
 
 

@@ -46,17 +46,17 @@ void CMatchingLoopFunctions::Destroy(){
     write_all_logs(m_logs, param_string);
 }
 
-CRadians GetZAngleOrientation(CEPuck2Entity* robot1) {
+CRadians GetZAngleOrientation(CEntity* robot1) {
    CRadians cZAngle, cYAngle, cXAngle;
-   robot1->GetEmbodiedEntity().GetOriginAnchor().Orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
+   GetEmbodiedEntity3(robot1)->GetOriginAnchor().Orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
    return cZAngle;
 }
 
-CVector2 ToMateVector(CEPuck2Entity* robot1, CEPuck2Entity* robot2) {
-    CVector2 self_position(robot1->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-                            robot1->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
-    CVector2 mate_position(robot2->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-                            robot2->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
+CVector2 ToMateVector(CEntity* robot1, CEntity* robot2) {
+    CVector2 self_position(GetEmbodiedEntity3(robot1)->GetOriginAnchor().Position.GetX(),
+                            GetEmbodiedEntity3(robot1)->GetOriginAnchor().Position.GetY());
+    CVector2 mate_position(GetEmbodiedEntity3(robot2)->GetOriginAnchor().Position.GetX(),
+                            GetEmbodiedEntity3(robot2)->GetOriginAnchor().Position.GetY());
     CVector2 to_mate = mate_position - self_position;
     CRadians cZAngle = GetZAngleOrientation(robot1);
     return to_mate.Rotate(-cZAngle).Normalize();
@@ -66,7 +66,7 @@ CVector2 ToMateVector(CEPuck2Entity* robot1, CEPuck2Entity* robot2) {
 void CMatchingLoopFunctions::PreStep(){
     CBasicLoopFunctions::PreStep();
     vector<int> robots_in_matching;
-    vector<CEPuck2Entity*> robots_not_in_matching;
+    vector<CEntity*> robots_not_in_matching;
     try{
         UInt32 time = GetSpace().GetSimulationClock();
         if((m_matching.size() == 0 || (time % m_repeat_interval == 0 && !m_isCommited))) {
@@ -79,16 +79,16 @@ void CMatchingLoopFunctions::PreStep(){
         vector<int> nf_matchig;
         vector<int> nf_half_matchig;
         for(unsigned i = 0; i < m_robots.size(); i++) {
-            BaseConrtoller& cController = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
+            BaseConrtoller& cController = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
             cController.m_heading = CVector2::ZERO;
         }
         for(vector<int>::iterator it = matching.begin(); it != matching.end(); it++)
         {
             pair<int, int> edge = m_robotGraph.GetEdge( *it );
-            CEPuck2Entity* robot1 = m_robots[edge.first];
-            CEPuck2Entity* robot2 = m_robots[edge.second];
-            BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(robot1->GetControllableEntity().GetController());
-            BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(robot2->GetControllableEntity().GetController());
+            CEntity* robot1 = m_robots[edge.first];
+            CEntity* robot2 = m_robots[edge.second];
+            BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot1)->GetController());
+            BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot2)->GetController());
             cController1.m_heading = ToMateVector(robot1, robot2);
             cController2.m_heading = ToMateVector(robot2, robot1);
             robots_in_matching.push_back(edge.first);
@@ -96,7 +96,7 @@ void CMatchingLoopFunctions::PreStep(){
         }
         for(int i = 0; i < m_robots.size(); i++){
             if(find(robots_in_matching.begin(), robots_in_matching.end(), i) == robots_in_matching.end()){
-                BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
+                BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
                 cController1.m_heading = cController1.RandomWalk();
             }
         }

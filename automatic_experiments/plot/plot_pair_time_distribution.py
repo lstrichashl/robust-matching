@@ -1,7 +1,7 @@
 
 import matplotlib.pyplot as plt
 from itertools import product
-from plot import stat_experiment_set, algo_to_label, get_std_mean
+from plot import stat_experiment_set, algo_to_label, get_std_mean, key_to_color
 import numpy as np
 
 base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/fixed_velocity_random_orientation_randomCommitedMovement/connected"
@@ -150,40 +150,37 @@ def plot_number_of_robots_on_x(range, f_percent):
 
 
 
-def plot_compare_algoithms(number_of_robots, f_count, range):
+def plot_compare_algoithms(number_of_robots, f_count, vis_range):
     nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
     f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
     plots = [
         {
             "title": algo_to_label(f_algorithm),
             "data": [{
-                "dir": f"{base_dir}/range_{range}_robots_{number_of_robots}/{nf_algorithm}_{f_algorithm}/faulty{f_count}",
+                "dir": f"{base_dir}/range_{vis_range}_robots_{number_of_robots}/{nf_algorithm}_{f_algorithm}/faulty{f_count}",
                 "label": algo_to_label(nf_algorithm)
-            } for nf_algorithm in nf_algorithms ] 
+            } for nf_algorithm in nf_algorithms if not(nf_algorithm == "virtual_forces_random" and f_algorithm == "algo_matching_walk_away")] 
         } for f_algorithm in f_algorithms
     ]
-    # fig, axs = plt.subplots(nrows=2, ncols=2, layout="constrained", figsize=(10,6))
-    # plot_time_by_pairs_distributions(plots, axs.flat)
-    # plt.show()
 
-    i = 0
     plots = [plots[0]]
+    print(plots[0]["title"])
     for v in plots:
         for result in v["data"]:
-            _,_,pairs_times, times_pairs = stat_experiment_set(result["dir"], cuttime=500)
+            _,_,pairs_times, times_pairs = stat_experiment_set(result["dir"], cuttime=1500)
             means,stds = {},{}
-            for time, values in pairs_times.items():
+            for time, values in times_pairs.items():
                 means[time] = values['mean']
                 stds[time] = values['std']
-            mv = list(means.values())
+            # mv = list(means.values())
             # assert all(mv[i+1] - mv[i] > -0.01 for i in range(len(mv)-1)), f"element {i}"
-            plt.errorbar(list(means.keys()), list(means.values()), list(stds.values()), fmt=".-", label=result["label"], capsize=5)
+            plt.errorbar(list(means.keys()), list(means.values()), list(stds.values()), fmt=".-", label=result["label"], capsize=5,color=key_to_color(result["label"]))
         plt.grid(linestyle = ':')
         plt.legend(fontsize=7)
         # plt.set_title(v["title"])
         plt.xlabel("time")
         plt.ylabel("pairs")
-        i += 1
+        plt.yticks(range(0,11))
     plt.show()
     # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/number_of_pairs_by_time_algorithms_range{vis_range}_robots{number_of_robots}_faulty{f_count}_{v['title']}.png",bbox_inches='tight')
 
@@ -212,7 +209,6 @@ def plot_range_on_x(number_of_robots, f_count):
     nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
     f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
     ranges = [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
-    ranges = [0.5]
     # ranges=[1,1.5,2]
     # faults = [1,3,5,8]
     tables = [
@@ -223,7 +219,7 @@ def plot_range_on_x(number_of_robots, f_count):
                     "dir": f"{base_dir}/range_{visrange}_robots_{number_of_robots}/{nf}_{f}/faulty{f_count}",
                     "x": visrange if visrange != 100 else 1
                 } for visrange in ranges]
-            } for nf in nf_algorithms],
+            } for nf in nf_algorithms  if not(nf == "virtual_forces_random" and f == "algo_matching_walk_away")],
             "title": algo_to_label(f)
         } for f in f_algorithms
     ]
@@ -239,17 +235,17 @@ def plot_range_on_x(number_of_robots, f_count):
                 number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
                 means[result["x"]] = number_of_pairs['mean']
                 stds[result["x"]] = number_of_pairs['std']
-            plt.errorbar(list(means.keys()), list(means.values()), list(stds.values()), label=v["label"],fmt=".-", capsize=5)
+            plt.errorbar(list(means.keys()), list(means.values()), list(stds.values()), label=v["label"],fmt=".-", capsize=5,color=key_to_color(v["label"]))
         plt.grid(linestyle = ':')
         plt.legend(fontsize=7)
         # plt.title(table["title"])
         plt.xlabel("range")
         plt.ylabel("time max pairing/diameter")
-        # axss[i].set_yticks(range(11))
+        plt.yticks(range(100,1000,100))
         i += 1
 
-    plt.show()
-    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_range_on_x_robots{number_of_robots}_faulty{f_count}_{table['title']}.png", bbox_inches='tight')
+    # plt.show()
+    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_range_on_x_robots{number_of_robots}_faulty{f_count}_{table['title']}.png", bbox_inches='tight')
 
 def plot_compare_crash_timing():
     nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
@@ -311,28 +307,58 @@ def plot_delay_crash(vis_range):
     plt.show()
     # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/crash_delay_numberpairs_robots{number_of_robots}_range{vis_range}_faulty{f_count}.png", bbox_inches='tight')
 
-def plot_convergance_time(number_of_robots, f_count, vis_range):
-    nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
-    f_algorithm = "crash"
-    plots = [{
-                "dir": f"{base_dir}/range_{vis_range}_robots_{number_of_robots}/{nf_algorithm}_{f_algorithm}/faulty{f_count}",
-                "label": algo_to_label(nf_algorithm)
-            } for nf_algorithm in nf_algorithms 
-        ] 
-    plt.figure(figsize=(6,4))
 
-    for result in plots:
-        means,stds = {},{}
-        arr_time_to_pairing,arr_numer_of_pairs,pairs_time,_ = stat_experiment_set(result["dir"], cuttime=1500, normalize_by_diameter=True)
-        time = get_std_mean(np.array(arr_time_to_pairing))
-        number_of_pairs = get_std_mean(np.array(arr_numer_of_pairs))
-        print(result["label"],time["mean"], time["std"], number_of_pairs["mean"], number_of_pairs["std"])
+def plot_faults_on_x(number_of_robots, visrange):
+    # base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/arena1.5/connected"
+    # f_count=4
+    nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
+    f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
+    # ranges=[1,1.5,2]
+    faults = range(0,11,1)
+    tables = [
+        {
+            "plots":[{
+                "label": algo_to_label(nf),
+                "data": [{
+                    "dir": f"{base_dir}/range_{visrange}_robots_{number_of_robots}/{nf}_{f}/faulty{f_count}",
+                    "x": f_count
+                } for f_count in faults]
+            } for nf in nf_algorithms  if not(nf == "virtual_forces_random" and f == "algo_matching_walk_away")],
+            "title": algo_to_label(f)
+        } for f in f_algorithms
+    ]
+    tables = [tables[3]]
+    i = 0
+
+    plt.figure(figsize=(4,3))
+    for table in tables:
+        for v in table["plots"]:
+            means,stds = {},{}
+            for result in v["data"]:
+                arr_time_to_pairing,_,_,_ = stat_experiment_set(result["dir"], cuttime=1500)
+                number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+                means[result["x"]] = number_of_pairs['mean']
+                stds[result["x"]] = number_of_pairs['std']
+            plt.errorbar(list(means.keys()), list(means.values()), list(stds.values()), label=v["label"],fmt=".-", capsize=5,color=key_to_color(v["label"]))
+        plt.grid(linestyle = ':')
+        plt.legend(fontsize=7)
+        # plt.title(table["title"])
+        plt.xlabel("faults")
+        plt.ylabel("time max pairing/diameter")
+        plt.yticks(range(100,1000,100))
+        i += 1
+
+    # plt.show()
+    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_faults_on_x_robots{number_of_robots}_faulty{f_count}_{table['title']}.png", bbox_inches='tight')
+
+
+
 
 if __name__ == "__main__":
     # base_dir = "/Users/lior.strichash/
     # private/robust-matching/automatic_experiments/results/virtual_forces_gazi"
     # base_dir3 = "/home/lior/workspace/robust-matching/automatic_experiments/results/repeated"
-    number_of_robots = 15
+    number_of_robots = 20
     vis_range = 0.5
     f_count = 0
     run_tag = f"range_{vis_range}_robots_{number_of_robots}"
@@ -340,10 +366,13 @@ if __name__ == "__main__":
     # plot_number_of_robots_on_x(range=vis_range, f_percent=0.2)
     # plot_compare_number_of_robots(vis_range, f_percent=0.2)
     # plot_compare_range(number_of_robots, f_count)
-    # plot_range_on_x(number_of_robots,f_count)
-    plot_delay_crash(vis_range)
+    # plot_delay_crash(vis_range)
     # plot_compare_algoithms_reverse(number_of_robots, f_count=f_count, range=vis_range)
-    # plot_compare_algoithms(number_of_robots, f_count, vis_range)
     # plot_convergance_time(number_of_robots, f_count, vis_range)
     # stat_all(results_path = "/home/lior/workspace/robust-matching/automatic_experiments/results/range_100_robots_20/virtual_forces_random_algo_matching_walk_away", from_cache=False)
     # stat_experiment_set(directory_path="automatic_experiments/results/range_100_robots_6/algo_matching_virtual_forces_walk_away/faulty3")
+
+
+    plot_compare_algoithms(number_of_robots, f_count, vis_range)
+    # plot_range_on_x(number_of_robots,f_count)
+    # plot_faults_on_x(number_of_robots, vis_range)

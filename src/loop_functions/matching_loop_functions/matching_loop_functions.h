@@ -26,7 +26,7 @@ public:
    virtual vector<int> GetMatching(){
       return m_matching;
    }
-   virtual vector<CEPuck2Entity*> GetRobotsInMatching(){
+   virtual vector<CEntity*> GetRobotsInMatching(){
       return m_robots_in_matching;
    }
 
@@ -34,7 +34,7 @@ private:
    Graph m_robotGraph;
    vector<int> m_matching;
    vector<double> m_costs;
-   vector<CEPuck2Entity*> m_robots_in_matching;
+   vector<CEntity*> m_robots_in_matching;
    bool m_isCommited;
 
    UInt32 m_repeat_interval;

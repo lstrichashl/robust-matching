@@ -40,6 +40,8 @@ def plot_compare_faulty_algorithms(number_of_robots: int, range):
     for algorithm_directory in algorithms_directories:
         with open(f"{algorithm_directory}/metadata.json") as f:
             metadata = json.load(f)
+            if metadata["faulty_algorithm"]["name"] == 'algo_matching_walk_away' and metadata["non_faulty_algorithm"]["name"] == "virtual_forces_random":
+                continue
             if metadata["faulty_algorithm"]['name'] not in plots:
                 plots[metadata["faulty_algorithm"]['name']] = {
                     "title": algo_to_label(metadata["faulty_algorithm"]['name']),
@@ -50,10 +52,11 @@ def plot_compare_faulty_algorithms(number_of_robots: int, range):
                 "label": algo_to_label(metadata["non_faulty_algorithm"]['name'])
             })
     # fig, axs = plt.subplots(1)
-    k = list(plots.keys())[2]
+    k = list(plots.keys())[3]
+    print(k)
     plot_data({k:plots[k]}, number_of_robots)
-    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/plot_compare_faults_range{range}_robots{number_of_robots}_{k}.png", bbox_inches='tight')
-    plt.show() 
+    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/plot_compare_faults_range{range}_robots{number_of_robots}_{k}.png", bbox_inches='tight')
+    # plt.show() 
 
 def plot_compare_range(number_of_robots):
     nf_algorithm = ["virtual_forces_random", "algo_matching"]

@@ -69,8 +69,19 @@ class AlgoMatching(NonFaultyAlgorithm):
     
     def get_loop_functions(self):
         return {
-            "@library": f'{base_dir}/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions',
+            "@library": f'{base_dir}/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions',
             "@label": "matching_loop_functions",
+            "params": self.get_loop_functions_params()
+        }
+
+class TitForTat(NonFaultyAlgorithm):
+    def __init__(self, range: int) -> None:
+        super().__init__(name="tit_for_tat",template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos', range=range)
+    
+    def get_loop_functions(self):
+        return {
+            "@library":  f'{base_dir}/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions',
+            "@label": "print_experiment_loop_fuctions",
             "params": self.get_loop_functions_params()
         }
 
@@ -121,6 +132,8 @@ def algorithmFactory(name, range) -> Algorithm:
         return KeepDistance(range=range)
     elif name == "virtual_forces_random":
         return VirtualForcesRandom(range=range)
+    elif name == "tit_for_tat":
+        return TitForTat(range=range)
     elif "virtual_forces_random_crash" in name:
         times = name.split("-")[1]
         start_time = times.split("_")[0]

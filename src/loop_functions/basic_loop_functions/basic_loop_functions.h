@@ -30,22 +30,21 @@ public:
    virtual bool IsExperimentFinished();
    virtual void PostExperiment();
    virtual void Reset();
-   virtual vector<CEPuck2Entity*> GetRobots(){
+   virtual vector<CEntity*> GetRobots(){
       return m_robots;
    }
-   virtual vector<CEPuck2Entity*> GetNFRobots();
-   vector<CVector2> GetPositions(vector<CEPuck2Entity*> robots);
-   Clusters GetRobotPairs(vector<CEPuck2Entity*> robots);
+   virtual vector<CEntity*> GetNFRobots();
+   vector<CVector2> GetPositions(vector<CEntity*> robots);
+   Clusters GetRobotPairs(vector<CEntity*> robots);
    virtual void add_log();
    virtual void PlaceCluster(TConfigurationNode& entityNode);
-   virtual void PlaceCluster(vector<DistributeConfig> configs,Real robot_range, CRange<Real> arena_range, int base_id,vector<CEPuck2Entity*> seed_entites={});
+   virtual void PlaceCluster(vector<DistributeConfig> configs,Real robot_range, CRange<Real> arena_range, int base_id,vector<CEntity*> seed_entites={});
    virtual void RemoveAll(vector<CEntity*> entites);
    virtual bool _is_connected_graph(vector<CVector2> positions, Real robot_range);
-   virtual void remove_robots();
 
 protected:
-   vector<CEPuck2Entity*> m_robots;
-   vector<CEPuck2Entity*> m_nf_robots;
+   vector<CEntity*> m_robots;
+   vector<CEntity*> m_nf_robots;
    vector<string> m_logs;
 
    string m_log_file_path;

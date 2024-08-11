@@ -54,14 +54,15 @@ def create_all_files(non_faulty_algorithm:NonFaultyAlgorithm, faulty_algorithm:F
     return file_paths
 
 def main():
-    num = 16  # set to the number of workers you want (the default is the cpu count of your machine)
+    num = 4  # set to the number of workers you want (the default is the cpu count of your machine)
     build()
     # n_robots = 6
     # range = 100
-    all_robots = [15]
-    # all_range = [0.5,0.3] + [0.2,0.4,0.6,0.7,0.8,0.9,1]
+    all_robots = [20]
+    # all_range = [0.3] + [0.2,0.4,0.6,0.7,0.8,0.9,1]
+    all_range = [0.6,0.7,0.8,0.9,1]
     # all_range = [1,1.5,2]
-    all_range = [0.5]
+    # all_range = [0.5]
     for n_robots, range in tqdm(product(all_robots,all_range)):
         print(f"{n_robots=} {range=}")
         tp = ThreadPool(num)
@@ -90,10 +91,10 @@ def main():
         #     AlgoMatchingCrash(range=range, start_crash_time=250,end_crash_time=300)
         # ]
         faulty_algorithms = [
-        #     AlgoMatchingWalkAway(range=range),
-              Crash(range=range),
-        #     KeepDistance(range=range),
-        #     VirtualForcesWalkAway(range=range),
+            # AlgoMatchingWalkAway(range=range),
+            Crash(range=range),
+            # KeepDistance(range=range),
+            # VirtualForcesWalkAway(range=range),
         ]
         file_pathes = []
         for nf_algo, f_algo in product(non_faulty_algorithms, faulty_algorithms):

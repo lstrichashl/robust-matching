@@ -17,7 +17,7 @@ void CPrintExperimentFunctions::Destroy(){
     std::ofstream os(m_log_file_path);
     std::string robot_types = "[";
     for (unsigned i=0; i<m_robots.size(); i++){
-        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(m_robots[i]->GetControllableEntity().GetController());
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
         robot_types += "{\"robot_id\":\""+std::to_string(i)+"\",\"type\":\""+cController1.GetType()+"\"},";
     }
     robot_types.pop_back();

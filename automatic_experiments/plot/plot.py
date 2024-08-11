@@ -183,9 +183,9 @@ def get_time_to_stable(results):
 def key_to_color(key:str):
     colors = {
         # "virtual_forces_random":"#ff7f0e",
-        "Virtual Forces":"#ff7f0e",
-        "Committed": "#1f77b4",
-        "IP": "#17b3cf"
+        "Virtual Forces":"#1f77b4",
+        "Committed": "#ff7f0e",
+        "IP": "#2ca02c"
     }
     return colors.get(key, "#ffffff")
 

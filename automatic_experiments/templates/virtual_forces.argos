@@ -31,6 +31,24 @@
                        max_speed="1" />
       </params>
     </virtual_forces_bot_controller>
+    <tit_for_tat_controller id="tit_for_tat" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
+      <actuators>
+        <differential_steering implementation="default" />
+        <epuck2_leds implementation="default" medium="leds" />
+        <range_and_bearing implementation="default" />
+      </actuators>
+      <sensors>
+      	<epuck2_encoder implementation="default" />
+        <epuck2_battery implementation="default"/>
+        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+      </sensors>
+      <params>
+        <wheel_turning hard_turn_angle_threshold="90"
+                       soft_turn_angle_threshold="70"
+                       no_turn_angle_threshold="10"
+                       max_speed="1" />
+      </params>
+    </tit_for_tat_controller>
     <virtual_forces_random_controller id="virtual_forces_random" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
       <actuators>
         <differential_steering implementation="default" />
