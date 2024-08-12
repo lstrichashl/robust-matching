@@ -20,9 +20,9 @@ void CBasicLoopFunctions::Init(TConfigurationNode& t_tree) {
       for(itDistr = itDistr.begin(&t_tree);
           itDistr != itDistr.end();
           ++itDistr) {
-            if(itDistr->Value() == "distribute_max_range"){
-                PlaceCluster(*itDistr);
-            }
+            // if(itDistr->Value() == "distribute_max_range"){
+            //     PlaceCluster(*itDistr);
+            // }
     }
 
     TConfigurationNode& paramsNode = GetNode(t_tree, "params");
@@ -188,15 +188,17 @@ bool CBasicLoopFunctions::IsExperimentFinished() {
         if(cController.GetEState() == STATE_ALONE){
             all_robots_are_paired = false;
             alone_robots++;
-            if(cController.m_position.Length() > 1.5){
+            if(cController.m_position.Length() > 10){ // TODO: make away robots const a parameter, or calcualate it based on the arena.
                 alone_robots_away++;
             }
         }
     }
     if(all_robots_are_paired || alone_robots == 1){
+        cout << "all robots are paired" << endl;
         return true;
     }
     if(alone_robots_away == alone_robots) {
+        cout << "alone robots are away" << endl;
         return true;
     }
     return false;
@@ -283,7 +285,6 @@ void CBasicLoopFunctions::RemoveAll(vector<CEntity*> entites){
 
 void CBasicLoopFunctions::PlaceCluster(vector<DistributeConfig> configs,Real robot_range, CRange<Real> arena_range, int base_id,vector<CEntity*> seed_entites){
     vector<CEntity*> spawn_entites, entites;
-    cout << "spawn en" << endl;
     UInt32 unMaxTrials = 100;
     /* Create a RNG (it is automatically disposed of by ARGoS) */
     CRandom::CRNG* pcRNG = CRandom::CreateRNG("argos");
@@ -342,7 +343,6 @@ void CBasicLoopFunctions::PlaceCluster(vector<DistributeConfig> configs,Real rob
             }
             base_id += unQuantity;
         }
-        cout << _is_connected_graph(all_positions, robot_range) << endl;
         arena_range = CRange<Real>(arena_range.GetMin()+0.1, arena_range.GetMax()-0.1);
     }
 }

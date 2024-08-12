@@ -1,3 +1,4 @@
 add_subdirectory(abstract_controllers)
 add_subdirectory(robust_matching)
 add_subdirectory(virtual_forces)
+add_subdirectory(meeting_points)

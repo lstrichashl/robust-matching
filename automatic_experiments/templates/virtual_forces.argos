@@ -195,6 +195,38 @@
                        max_speed="1" />
       </params>
     </adverserial_opposite_direction_controller>
+        <meeting_point_controller id="meeting_point" library="build/src/controllers/meeting_points/libmeeting_points.so">
+      <actuators>
+        <quadrotor_position implementation="default" />
+        <range_and_bearing implementation="default" />
+      </actuators>
+      <sensors>
+        <positioning implementation="default" />
+        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+      </sensors>
+      <params>
+        <wheel_turning hard_turn_angle_threshold="90"
+                       soft_turn_angle_threshold="70"
+                       no_turn_angle_threshold="10"
+                       max_speed="1" />
+      </params>
+    </meeting_point_controller>
+    <meeting_point_crash_controller id="meeting_point_crash" library="build/src/controllers/meeting_points/libmeeting_points.so">
+      <actuators>
+        <quadrotor_position implementation="default" />
+        <range_and_bearing implementation="default" />
+      </actuators>
+      <sensors>
+        <positioning implementation="default" />
+        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+      </sensors>
+      <params>
+        <wheel_turning hard_turn_angle_threshold="90"
+                       soft_turn_angle_threshold="70"
+                       no_turn_angle_threshold="10"
+                       max_speed="1" />
+      </params>
+    </meeting_point_crash_controller>
   </controllers>
 
   <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions"
