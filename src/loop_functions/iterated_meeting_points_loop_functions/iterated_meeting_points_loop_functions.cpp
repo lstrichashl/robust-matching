@@ -5,7 +5,9 @@ CIteratedMeetingPoints::CIteratedMeetingPoints():
     m_matching(0),
     m_costs(0),
     CBasicLoopFunctions()
-    {}
+    {
+        default_robot_type = "eye-bot";
+    }
 
 Graph* GenerateGraph(vector<CEntity*> robots, double range, Graph oldGraph, vector<int> oldMatching){
     std::vector<CVector2> positions;

@@ -20,9 +20,9 @@ void CBasicLoopFunctions::Init(TConfigurationNode& t_tree) {
       for(itDistr = itDistr.begin(&t_tree);
           itDistr != itDistr.end();
           ++itDistr) {
-            // if(itDistr->Value() == "distribute_max_range"){
-            //     PlaceCluster(*itDistr);
-            // }
+            if(itDistr->Value() == "distribute_max_range"){
+                PlaceCluster(*itDistr);
+            }
     }
 
     TConfigurationNode& paramsNode = GetNode(t_tree, "params");
@@ -36,7 +36,7 @@ void CBasicLoopFunctions::Init(TConfigurationNode& t_tree) {
 }
 
 void CBasicLoopFunctions::Reset(){
-    CSpace::TMapPerType& m_cRobots = GetSpace().GetEntitiesByType("e-puck2");
+    CSpace::TMapPerType& m_cRobots = GetSpace().GetEntitiesByType(default_robot_type);
     for(CSpace::TMapPerType::iterator it = m_cRobots.begin(); it != m_cRobots.end(); ++it) {
         CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
         m_robots.push_back(robot);
@@ -363,7 +363,7 @@ void CBasicLoopFunctions::PlaceCluster(TConfigurationNode& tDestributionTree) {
             if(itDistr->Value() == "robot"){
                 UInt32 unQuantity;
                 GetNodeAttribute(*itDistr, "quantity", unQuantity);
-                configs.push_back(DistributeConfig(GetNode(*itDistr, "e-puck2"), unQuantity));
+                configs.push_back(DistributeConfig(GetNode(*itDistr, default_robot_type), unQuantity));
             }
           }
         UInt32 base_id = 0;

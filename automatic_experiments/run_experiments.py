@@ -19,7 +19,7 @@ def work(tmp_file_path):
     process = subprocess.Popen(['argos3', '-c', tmp_file_path], stdout=subprocess.DEVNULL)
     process.wait()
     process.kill()
-    os.remove(tmp_file_path)
+    # os.remove(tmp_file_path)
 
 def build():
     os.system(f'cd {base_dir}/build && make')

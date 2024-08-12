@@ -32,6 +32,8 @@ class NonFaultyAlgorithm(Algorithm):
     def __init__(self, name: str, range: int, template_file_path: str) -> None:
         super().__init__(name, range=range)
         self.template_file_path = template_file_path
+        self.robot_type = "e-puck2"
+        self.arena_size = 1.5
 
 class VirtualForces(NonFaultyAlgorithm):
     def __init__(self, range: int) -> None:
@@ -74,14 +76,18 @@ class AlgoMatching(NonFaultyAlgorithm):
             "params": self.get_loop_functions_params()
         }
 
-class TitForTat(NonFaultyAlgorithm):
+class MeetingPoints(NonFaultyAlgorithm):
     def __init__(self, range: int) -> None:
-        super().__init__(name="tit_for_tat",template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos', range=range)
-    
+        super().__init__(name="meeting_points",template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos', range=range)
+        self.name = "meeting_point"
+        self.controller_type = "meeting_point"
+        self.robot_type = "eye-bot"
+        self.arena_size = 16
+
     def get_loop_functions(self):
         return {
-            "@library":  f'{base_dir}/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions',
-            "@label": "print_experiment_loop_fuctions",
+            "@library":  f'{base_dir}/build/src/loop_functions/iterated_meeting_points_loop_functions/libiterated_meeting_points_loop_functions',
+            "@label": "iterated_meeting_points_loop_functions",
             "params": self.get_loop_functions_params()
         }
 
@@ -113,7 +119,9 @@ class AlgoMatchingCrash(FaultyAlgorithm):
         self.controller_type = "algo_matching_crash"
         self.start_crash_time = start_crash_time
         self.end_crash_time = end_crash_time
-        
+class MeetingPointsCrash(FaultyAlgorithm):
+    def __init__(self, range: int) -> None:
+        super().__init__(name=f"meeting_point_crash", range=range)
 
 def algorithmFactory(name, range) -> Algorithm:
     if name == "virtual_forces":
@@ -132,8 +140,10 @@ def algorithmFactory(name, range) -> Algorithm:
         return KeepDistance(range=range)
     elif name == "virtual_forces_random":
         return VirtualForcesRandom(range=range)
-    elif name == "tit_for_tat":
-        return TitForTat(range=range)
+    elif name == "meeting_points":
+        return MeetingPoints(range=range)
+    elif name == "meeting_points_crash":
+        return MeetingPointsCrash(range=range)
     elif "virtual_forces_random_crash" in name:
         times = name.split("-")[1]
         start_time = times.split("_")[0]
@@ -184,7 +194,10 @@ class Experiment:
         # doc['argos-configuration']['arena']['distribute'][0]['entity']['e-puck2']['@rab_range'] = self.non_faulty_algorithm.range
         # doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.controller_type
         # doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['@rab_range'] = self.faulty_algorithm.range
-        doc['argos-configuration']['visualization'] = doc['argos-configuration']['visualization'] if self.visualization else {}
+        if self.visualization:
+            doc['argos-configuration']['visualization']["qt-opengl"]['camera']['placements']['placement']["@position"] = "0.0,-0.792159," + str(self.non_faulty_algorithm.arena_size)
+        else:
+            doc['argos-configuration']['visualization'] = {}
         doc['argos-configuration']['loop_functions'] = self.get_loop_functions()
         doc['argos-configuration']['loop_functions']['distribute_max_range'] = distribute_max_range(experiment=self)
 
@@ -198,6 +211,7 @@ class Experiment:
         with open(self.argos_file_path, 'w') as f:
             f.write(to_save_string)
 
+        print(self.argos_file_path)
         return self.argos_file_path
     
 
@@ -206,10 +220,10 @@ class Experiment:
 def distribute_max_range(experiment: Experiment):
     return {
         '@range': experiment.non_faulty_algorithm.range,
-        '@arena_size': '1.5',
+        '@arena_size': experiment.non_faulty_algorithm.arena_size,
         'robot': [{
             '@quantity': experiment.non_faulty_count, 
-            'e-puck2': {
+            experiment.non_faulty_algorithm.robot_type: {
                 '@id': 'non_faulty', 
                 '@rab_range': experiment.non_faulty_algorithm.range, 
                 '@rab_data_size': '3', 
@@ -217,7 +231,7 @@ def distribute_max_range(experiment: Experiment):
             }
         },{
             '@quantity': experiment.faulty_count, 
-            'e-puck2': {
+            experiment.non_faulty_algorithm.robot_type: {
                 '@id': 'faulty', 
                 '@rab_range': experiment.faulty_algorithm.range, 
                 '@rab_data_size': '3', 

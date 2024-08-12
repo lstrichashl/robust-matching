@@ -57,6 +57,8 @@ protected:
 // private:
     vector<CVector2> m_last_positions;
     vector<CVector2> m_new_positions;
+
+    string default_robot_type = "e-puck2";
 };
 
 #endif

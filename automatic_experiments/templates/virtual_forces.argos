@@ -195,7 +195,7 @@
                        max_speed="1" />
       </params>
     </adverserial_opposite_direction_controller>
-        <meeting_point_controller id="meeting_point" library="build/src/controllers/meeting_points/libmeeting_points.so">
+    <meeting_point_controller id="meeting_point" library="build/src/controllers/meeting_points/libmeeting_points.so">
       <actuators>
         <quadrotor_position implementation="default" />
         <range_and_bearing implementation="default" />
@@ -251,7 +251,7 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-    <arena size="6.0,6.0,1.0" center="0.0,0.0,0.5">
+    <arena size="16.0,16.0,1.0" center="0.0,0.0,0.5">
 		 <!-- <distribute>
 		   <position method="uniform" min="-0.75,-0.75,0" max="0.75,0.75,0" />
 		   <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
