@@ -16,7 +16,6 @@ CMeetingPointEpuck::CMeetingPointEpuck():
 }
 
 void CMeetingPointEpuck::ControlStep() {
-    // m_heading = m_heading.Normalize();
     if(ShouldTransitionToPaired()){
         m_eState = STATE_PAIRED;
         cout << "paired" << endl;
@@ -61,7 +60,7 @@ int CMeetingPointEpuck::GetEncoderDiff(){
 void CMeetingPointEpuck::MoveForward(){
     int iDiff = GetEncoderDiff();
     m_fDistance += float(iDiff) * 2 * CRadians::PI.GetValue() * 0.0205f;
-    if(m_fDistance < (m_heading.Length()-PAIRING_THRESHOLD) * 500){
+    if(m_fDistance < (m_meeting_point.Length()-PAIRING_THRESHOLD/2) * 1000){
         m_pcWheels->SetLinearVelocity(5.0f, 5.0f);
     }
     else{
@@ -77,7 +76,7 @@ void CMeetingPointEpuck::RotateToAngle(){
     if(m_relative_orientation > 2 * CRadians::PI.GetValue()){
         m_relative_orientation -= 2 * CRadians::PI.GetValue();
     }
-    Real angle = m_heading.Angle().UnsignedNormalize().GetValue();
+    Real angle = m_meeting_point.Angle().UnsignedNormalize().GetValue();
     Real error = m_relative_orientation-angle;
 
     if(error > CRadians::PI.GetValue()){
@@ -106,6 +105,32 @@ void CMeetingPointEpuck::NewIteration(){
 }
 
 
+Real GaziRepultion(double distance){
+    if(distance > 20){
+        return 0;
+    }
+    double b = 10;
+    double c = 30;
+    double v = distance * (- b * ::pow(M_E, -::pow(distance,2)/c));
+    return v;
+}
+
+CVector2 CMeetingPointEpuck::FlockingVector() {
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+    if(! tMsgs.empty()) {
+        CVector2 local_repulsion_force;
+        for(size_t i = 0; i < tMsgs.size(); ++i) {
+            if(tMsgs[i].Data[0] == STATE_PAIRED) {
+                Real fLJ = GaziRepultion(tMsgs[i].Range);
+                local_repulsion_force += CVector2(fLJ, tMsgs[i].HorizontalBearing);
+            }
+        }
+        return local_repulsion_force;
+    }
+    else {
+        return CVector2();
+    }
+}
 
 
 REGISTER_CONTROLLER(CMeetingPointEpuck, "meeting_point_epuck_controller")

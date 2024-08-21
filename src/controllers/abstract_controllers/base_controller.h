@@ -67,6 +67,7 @@ public:
    virtual CVector2 RandomWalk();
    std::set<int> m_matched_robot_ids;
    virtual void NewIteration() {}
+   CVector2 m_meeting_point;
 
 protected:
     string m_typename;

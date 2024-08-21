@@ -85,8 +85,8 @@ void CIteratedMeetingPointsEpuck::UpdateMatching(){
             CEntity* robot2 = signle_robots[edge.second];
             BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot1)->GetController());
             BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot2)->GetController());
-            cController1.m_heading = ToMateVector(robot1, robot2);
-            cController2.m_heading = ToMateVector(robot2, robot1);
+            cController1.m_meeting_point = ToMateVector(robot1, robot2)/2;
+            cController2.m_meeting_point = ToMateVector(robot2, robot1)/2;
 
             cController1.m_matched_robot_ids.insert(edge.second);
             cController2.m_matched_robot_ids.insert(edge.first);

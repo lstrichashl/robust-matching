@@ -21,6 +21,7 @@ public:
     virtual void MoveForward();
     virtual void RotateToAngle();
     virtual void NewIteration();
+    virtual CVector2 FlockingVector();
 
     int m_iPreviousEncoder;
 
