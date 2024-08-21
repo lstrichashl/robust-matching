@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="1500" ticks_per_second="10" random_seed="2" />
+    <experiment length="1500" ticks_per_second="10" random_seed="0" />
   </framework>
   
   <!-- *************** -->
@@ -22,13 +22,13 @@
           <sensors>
               <epuck2_encoder implementation="default" />
             <epuck2_battery implementation="default"/>
-            <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+            <range_and_bearing implementation="medium" medium="rab" show_rays="false" />
           </sensors>
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
-                       soft_turn_angle_threshold="70"
-                       no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       soft_turn_angle_threshold="5"
+                       no_turn_angle_threshold="5"
+                       max_speed="5" />
       </params>
     </meeting_point_epuck_controller>
     <crash_controller id="crash" library="build/src/controllers/abstract_controllers/libabstract_controllers.so">
@@ -49,6 +49,24 @@
                          max_speed="1" />
         </params>
       </crash_controller>
+      <keep_distance_controller id="keep_distance" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
+        <actuators>
+          <differential_steering implementation="default" />
+          <epuck2_leds implementation="default" medium="leds" />
+          <range_and_bearing implementation="default" />
+        </actuators>
+        <sensors>
+          <epuck2_encoder implementation="default" />
+          <epuck2_battery implementation="default"/>
+          <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+        </sensors>
+        <params>
+          <wheel_turning hard_turn_angle_threshold="90"
+                         soft_turn_angle_threshold="70"
+                         no_turn_angle_threshold="10"
+                         max_speed="20" />
+        </params>
+      </keep_distance_controller>
   </controllers>
 
     <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/iterated_meeting_points_loop_functions/libiterated_meeting_points_loop_functions"
@@ -57,14 +75,14 @@
           log_file_path="tmp"
         />
         <distribute_max_range range="0.5" arena_size="2.0">
-          <robot quantity="6">
+          <robot quantity="10">
               <e-puck2 id="non_faulty" rab_range="0.5" rab_data_size="3">
                   <controller config="meeting_point_epuck"></controller>
               </e-puck2>
           </robot>
-          <robot quantity="6">
+          <robot quantity="10">
               <e-puck2 id="faulty" rab_range="0.5" rab_data_size="3">
-                  <controller config="crash"></controller>
+                  <controller config="keep_distance"></controller>
               </e-puck2>
           </robot>
       </distribute_max_range>

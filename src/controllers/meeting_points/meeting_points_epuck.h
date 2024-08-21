@@ -17,18 +17,23 @@ public:
     CMeetingPointEpuck();
     virtual ~CMeetingPointEpuck() {}
     virtual void ControlStep();
-    virtual int GetEncoderDiff();
+    virtual int GetEncoderDiffRight();
+    virtual int GetEncoderDiffLeft();
     virtual void MoveForward();
     virtual void RotateToAngle();
     virtual void NewIteration();
     virtual CVector2 FlockingVector();
+    virtual CVector2 GetDirectionFromEncoders();
+    virtual CVector2 ToMateVector(CVector2 self_position, CVector2 meeting_point);
 
-    int m_iPreviousEncoder;
+    int m_iPreviousEncoderRight, m_iPreviousEncoderLeft;
 
     Real m_fDistance;
     Real m_relative_orientation;
 
     MeetingPointPhase m_meeting_point_phase;
+
+    CVector2 m_encoder_position;
 
 
 

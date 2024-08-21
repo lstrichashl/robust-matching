@@ -5,6 +5,7 @@ BaseConrtoller::BaseConrtoller():
    m_pcWheels(NULL),
    m_pcLedAct(NULL) {
       pcRNG = CRandom::CreateRNG("argos");
+      m_is_crash = false;
    }
 
 void BaseConrtoller::Init(TConfigurationNode& t_node){
@@ -52,7 +53,6 @@ void BaseConrtoller::ControlStep(){
       m_pcLedAct->SetAllRGBColors(CColor::RED);
       m_pcLedAct->SetAllRedLeds(true);
    }
-   //  cout << m_heading << endl;
    SetWheelSpeedsFromVector(m_heading);
    CRadians cHeadingAngle = m_heading.Angle().SignedNormalize();
    CDegrees degrees = CDegrees(cHeadingAngle.GetValue() * cHeadingAngle.RADIANS_TO_DEGREES).SignedNormalize();

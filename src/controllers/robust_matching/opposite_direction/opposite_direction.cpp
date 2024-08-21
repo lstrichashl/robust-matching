@@ -11,6 +11,7 @@ void COppositeDirection::ControlStep() {
 }
 
 void COppositeDirection::Reset() {
+    BaseConrtoller::Reset();
     m_pcLedAct->SetAllRGBColors(CColor::RED);
     m_pcLedAct->SetAllRedLeds(true);
 }

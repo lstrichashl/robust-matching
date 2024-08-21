@@ -15,7 +15,6 @@ public:
     CRobustMatching();
     virtual ~CRobustMatching() {}
     virtual void ControlStep();
-    virtual void Reset();
 
 };
 class CRobustMatchingCrash : public CRobustMatching {

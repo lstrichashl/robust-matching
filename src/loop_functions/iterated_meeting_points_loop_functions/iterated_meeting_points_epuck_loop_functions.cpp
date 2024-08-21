@@ -23,7 +23,7 @@ Graph* GenerateGraph2(vector<CEntity*> robots, double range, Graph oldGraph, vec
     for(unsigned i=0; i<number_of_robots; i++){
         BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robots[i])->GetController());
         if(cController1.GetEState() == STATE_PAIRED){
-            unsigned j = *cController1.m_matched_robot_ids.rbegin();
+            unsigned j = *cController1.m_matched_robot_indexes.rbegin();
             CVector2 distance_vector1 = (positions[i] - positions[j]);
             if(distance_vector1.Length() < range){
                 G->AddEdge(i, j, distance_vector1.Length());
@@ -32,7 +32,7 @@ Graph* GenerateGraph2(vector<CEntity*> robots, double range, Graph oldGraph, vec
         else if(cController1.GetEState() == STATE_ALONE){
             for(unsigned j=0;j<number_of_robots;j++){
                 BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robots[j])->GetController());
-                if(i != j && cController2.GetEState() == STATE_ALONE && cController1.m_matched_robot_ids.find(j) == cController1.m_matched_robot_ids.end()){
+                if(i != j && cController2.GetEState() == STATE_ALONE && cController1.m_matched_robot_indexes.find(j) == cController1.m_matched_robot_indexes.end()){
                     CVector2 distance_vector1 = (positions[i] - positions[j]);
                     if(distance_vector1.Length() < range){
                         G->AddEdge(i, j, distance_vector1.Length());
@@ -52,14 +52,13 @@ CRadians GetZAngleOrientation(CEntity* robot1) {
    return cZAngle;
 }
 
-CVector2 ToMateVector(CEntity* robot1, CEntity* robot2) {
+CVector2 GetMeetingPoint(CEntity* robot1, CEntity* robot2) {
     CVector2 self_position(GetEmbodiedEntity3(robot1)->GetOriginAnchor().Position.GetX(),
                             GetEmbodiedEntity3(robot1)->GetOriginAnchor().Position.GetY());
     CVector2 mate_position(GetEmbodiedEntity3(robot2)->GetOriginAnchor().Position.GetX(),
                             GetEmbodiedEntity3(robot2)->GetOriginAnchor().Position.GetY());
-    CVector2 to_mate = mate_position - self_position;
-    CRadians cZAngle = GetZAngleOrientation(robot1);
-    return to_mate.Rotate(-cZAngle);
+    CVector2 meeting_point((mate_position.GetX()+self_position.GetX())/2, (mate_position.GetY()+self_position.GetY())/2);
+    return meeting_point;
 }
 
 void CIteratedMeetingPointsEpuck::UpdateMatching(){
@@ -85,11 +84,14 @@ void CIteratedMeetingPointsEpuck::UpdateMatching(){
             CEntity* robot2 = signle_robots[edge.second];
             BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot1)->GetController());
             BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot2)->GetController());
-            cController1.m_meeting_point = ToMateVector(robot1, robot2)/2;
-            cController2.m_meeting_point = ToMateVector(robot2, robot1)/2;
+            cController1.m_meeting_point = GetMeetingPoint(robot1, robot2);
+            cController2.m_meeting_point = GetMeetingPoint(robot2, robot1);
+            cController1.m_matched_robot_indexes.insert(edge.second);
+            cController2.m_matched_robot_indexes.insert(edge.first);
+            cController1.matched_robot_id = cController2.GetId();
+            cController2.matched_robot_id = cController1.GetId();
 
-            cController1.m_matched_robot_ids.insert(edge.second);
-            cController2.m_matched_robot_ids.insert(edge.first);
+            cout << cController1.matched_robot_id << endl;
 
             cController1.NewIteration();
             cController2.NewIteration();
@@ -101,6 +103,14 @@ void CIteratedMeetingPointsEpuck::UpdateMatching(){
    }
 }
 
+CVector2 ToMateVector2(CEntity* robot1, CVector2 meeting_point) {
+    CVector2 self_position(GetEmbodiedEntity3(robot1)->GetOriginAnchor().Position.GetX(),
+                            GetEmbodiedEntity3(robot1)->GetOriginAnchor().Position.GetY());
+    CVector2 to_mate = meeting_point - self_position;
+    CRadians cZAngle = GetZAngleOrientation(robot1);
+    return to_mate.Rotate(-cZAngle);
+}
+
 void CIteratedMeetingPointsEpuck::PreStep(){
     CBasicLoopFunctions::PreStep();
     UInt32 time = GetSpace().GetSimulationClock();
@@ -110,6 +120,16 @@ void CIteratedMeetingPointsEpuck::PreStep(){
     else if(time % 200 == 0){
         UpdateMatching();
     }
+    for(vector<int>::iterator it = m_matching.begin(); it != m_matching.end(); it++)
+        {
+            pair<int, int> edge = m_robotGraph.GetEdge( *it );
+            CEntity* robot1 = m_robots[edge.first];
+            CEntity* robot2 = m_robots[edge.second];
+            BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot1)->GetController());
+            BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot2)->GetController());
+            cController1.m_heading = ToMateVector2(robot1, cController1.m_meeting_point);
+            cController2.m_heading = ToMateVector2(robot2, cController1.m_meeting_point);
+        }
 }
 
 void CIteratedMeetingPointsEpuck::Reset(){

@@ -28,7 +28,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       max_speed="5" />
       </params>
     </virtual_forces_bot_controller>
     <tit_for_tat_controller id="tit_for_tat" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
@@ -46,7 +46,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       max_speed="5" />
       </params>
     </tit_for_tat_controller>
     <virtual_forces_random_controller id="virtual_forces_random" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
@@ -64,7 +64,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       max_speed="5" />
       </params>
     </virtual_forces_random_controller>
     <virtual_forces_adverserial_controller id="virtual_forces_walk_away" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
@@ -82,7 +82,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       max_speed="5" />
       </params>
     </virtual_forces_adverserial_controller>
     <keep_distance_controller id="keep_distance" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
@@ -100,7 +100,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="20" />
+                       max_speed="5" />
       </params>
     </keep_distance_controller>
     <crash_controller id="crash" library="build/src/controllers/abstract_controllers/libabstract_controllers.so">
@@ -118,7 +118,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       max_speed="5" />
       </params>
     </crash_controller>
     <virtual_forces_random_crash_controller id="virtual_forces_random_crash" library="build/src/controllers/abstract_controllers/libabstract_controllers.so">
@@ -136,7 +136,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       max_speed="5" />
           <crash start_time="50" end_time="100"/>
       </params>
     </virtual_forces_random_crash_controller>
@@ -153,9 +153,9 @@
       </sensors>
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
-                       soft_turn_angle_threshold="70"
-                       no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       soft_turn_angle_threshold="2"
+                       no_turn_angle_threshold="2"
+                       max_speed="5" />
       </params>
     </robust_matching_controller>
     <robust_matching_crash_controller id="algo_matching_crash" library="build/src/controllers/robust_matching/librobust_matching.so">
@@ -173,7 +173,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       max_speed="5" />
           <crash start_time="50" end_time="100"/>
       </params>
     </robust_matching_crash_controller>
@@ -192,7 +192,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       max_speed="5" />
       </params>
     </adverserial_opposite_direction_controller>
     <meeting_point_controller id="meeting_point" library="build/src/controllers/meeting_points/libmeeting_points.so">
@@ -208,7 +208,7 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       max_speed="5" />
       </params>
     </meeting_point_controller>
     <meeting_point_crash_controller id="meeting_point_crash" library="build/src/controllers/meeting_points/libmeeting_points.so">
@@ -224,9 +224,27 @@
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
                        no_turn_angle_threshold="10"
-                       max_speed="1" />
+                       max_speed="5" />
       </params>
     </meeting_point_crash_controller>
+    <meeting_point_epuck_controller id="meeting_point_epuck" library="build/src/controllers/meeting_points/libmeeting_points.so">
+      <actuators>
+          <differential_steering implementation="default" />
+          <epuck2_leds implementation="default" medium="leds" />
+          <range_and_bearing implementation="default" />
+        </actuators>
+        <sensors>
+            <epuck2_encoder implementation="default" />
+          <epuck2_battery implementation="default"/>
+          <range_and_bearing implementation="medium" medium="rab" show_rays="false" />
+        </sensors>
+    <params>
+      <wheel_turning hard_turn_angle_threshold="90"
+                     soft_turn_angle_threshold="5"
+                     no_turn_angle_threshold="5"
+                     max_speed="5" />
+    </params>
+  </meeting_point_epuck_controller>
   </controllers>
 
   <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions"
@@ -314,7 +332,7 @@
                   label="matching_qt_user_functions" /> -->
       <camera>
         <placements>
-            <placement index="0" position="0.0,-0.792159,1.51472" look_at="0.0,-0.41199,0.58981" up="-0.00924894,0.924863,0.380188" lens_focal_length="20"/>
+            <placement index="0" position="0.0,0,5.51472" look_at="0.0,0,0" up="-0.00924894,0.924863,0.380188" lens_focal_length="20"/>
         </placements>
       </camera>
     </qt-opengl>

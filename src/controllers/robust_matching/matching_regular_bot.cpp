@@ -13,15 +13,8 @@ CRobustMatching::CRobustMatching():BaseConrtoller(){
 
 
 void CRobustMatching::ControlStep() {
-   m_heading = m_heading.Normalize();
+   m_heading = m_heading.Normalize() * 5;
    BaseConrtoller::ControlStep();
-}
-
-void CRobustMatching::Reset(){
-   BaseConrtoller::Reset();
-   m_eState = STATE_ALONE;
-   m_pcLedAct->SetAllBlack();
-   m_pcLedAct->SetAllRGBColors(CColor::GREEN);
 }
 
 REGISTER_CONTROLLER(CRobustMatching, "robust_matching_controller")

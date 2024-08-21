@@ -91,6 +91,19 @@ class MeetingPoints(NonFaultyAlgorithm):
             "params": self.get_loop_functions_params()
         }
 
+class MeetingPointEpuck(NonFaultyAlgorithm):
+    def __init__(self, range: int) -> None:
+        super().__init__(name="meeting_point_epuck",template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos', range=range)
+        self.name = "meeting_point_epuck"
+        self.controller_type = "meeting_point_epuck"
+
+    def get_loop_functions(self):
+        return {
+            "@library":  f'{base_dir}/build/src/loop_functions/iterated_meeting_points_loop_functions/libiterated_meeting_points_loop_functions',
+            "@label": "iterated_meeting_points_epuck_loop_functions",
+            "params": self.get_loop_functions_params()
+        }
+
 class FaultyAlgorithm(Algorithm):
     def __init__(self, name: str, range: int) -> None:
         super().__init__(name, range)
@@ -141,7 +154,7 @@ def algorithmFactory(name, range) -> Algorithm:
     elif name == "virtual_forces_random":
         return VirtualForcesRandom(range=range)
     elif name == "meeting_points":
-        return MeetingPoints(range=range)
+        return MeetingPointEpuck(range=range)
     elif name == "meeting_points_crash":
         return MeetingPointsCrash(range=range)
     elif "virtual_forces_random_crash" in name:
@@ -195,7 +208,7 @@ class Experiment:
         # doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['controller']['@config'] = self.faulty_algorithm.controller_type
         # doc['argos-configuration']['arena']['distribute'][1]['entity']['e-puck2']['@rab_range'] = self.faulty_algorithm.range
         if self.visualization:
-            doc['argos-configuration']['visualization']["qt-opengl"]['camera']['placements']['placement']["@position"] = "0.0,-0.792159," + str(self.non_faulty_algorithm.arena_size)
+            doc['argos-configuration']['visualization']["qt-opengl"]['camera']['placements']['placement']["@position"] = "0.0,0," + str(self.non_faulty_algorithm.arena_size)
         else:
             doc['argos-configuration']['visualization'] = {}
         doc['argos-configuration']['loop_functions'] = self.get_loop_functions()

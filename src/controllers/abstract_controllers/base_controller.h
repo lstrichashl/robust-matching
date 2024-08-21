@@ -65,7 +65,8 @@ public:
       void Init(TConfigurationNode& t_tree);
    };
    virtual CVector2 RandomWalk();
-   std::set<int> m_matched_robot_ids;
+   std::set<int> m_matched_robot_indexes;
+   string matched_robot_id;
    virtual void NewIteration() {}
    CVector2 m_meeting_point;
 
