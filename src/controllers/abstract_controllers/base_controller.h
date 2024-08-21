@@ -8,6 +8,8 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_differential_steering_actuator.h>
 #include <iostream>
 #include <argos3/core/simulator/simulator.h>
+#include <argos3/plugins/robots/e-puck2/control_interface/ci_epuck2_encoder_sensor.h>
+#include <set>
 
 using namespace std;
 using namespace argos;
@@ -63,6 +65,8 @@ public:
       void Init(TConfigurationNode& t_tree);
    };
    virtual CVector2 RandomWalk();
+   std::set<int> m_matched_robot_ids;
+   virtual void NewIteration() {}
 
 protected:
     string m_typename;
@@ -71,6 +75,7 @@ protected:
     CCI_EPuck2LEDsActuator *m_pcLedAct;
     CCI_RangeAndBearingActuator* m_pcRABAct;
     CCI_RangeAndBearingSensor* m_pcRABSens;
+    CCI_EPuck2EncoderSensor* m_pcEncoderSensor;
     SWheelTurningParams m_sWheelTurningParams;
 
    

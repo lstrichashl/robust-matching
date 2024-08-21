@@ -1,5 +1,5 @@
-#ifndef ROBUST_MATCHING_H
-#define ROBUST_MATCHING_H
+#ifndef MEETING_POINTS_H
+#define MEETING_POINTS_H
 
 #include <argos3/plugins/robots/generic/control_interface/ci_quadrotor_position_actuator.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_positioning_sensor.h>

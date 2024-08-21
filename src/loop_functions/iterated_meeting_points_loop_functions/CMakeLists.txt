@@ -1,5 +1,5 @@
 link_directories(${CMAKE_BINARY_DIR}/src/controllers/robust_matching)
-set(iterated_meeting_points_loop_functions_SOURCES iterated_meeting_points_loop_functions.cpp)
+set(iterated_meeting_points_loop_functions_SOURCES iterated_meeting_points_loop_functions.cpp iterated_meeting_points_epuck_loop_functions.cpp)
 
 # if(ARGOS_QTOPENGL_FOUND)
 #   include_directories(${ARGOS_QTOPENGL_INCLUDE_DIRS})

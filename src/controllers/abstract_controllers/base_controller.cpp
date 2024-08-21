@@ -13,6 +13,7 @@ void BaseConrtoller::Init(TConfigurationNode& t_node){
     m_pcLedAct = GetActuator<CCI_EPuck2LEDsActuator>("epuck2_leds");
     m_pcRABAct = GetActuator<CCI_RangeAndBearingActuator  >("range_and_bearing" );
     m_pcRABSens = GetSensor  <CCI_RangeAndBearingSensor    >("range_and_bearing" );
+    m_pcEncoderSensor = GetSensor  <CCI_EPuck2EncoderSensor    >("epuck2_encoder" );
     try {
       m_sWheelTurningParams.Init(GetNode(t_node, "wheel_turning"));
     }
