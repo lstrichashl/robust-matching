@@ -6,28 +6,28 @@
 #include <sstream>
 using namespace std;
 
-pair< Graph, vector<double> > CreateRandomGraph()
-{
-	//random seed
-	int x;
-	cin >> x;
-	srand( x );
+// pair< Graph, vector<double> > CreateRandomGraph()
+// {
+// 	//random seed
+// 	int x;
+// 	cin >> x;
+// 	srand( x );
 
-	//Please see Graph.h for a description of the interface
-	int n = 50;
+// 	//Please see Graph.h for a description of the interface
+// 	int n = 50;
 
-	Graph G(n);
-	vector<double> cost;
-	for(int i = 0; i < n; i++)
-		for(int j = i+1; j < n; j++)
-			if(rand()%10 == 0)
-			{
-				G.AddEdge(i, j);
-				cost.push_back(rand()%1000);
-			}
+// 	Graph G(n);
+// 	vector<double> cost;
+// 	for(int i = 0; i < n; i++)
+// 		for(int j = i+1; j < n; j++)
+// 			if(rand()%10 == 0)
+// 			{
+// 				G.AddEdge(i, j);
+// 				cost.push_back(rand()%1000);
+// 			}
 
-	return make_pair(G, cost);
-}
+// 	return make_pair(G, cost);
+// }
 
 Graph ReadGraph(string filename)
 {
@@ -214,7 +214,7 @@ list<int> MatchingForComponents(Graph& graph, vector<Graph>& components, vector<
 		}else{
 			solution = MinimumMatchingSubgraph(components[i]);
 		}
-		cout << solution.second << endl;
+		// cout << solution.second << endl;
 		for(list<int>::iterator it = solution.first.begin(); it != solution.first.end(); it++){
 			pair<int, int> e = components[i].GetEdge( *it );
 			matching.push_back(graph.GetEdgeIndex(comp_vertecies[i][e.first], comp_vertecies[i][e.second]));
@@ -224,7 +224,7 @@ list<int> MatchingForComponents(Graph& graph, vector<Graph>& components, vector<
 }
 
 list<int> GetMatching(Graph& graph){
-	AddHopToGraph(graph);
+	// AddHopToGraph(graph);
 	map<int, int> vertexMap;
 	vector<vector<int> > comp_vertecies = graph.findConnectedComponents(vertexMap);
 	vector<Graph> components;

@@ -21,6 +21,8 @@ class CIteratedMeetingPointsEpuck : public CBasicLoopFunctions {
         vector<int> m_matching;
         vector<double> m_costs;
         vector<CEntity*> m_robots_in_matching;
+        double m_matching_max_cost;
+        int m_start_time_iterval;
 };
 
 

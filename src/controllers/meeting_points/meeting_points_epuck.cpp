@@ -180,23 +180,23 @@ Real GaziRepultion(double distance){
 }
 
 CVector2 CMeetingPointEpuck::FlockingVector() {
-    // const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
-    // if(! tMsgs.empty()) {
-    //     CVector2 local_repulsion_force;
-    //     for(size_t i = 0; i < tMsgs.size(); ++i) {
-    //         // cout << tMsgs[i].Data[1] << endl;
-    //         if(tMsgs[i].Data[1] != stoi(matched_robot_id)){
-    //             Real fLJ = GaziRepultion(tMsgs[i].Range);
-    //             local_repulsion_force += CVector2(fLJ, tMsgs[i].HorizontalBearing);
-    //         }
-    //     }
-    //     // cout << local_repulsion_force << endl;
-    //     return local_repulsion_force;
-    // }
-    // else {
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+    if(! tMsgs.empty()) {
+        CVector2 local_repulsion_force;
+        for(size_t i = 0; i < tMsgs.size(); ++i) {
+            // cout << tMsgs[i].Data[1] << endl;
+            if(tMsgs[i].Data[1] != stoi(matched_robot_id)){
+                Real fLJ = GaziRepultion(tMsgs[i].Range);
+                local_repulsion_force += CVector2(fLJ, tMsgs[i].HorizontalBearing);
+            }
+        }
+        // cout << local_repulsion_force << endl;
+        return local_repulsion_force;
+    }
+    else {
     // cout << GetId()<< ":"  << matched_robot_id << endl;
         return CVector2();
-    // }
+    }
 }
 
 

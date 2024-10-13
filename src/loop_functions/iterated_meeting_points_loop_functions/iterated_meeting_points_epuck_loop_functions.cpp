@@ -45,6 +45,52 @@ Graph* GenerateGraph2(vector<CEntity*> robots, double range, Graph oldGraph, vec
     return G;
 }
 
+Graph* GenerateGraph3(vector<CEntity*> robots, double range, Graph oldGraph, vector<int> oldMatching){
+    std::vector<CVector2> positions;
+    std::vector<std::pair<int, CQuaternion>> orientations;
+    int number_of_robots = robots.size();
+    for (unsigned i=0; i<number_of_robots; i++){
+        CVector2 position(GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Position.GetX(),
+                GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Position.GetY());
+        positions.push_back(position);
+        orientations.push_back(std::make_pair(i, GetEmbodiedEntity3(robots[i])->GetOriginAnchor().Orientation));
+    }
+    Graph* G = new Graph(number_of_robots);
+    for(unsigned i=0; i<number_of_robots; i++){
+        for(unsigned j=0;j<number_of_robots;j++){
+            if(i != j) {
+                CRadians cZAngle1 = GetZAngleOrientation(orientations[i].second);
+                CRadians cZAngle2 = GetZAngleOrientation(orientations[j].second);
+                CVector2 distance_vector1 = (positions[i] - positions[j]);
+
+                Real angle_distance = 1 - (abs(cZAngle1.GetValue() - cZAngle2.GetValue()) / 3.141592);
+                if(distance_vector1.Length() < range){
+                    G->AddEdge(i, j, distance_vector1.Length());
+                }
+            }
+        }
+    }
+    AddHopToGraph(G, positions);
+    for(unsigned i=0; i < number_of_robots; i++){
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robots[i])->GetController());
+        if(cController1.GetEState() == STATE_PAIRED){
+            int matched_robot = *cController1.m_matched_robot_indexes.rbegin();
+            list<int> adjlist = G->AdjList(i);
+            for(const int j: adjlist){
+                if(j != matched_robot){
+                    G->costs[G->GetEdgeIndex(i,j)] = 10000;
+                }
+            }
+        }
+        else {
+            for(const int& j :cController1.m_matched_robot_indexes){
+                G->costs[G->GetEdgeIndex(i,j)] = 10000;
+            }
+        }
+    }
+    return G;
+}
+
 
 CRadians GetZAngleOrientation(CEntity* robot1) {
    CRadians cZAngle, cYAngle, cXAngle;
@@ -66,16 +112,36 @@ void CIteratedMeetingPointsEpuck::UpdateMatching(){
     vector<CEntity*> robots_not_in_matching;
     vector<CEntity*> signle_robots = m_robots;
     try{
-        Graph* g = GenerateGraph2(signle_robots, 20, m_robotGraph, m_matching);
-        MatchingResult result = GetMatchingResult(g, signle_robots, 20);
+        Graph* g = GenerateGraph3(signle_robots, 20000, m_robotGraph, m_matching);
+        // for(int i = 0; i < m_robots.size(); i++){
+        //     string result1;
+        //     for(const auto& elem : g->AdjList(i)){
+        //         result1 += std::to_string(elem) + " ";
+        //     }
+        //     cout << i << ": " << result1 << endl;
+        // }
+        cout << g->edges.size() << endl;
+        for(int i = 0; i < g->edges.size(); i++){
+            cout << g->edges[i].first << " " << g->edges[i].second << endl;
+        }
+        UInt32 time = GetSpace().GetSimulationClock();
+        if(true){
+
+        MatchingResult result = GetMatchingResult(g, signle_robots, 20000);
+
         m_matching = result._matching;
         m_robotGraph = result._graph;
         m_robots_in_matching = result._robots;
         vector<int> matching = result._matching;
         cout << "matching:" << endl;
+        m_matching_max_cost = -1;
         for(vector<int>::iterator it = matching.begin(); it != matching.end(); it++){
             pair<int, int> edge = m_robotGraph.GetEdge( *it );
             cout << edge.first << "," << edge.second << endl;
+            double cost = m_robotGraph.GetCost(edge.first, edge.second);
+            if(cost > m_matching_max_cost) {
+                m_matching_max_cost = cost;
+            }
         }
         for(vector<int>::iterator it = matching.begin(); it != matching.end(); it++)
         {
@@ -86,15 +152,16 @@ void CIteratedMeetingPointsEpuck::UpdateMatching(){
             BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot2)->GetController());
             cController1.m_meeting_point = GetMeetingPoint(robot1, robot2);
             cController2.m_meeting_point = GetMeetingPoint(robot2, robot1);
+            if(edge.first == 3 || edge.second == 3){
+                cout << edge.first << "," << edge.second << endl;
+            }
             cController1.m_matched_robot_indexes.insert(edge.second);
             cController2.m_matched_robot_indexes.insert(edge.first);
             cController1.matched_robot_id = cController2.GetId();
             cController2.matched_robot_id = cController1.GetId();
-
-            cout << cController1.matched_robot_id << endl;
-
             cController1.NewIteration();
             cController2.NewIteration();
+        }
         }
     }
    catch(std::exception& ex) {
@@ -114,12 +181,25 @@ CVector2 ToMateVector2(CEntity* robot1, CVector2 meeting_point) {
 void CIteratedMeetingPointsEpuck::PreStep(){
     CBasicLoopFunctions::PreStep();
     UInt32 time = GetSpace().GetSimulationClock();
-    if(time == 1){
+    if(time == 1 || time % 150 == 0){ // time-m_start_time_iterval > m_matching_max_cost * 150
+        cout << "new iterval" << endl;
+        m_start_time_iterval = time;
         UpdateMatching();
     }
-    else if(time % 200 == 0){
-        UpdateMatching();
-    }
+
+
+    // for(unsigned i=0; i<m_robots.size(); i++){
+    //     if(i == 1 || i == 3){
+    //         BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
+    //         string result1;
+    //         for(const auto& elem : cController1.m_matched_robot_indexes){
+    //             result1 += std::to_string(elem) + " ";
+    //         }
+    //         cout << i << ": " << result1 << endl;   
+    //     }
+    // }
+    // // cout << "iterval length" << time-m_start_time_iterval << endl;
+    // // cout << "max cost" << m_matching_max_cost << endl;
     for(vector<int>::iterator it = m_matching.begin(); it != m_matching.end(); it++)
         {
             pair<int, int> edge = m_robotGraph.GetEdge( *it );

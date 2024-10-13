@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="1500" ticks_per_second="10" random_seed="0" />
+    <experiment length="1500" ticks_per_second="10" random_seed="431016" /> //431016 //763877
   </framework>
   
   <!-- *************** -->
@@ -82,7 +82,7 @@
           </robot>
           <robot quantity="10">
               <e-puck2 id="faulty" rab_range="0.5" rab_data_size="3">
-                  <controller config="keep_distance"></controller>
+                  <controller config="crash"></controller>
               </e-puck2>
           </robot>
       </distribute_max_range>
@@ -145,7 +145,7 @@
                   label="matching_qt_user_functions" /> -->
       <camera>
         <placements>
-            <placement index="0" position="0.0,0,1.51472" look_at="0.0,0,0.58981" up="-0.00924894,0.924863,0.380188" lens_focal_length="20"/>
+            <placement index="0" position="0.0,0,1.5" look_at="0.0,0,0" up="0,1,0" lens_focal_length="20"/>
         </placements>
       </camera>
     </qt-opengl>
