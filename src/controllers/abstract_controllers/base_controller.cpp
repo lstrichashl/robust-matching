@@ -9,6 +9,15 @@ BaseConrtoller::BaseConrtoller():
    }
 
 void BaseConrtoller::Init(TConfigurationNode& t_node){
+   try{
+      TConfigurationNode&  crash_node = GetNode(t_node, "crash");
+      GetNodeAttribute(crash_node, "m_crash_starttime", m_crash_starttime);
+      GetNodeAttribute(crash_node, "m_crash_endtime", m_crash_endtime);
+   }
+   catch(CARGoSException& ex) {
+      m_crash_starttime = 100000000;
+      m_crash_endtime = 100000000;
+   }
     m_crash_time = pcRNG->Uniform(CRange<Real>(m_crash_starttime, m_crash_endtime));
     m_pcWheels = GetActuator<CCI_DifferentialSteeringActuator>("differential_steering");
     m_pcLedAct = GetActuator<CCI_EPuck2LEDsActuator>("epuck2_leds");
@@ -54,9 +63,6 @@ void BaseConrtoller::ControlStep(){
       m_pcLedAct->SetAllRedLeds(true);
    }
    SetWheelSpeedsFromVector(m_heading);
-   CRadians cHeadingAngle = m_heading.Angle().SignedNormalize();
-   CDegrees degrees = CDegrees(cHeadingAngle.GetValue() * cHeadingAngle.RADIANS_TO_DEGREES).SignedNormalize();
-   m_pcRABAct->SetData(2, (int)degrees.GetValue());
 }
 
 
@@ -172,14 +178,14 @@ bool BaseConrtoller::ShouldTransitionToPaired(){
 }
 
 CVector2 BaseConrtoller::RandomWalk(){
-    if(m_time % 50 == 0){
-        CRadians angle = pcRNG->Uniform(CRadians::UNSIGNED_RANGE);
-        Real radius = pcRNG->Uniform(CRange<Real>(0,1));
-        random_destination = CVector2(radius * Cos(angle), radius * Sin(angle));
-    }
-    CVector2 to_point = random_destination - m_position;
-    CRadians cZAngle, cYAngle, cXAngle;
-    m_orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
-    to_point.Rotate(-cZAngle);
-    return to_point.Normalize();
+   if(m_time % 50 == 0 || random_destination == CVector2::ZERO){
+      CRadians angle = pcRNG->Uniform(CRadians::UNSIGNED_RANGE);
+      Real radius = pcRNG->Uniform(CRange<Real>(0,1));
+      random_destination = CVector2(radius * Cos(angle), radius * Sin(angle));
+   }
+   CVector2 to_point = random_destination - m_position;
+   CRadians cZAngle, cYAngle, cXAngle;
+   m_orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
+   to_point.Rotate(-cZAngle);
+   return to_point.Normalize();
 }

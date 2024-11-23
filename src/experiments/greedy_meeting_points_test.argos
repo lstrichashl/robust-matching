@@ -1,0 +1,156 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="0" />
+    <experiment length="1500" ticks_per_second="10" random_seed="495819" /> //204484
+  </framework>
+  
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    <greedy_meeting_point_controller id="greedy_meeting_points" library="build/src/controllers/meeting_points/libmeeting_points.so">
+        <actuators>
+            <differential_steering implementation="default" />
+            <epuck2_leds implementation="default" medium="leds" />
+            <range_and_bearing implementation="default" />
+          </actuators>
+          <sensors>
+              <epuck2_encoder implementation="default" />
+            <epuck2_battery implementation="default"/>
+            <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+          </sensors>
+      <params>
+        <wheel_turning hard_turn_angle_threshold="90"
+                       soft_turn_angle_threshold="5"
+                       no_turn_angle_threshold="5"
+                       max_speed="5" />
+      </params>
+    </greedy_meeting_point_controller>
+    <greedy_meeting_point_controller id="greedy_crash" library="build/src/controllers/abstract_controllers/libabstract_controllers.so">
+        <actuators>
+          <differential_steering implementation="default" />
+          <epuck2_leds implementation="default" medium="leds" />
+          <range_and_bearing implementation="default" />
+        </actuators>
+        <sensors>
+            <epuck2_encoder implementation="default" />
+          <epuck2_battery implementation="default"/>
+          <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+        </sensors>
+        <params >
+          <crash m_crash_starttime="0" 
+                m_crash_endtime="1"/>
+          <wheel_turning hard_turn_angle_threshold="90"
+                         soft_turn_angle_threshold="70"
+                         no_turn_angle_threshold="10"
+                         max_speed="1" />
+        </params>
+      </greedy_meeting_point_controller>
+      <keep_distance_controller id="keep_distance" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
+        <actuators>
+          <differential_steering implementation="default" />
+          <epuck2_leds implementation="default" medium="leds" />
+          <range_and_bearing implementation="default" />
+        </actuators>
+        <sensors>
+          <epuck2_encoder implementation="default" />
+          <epuck2_battery implementation="default"/>
+          <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+        </sensors>
+        <params>
+          <wheel_turning hard_turn_angle_threshold="90"
+                         soft_turn_angle_threshold="70"
+                         no_turn_angle_threshold="10"
+                         max_speed="5" />
+        </params>
+      </keep_distance_controller>
+  </controllers>
+
+    <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/greedy_meeting_points_loop_functions/libgreedy_meeting_points_loop_functions.so"
+                    label="greedy_meeting_points_loop_functions">
+        <params
+          log_file_path="tmp"
+        />
+        <distribute_max_range range="5" arena_size="2">
+          <robot quantity="10">
+              <e-puck2 id="non_faulty" rab_range="5" rab_data_size="4">
+                  <controller config="greedy_meeting_points"></controller>
+              </e-puck2>
+          </robot>
+          <robot quantity="10">
+            <e-puck2 id="faulty" rab_range="5" rab_data_size="4">
+                <controller config="greedy_crash"></controller>
+            </e-puck2>
+        </robot>
+      </distribute_max_range>
+  </loop_functions>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+    <arena size="16.0,16.0,1.0" center="0.0,0.0,0.5">
+        <!-- <distribute>
+        <position method="uniform" min="-7.75,-7.75,0" max="7.75,7.75,0" />
+        <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
+        <entity quantity="2" max_trials="100">
+            <e-puck2 id="non_faulty" rab_range="0.5" rab_data_size="4">
+                <controller config="greedy_meeting_points"></controller>
+            </e-puck2>
+        </entity>
+        </distribute> -->
+
+    <box id="wall_north" size="16,0.1,0.2" movable="false">
+      <body position="0,8,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_south" size="16,0.1,0.2" movable="false">
+      <body position="0,-8,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_east" size="0.1,16,0.2" movable="false">
+      <body position="8,0,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_west" size="0.1,16,0.2" movable="false">
+      <body position="-8,0,0" orientation="0,0,0" />
+    </box>
+    </arena>
+
+
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <dynamics2d id="dyn2d" />
+    <pointmass3d id="pm3d" iterations="10" />
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <led id="leds" />
+    <range_and_bearing id="rab" />
+  </media>
+
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+      <qt-opengl>
+        <user_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/basic_loop_functions/libbasic_loop_functions"
+              label="basic_qt_user_functions" />
+
+      <!-- <user_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/matching_loop_functions/libmatching_loop_functions"
+                  label="matching_qt_user_functions" /> -->
+      <camera>
+        <placements>
+            <placement index="0" position="0.0,0,2" look_at="0.0,0,0" up="0,1,0" lens_focal_length="20"/>
+        </placements>
+      </camera>
+    </qt-opengl>
+  </visualization>
+  
+</argos-configuration>

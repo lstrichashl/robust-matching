@@ -33,7 +33,7 @@ class NonFaultyAlgorithm(Algorithm):
         super().__init__(name, range=range)
         self.template_file_path = template_file_path
         self.robot_type = "e-puck2"
-        self.arena_size = 1.5
+        self.arena_size = 4.0
 
 class VirtualForces(NonFaultyAlgorithm):
     def __init__(self, range: int) -> None:

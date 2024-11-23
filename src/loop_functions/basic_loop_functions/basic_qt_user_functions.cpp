@@ -8,8 +8,18 @@ void CBasicQTUserFunctions::DrawInWorld(){
     vector<CEntity*> robots = m_loop_functions.GetRobots();
     vector<CVector2> positions = m_loop_functions.GetPositions(robots);
     for(unsigned i = 0; i < positions.size(); i++) {
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robots[i])->GetController());
         CVector3 draw_text_position( positions[i].GetX()-0.05,positions[i].GetY()+0.05, 0.01);
-        DrawText(draw_text_position, to_string(i), CColor::RED);
+        DrawText(draw_text_position, cController1.GetId(), CColor::RED);
+        DrawPoint(
+            CVector3(cController1.m_meeting_point.GetX(), cController1.m_meeting_point.GetY(), 0.1),
+            CColor::BLUE
+        );
+        // CVector2 n = cController1.m_heading.Normalize().Rotate();
+        // DrawRay(
+        //     CRay3(draw_text_position, CVector3(n.GetX(),n.GetY(),0.01), cController1.m_heading.Length()),
+        //     CColor::BLACK
+        // );
     }
     // for(unsigned rinx = 0; rinx < robots.size(); rinx++){
     //     BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robots[rinx])->GetController());

@@ -58,7 +58,7 @@
       <sensors>
       	<epuck2_encoder implementation="default" />
         <epuck2_battery implementation="default"/>
-        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+        <range_and_bearing implementation="medium" medium="rab" show_rays="false" />
       </sensors>
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
@@ -112,7 +112,7 @@
       <sensors>
       	<epuck2_encoder implementation="default" />
         <epuck2_battery implementation="default"/>
-        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+        <range_and_bearing implementation="medium" medium="rab" show_rays="false" />
       </sensors>
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
@@ -252,7 +252,7 @@
         <params
           log_file_path="tmp"
         />
-        <distribute_max_range range="0.5" arena_size="2.0">
+        <distribute_max_range range="0.5" arena_size="5.0">
           <robot quantity="10">
               <e-puck2 id="non_faulty" rab_range="0.5" rab_data_size="3">
                   <controller config="virtual_forces"></controller>

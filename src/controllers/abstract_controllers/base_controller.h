@@ -69,9 +69,10 @@ public:
    string matched_robot_id;
    virtual void NewIteration() {}
    CVector2 m_meeting_point;
+   string m_typename;
+   int time_for_wait_for_parter_in_target = 0;
 
 protected:
-    string m_typename;
     EState m_eState;
     CCI_DifferentialSteeringActuator *m_pcWheels;
     CCI_EPuck2LEDsActuator *m_pcLedAct;
@@ -81,7 +82,7 @@ protected:
     SWheelTurningParams m_sWheelTurningParams;
 
    
-private:
+protected:
    CVector2 random_destination;
    CRandom::CRNG* pcRNG;
 };
