@@ -1,7 +1,7 @@
 #ifndef GREEDY_MEETING_POINT_H
 #define GREEDY_MEETING_POINT_H
 
-#include "meeting_points_epuck.h"
+#include "../meeting_points_epuck.h"
 
 using namespace argos;
 
@@ -20,6 +20,7 @@ public:
     virtual ~CGreedyMeetingPoint() {}
     virtual void ControlStep();
     virtual CVector2 FlockingVector();
+    virtual void headingUpdate();
 
 
 protected:

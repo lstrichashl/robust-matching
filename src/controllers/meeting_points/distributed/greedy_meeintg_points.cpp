@@ -32,7 +32,6 @@ CGreedyMeetingPoint::CGreedyMeetingPoint(){
 
 void CGreedyMeetingPoint::ControlStep(){
     const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
-    CVector2 random = RandomWalk();
     if(m_eState == STATE_ALONE){
         if(handshake == IDLE){
             if(! tMsgs.empty()) {
@@ -111,33 +110,17 @@ void CGreedyMeetingPoint::ControlStep(){
             }
         }
 
-        // if(m_meeting_point == CVector2::ZERO){
-        //     CVector2 gaziForce;
-        //     const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
-        //     for(size_t i = 0; i < tMsgs.size(); ++i) {
-        //         Real force = GaziForce2(tMsgs[i].Range);
-        //         if(tMsgs[i].Data[0] == STATE_ALONE){
-        //             force *= 5;
-        //         }
-        //         gaziForce += CVector2(force, tMsgs[i].HorizontalBearing);
-        //     }
-        //     m_heading = gaziForce.Normalize();
-        // }
-        // else{
-        //     // m_heading += FlockingVector();
-        //     // m_heading *= 5;
-        // }
-        CVector2 distance_to_meeting_point = m_meeting_point - m_position;
-        if(distance_to_meeting_point.Length() < 0.035 && handshake == ACK){
+        Real distance_to_meeting_point = (m_meeting_point - m_position).Length();
+        if(distance_to_meeting_point < 0.035 && handshake == ACK){
             handshake = WAIT_FOR_PARTER_IN_TARGET;
             m_heading = CVector2::ZERO;
             time_for_wait_for_parter_in_target = 0;
-            // m_matched_robot_indexes.insert(stoi(matched_robot_id));
-            //     handshake = IDLE;
-            //     other_try_to_sin_robot_id = -1;
-            //     matched_robot_id = "-1";
         }
         if(handshake == WAIT_FOR_PARTER_IN_TARGET) {
+            if(distance_to_meeting_point > 0.035){
+                handshake = ACK;
+                time_for_wait_for_parter_in_target = 0;
+            }
             m_heading = CVector2::ZERO;
             time_for_wait_for_parter_in_target += 1;
             if(time_for_wait_for_parter_in_target >= 200) {
@@ -149,22 +132,9 @@ void CGreedyMeetingPoint::ControlStep(){
                 time_for_wait_for_parter_in_target = 0;
             }
         }
-        Real heading_d = m_heading.Length() - m_prev_heading.Length();
-        m_prev_heading = m_heading;
-
-        m_heading = 2 * m_heading + 10 * heading_d * m_heading;
-        if(handshake != WAIT_FOR_PARTER_IN_TARGET){
-            CVector2 flocking = FlockingVector() * 10;
-            m_heading += flocking;
-            if(handshake != ACK){
-                m_heading = random + flocking;
-            }
-            else{
-                m_heading += random / 5;
-            }
-        }
+        headingUpdate();
     }
-    if(GetId() == "2"){
+    if(GetId() == "61"){
         cout << GetId() << " matched:" << matched_robot_id << " TCP:" << handshake << " try:" << other_try_to_sin_robot_id << " e_state:" << m_eState << endl;
         CVector2 distance_to_meeting_point = m_meeting_point - m_position;
         cout << m_heading.GetX() << ", " << m_heading.GetY() << " " <<  distance_to_meeting_point.Length() << endl;
@@ -175,6 +145,25 @@ void CGreedyMeetingPoint::ControlStep(){
     m_pcRABAct->SetData(2, handshake);
     m_pcRABAct->SetData(3, other_try_to_sin_robot_id);
     BaseConrtoller::ControlStep();
+}
+
+void CGreedyMeetingPoint::headingUpdate(){
+    CVector2 random = RandomWalk();
+    Real heading_d = m_heading.Length() - m_prev_heading.Length();
+    m_prev_heading = m_heading;
+
+    m_heading = 2 * m_heading + 10 * heading_d * m_heading;
+    if(handshake != WAIT_FOR_PARTER_IN_TARGET){
+        CVector2 flocking = FlockingVector() * 10;
+        m_heading += flocking;
+        if(handshake != ACK){
+            m_heading = random + flocking;
+            m_heading *= 5;
+        }
+        else{
+            m_heading += random / 5;
+        }
+    }
 }
 
 CVector2 CGreedyMeetingPoint::FlockingVector() {

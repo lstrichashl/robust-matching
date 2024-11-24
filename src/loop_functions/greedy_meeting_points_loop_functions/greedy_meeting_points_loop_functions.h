@@ -3,7 +3,7 @@
 
 #include "src/loop_functions/basic_loop_functions/basic_loop_functions.h"
 #include <argos3/plugins/robots/e-puck2/simulator/epuck2_entity.h>
-#include "src/controllers/meeting_points/greedy_meeting_points.h"
+#include "src/controllers/meeting_points/distributed/greedy_meeting_points.h"
 #include <unordered_map>
 
 using namespace argos;
