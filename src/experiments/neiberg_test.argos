@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="200" ticks_per_second="10" random_seed="12345" />
+    <experiment length="200" ticks_per_second="10" random_seed="1" />
   </framework>
   
   <!-- *************** -->
@@ -37,7 +37,7 @@
         />
         <distribute_max_range range="0.5" arena_size="5.0">
           <robot quantity="10">
-              <e-puck2 id="r" rab_range="0.5" rab_data_size="50">
+              <e-puck2 id="r" rab_range="0.5" rab_data_size="500">
                   <controller config="neighborhood_graph"></controller>
               </e-puck2>
           </robot>
