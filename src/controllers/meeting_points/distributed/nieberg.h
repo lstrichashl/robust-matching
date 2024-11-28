@@ -15,25 +15,23 @@ using namespace std;
 
 
 struct Edge {
-    UInt8 node1, node2;
+    UInt8 node1;
+    UInt8 node2;
     bool isMatching;
+    UInt8 weight; // Weight of the edge
 
-    // Constructor
-    Edge(UInt8 n1, UInt8 n2, bool match) : node1(n1), node2(n2), isMatching(match) {}
+    Edge(UInt8 n1, UInt8 n2, bool match, UInt8 w)
+        : node1(n1), node2(n2), isMatching(match), weight(w) {}
 
-    // Equality operator
     bool operator==(const Edge& other) const {
         return (node1 == other.node1 && node2 == other.node2) ||
-               (node1 == other.node2 && node2 == other.node1); // Undirected graph
+               (node1 == other.node2 && node2 == other.node1);
     }
 };
 
-// Hash function for Edge
 struct edge_hash {
-    std::size_t operator()(const Edge& edge) const {
-        auto hash1 = std::hash<int>{}(edge.node1);
-        auto hash2 = std::hash<int>{}(edge.node2);
-        return hash1 ^ hash2;
+    std::size_t operator()(const Edge& e) const {
+        return std::hash<UInt8>()(e.node1) ^ std::hash<UInt8>()(e.node2);
     }
 };
 
@@ -54,6 +52,9 @@ public:
     std::unordered_set<UInt8> m_sNodes;        // Nodes in the graph
     std::unordered_set<Edge, edge_hash> m_sEdges; // Edges in the graph
 
+    std::vector<std::vector<UInt8>> m_vAugmentationPaths;
+    std::unordered_map<size_t, Real> m_vPathGains;
+
     NeighborhoodGraphController();
     virtual ~NeighborhoodGraphController() {}
     virtual void Init(TConfigurationNode& t_node);
@@ -72,8 +73,10 @@ public:
 
     virtual void FinalizeGraph();
 
-    virtual void FindAugmentationPaths(UInt8 startNode, UInt8 maxLength,
-                                        std::vector<std::vector<UInt8>>& paths);
+    virtual void FindAugmentationPaths(UInt8 startNode, 
+                                        UInt8 maxLength, 
+                                        std::vector<std::vector<UInt8>>& paths, 
+                                        std::unordered_map<size_t, Real>& pathGains);
 };
 
 #endif

@@ -42,18 +42,22 @@ void NeighborhoodGraphController::ControlStep(){
         // Neighborhood discovery complete; finalize graph
         // FinalizeGraph();
 
-        std::vector<std::vector<UInt8>> augmentationPaths;
-        FindAugmentationPaths(m_uRobotId, m_uMaxDistance, augmentationPaths);
+        std::vector<std::vector<UInt8>> paths;
+        std::unordered_map<size_t, Real> gains;
+
+        FindAugmentationPaths(m_uRobotId, m_uMaxDistance, paths, gains);
 
         // Print all augmentation paths
         if(GetId() == "196"){
-            std::cout << "Robot " << m_uRobotId << " augmentation paths:\n";
-            for (const auto& path : augmentationPaths) {
-                std::cout << "Path: ";
+            FinalizeGraph();
+            std::cout << "Robot " << m_uRobotId << " augmentation paths and gains:\n";
+            for (size_t i = 0; i < paths.size(); ++i) {
+                const auto& path = paths[i];
+                std::cout << "Path " << i << " [";
                 for (UInt8 node : path) {
                     std::cout << node << " ";
                 }
-                std::cout << std::endl;
+                std::cout << "] Gain = " << gains[i] << std::endl;
             }
         }
     }
@@ -74,9 +78,9 @@ void PrintCByteArray(const argos::CByteArray& cData, UInt8 robotid) {
     std::cout << std::endl;
 }
 
-void AddEdge(std::unordered_set<Edge, edge_hash>& sEdges, UInt8 uNode1, UInt8 uNode2, bool isMatched) {
+void AddEdge(std::unordered_set<Edge, edge_hash>& sEdges, UInt8 uNode1, UInt8 uNode2, bool isMatched, UInt8 weight) {
     // Normalize the edge as (min(uNode1, uNode2), max(uNode1, uNode2))
-    sEdges.emplace(std::min(uNode1, uNode2), std::max(uNode1, uNode2), isMatched);
+    sEdges.emplace(std::min(uNode1, uNode2), std::max(uNode1, uNode2), isMatched, weight);
 }
 
 void NeighborhoodGraphController::ExchangeNeighborhood() {
@@ -94,12 +98,13 @@ void NeighborhoodGraphController::ExchangeNeighborhood() {
             // Merge the received graph
             m_sNodes.insert(sReceivedNodes.begin(), sReceivedNodes.end());
             for (const auto& edge : sReceivedEdges) {
-                AddEdge(m_sEdges, edge.node1, edge.node2, edge.isMatching); // Use normalized insertion
+                AddEdge(m_sEdges, edge.node1, edge.node2, edge.isMatching, edge.weight); // Use normalized insertion
             }
 
             if (m_uCurrentHop == 1) {
                 // Add an edge between the current robot and the sender
-                AddEdge(m_sEdges, m_uRobotId, senderId, senderId == m_matchedRobotId);
+                UInt8 range= static_cast<UInt8>(tMessage.Range);
+                AddEdge(m_sEdges, m_uRobotId, senderId, senderId == m_matchedRobotId, range);
             }
         }
     }
@@ -124,14 +129,15 @@ void NeighborhoodGraphController::SerializeGraph(CByteArray& cData) {
         if(edge.isMatching){
             matching = 1;
         }
-        cData << edge.node1 << edge.node2 << matching;
+        cData << edge.node1 << edge.node2 << matching << edge.weight;
     }
-    for(int i = cData.Size(); i < 500; i++){
+    for(int i = cData.Size(); i < 1000; i++){
         UInt8 a = 0;
         cData << a;
     }
-
-    // PrintCByteArray(cData, m_uRobotId);
+    if(GetId() == "196"){
+        PrintCByteArray(cData, m_uRobotId);
+    }
 }
 
 void NeighborhoodGraphController::DeserializeGraph(const CByteArray& cData,
@@ -152,7 +158,8 @@ void NeighborhoodGraphController::DeserializeGraph(const CByteArray& cData,
         UInt8 uNode1 = cData[index++];
         UInt8 uNode2 = cData[index++];
         UInt8 isMatching = cData[index++];
-        AddEdge(sEdges, uNode1, uNode2, isMatching == 1);
+        UInt8 weight = cData[index++];
+        AddEdge(sEdges, uNode1, uNode2, isMatching == 1, weight);
     }
 }
 
@@ -174,23 +181,26 @@ void NeighborhoodGraphController::FinalizeGraph() {
 
 
 void NeighborhoodGraphController::FindAugmentationPaths(UInt8 startNode, UInt8 maxLength,
-                                                         std::vector<std::vector<UInt8>>& paths) {
+                                                         std::vector<std::vector<UInt8>>& paths,
+                                                         std::unordered_map<size_t, Real>& pathGains) {
     // BFS-based approach to find augmentation paths
-    std::queue<std::pair<std::vector<UInt8>, bool>> queue; // {path, isLastEdgeMatched}
-    queue.push({{startNode}, false}); // Start with the unmatched node
-
+    std::queue<std::tuple<std::vector<UInt8>, bool, Real>> queue; // {path, isLastEdgeMatched, currentGain}
+    queue.push({{startNode}, false, 0.0}); // Start with the initial node, unmatched state, and zero gain.
+    size_t pathIndex = 0;
     while (!queue.empty()) {
-        auto [currentPath, isLastEdgeMatched] = queue.front();
+        auto [currentPath, isLastEdgeMatched, currentGain] = queue.front();
         queue.pop();
 
         UInt8 currentNode = currentPath.back();
         if (currentPath.size() > 1 && currentNode == startNode && currentPath.size() - 1 <= maxLength) {
             // Augmentation path found (excluding cycles)
             paths.push_back(currentPath);
+            pathGains[pathIndex++] = currentGain;
             continue;
         }
         else if (currentPath.size() > 1 && !isLastEdgeMatched){
             paths.push_back(currentPath);
+            pathGains[pathIndex++] = currentGain;
         }
 
         if (currentPath.size() > maxLength + 1) {
@@ -215,8 +225,12 @@ void NeighborhoodGraphController::FindAugmentationPaths(UInt8 startNode, UInt8 m
                 // Avoid revisiting nodes
                 if (std::find(currentPath.begin(), currentPath.end(), neighbor) == currentPath.end()) {
                     std::vector<UInt8> newPath = currentPath;
+                    Real newGain = currentGain;
+                    if (!edge.isMatching) {
+                        newGain += edge.weight;
+                    }
                     newPath.push_back(neighbor);
-                    queue.push({newPath, edge.isMatching});
+                    queue.push({newPath, edge.isMatching, newGain});
                 }
             }
         }

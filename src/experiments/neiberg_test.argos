@@ -37,7 +37,7 @@
         />
         <distribute_max_range range="0.5" arena_size="5.0">
           <robot quantity="10">
-              <e-puck2 id="r" rab_range="0.5" rab_data_size="500">
+              <e-puck2 id="r" rab_range="0.5" rab_data_size="1000">
                   <controller config="neighborhood_graph"></controller>
               </e-puck2>
           </robot>
