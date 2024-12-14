@@ -23,7 +23,7 @@ Real GaziForce2(double distance){
     return GaziAttraction2(distance) + GaziRepultion2(distance);
 }
 
-CGreedyMeetingPoint::CGreedyMeetingPoint(){
+CGreedyMeetingPoint::CGreedyMeetingPoint():CMeetingPointEpuck(){
     handshake = IDLE;
     other_try_to_sin_robot_id = -1;
     matched_robot_id = "-1";
@@ -31,6 +31,7 @@ CGreedyMeetingPoint::CGreedyMeetingPoint(){
 
 
 void CGreedyMeetingPoint::ControlStep(){
+    string robot_log_id = "272";
     const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
     if(m_eState == STATE_ALONE){
         if(handshake == IDLE){
@@ -38,6 +39,9 @@ void CGreedyMeetingPoint::ControlStep(){
                 vector<pair<int,Real>> neighboring_idle_robots;
                 vector<pair<int,Real>> neighboring_sin_me_robots;
                 for(size_t i = 0; i < tMsgs.size(); ++i) {
+                    if(GetId() == robot_log_id){
+                        cout << "message: "  << tMsgs[i].Data[0] << " " << tMsgs[i].Data[1] << " "<< tMsgs[i].Data[2] << " "<< tMsgs[i].Data[3] << endl;
+                    }
                     if(tMsgs[i].Data[2] == SIN && tMsgs[i].Data[3] == stoi(GetId())){
                         neighboring_sin_me_robots.push_back(make_pair(tMsgs[i].Data[1], tMsgs[i].Range));
                     }
@@ -51,6 +55,9 @@ void CGreedyMeetingPoint::ControlStep(){
                         if(m_matched_robot_indexes.find(neighboring_sin_me_robots[j].first) == m_matched_robot_indexes.end()){
                             handshake = SINACK;
                             other_try_to_sin_robot_id = neighboring_sin_me_robots[j].first;
+                            if(GetId() == robot_log_id){
+                                cout << "bbb" << other_try_to_sin_robot_id << endl;
+                            }
                             break;
                         }
                     }
@@ -61,6 +68,9 @@ void CGreedyMeetingPoint::ControlStep(){
                         if(m_matched_robot_indexes.find(neighboring_idle_robots[j].first) == m_matched_robot_indexes.end()){
                             handshake = SIN;
                             other_try_to_sin_robot_id = neighboring_idle_robots[j].first;
+                            if(GetId() == robot_log_id){
+                                cout << "aaa" << other_try_to_sin_robot_id << endl;
+                            }
                             break;
                         }
                     }
@@ -134,10 +144,10 @@ void CGreedyMeetingPoint::ControlStep(){
         }
         headingUpdate();
     }
-    if(GetId() == "61"){
-        cout << GetId() << " matched:" << matched_robot_id << " TCP:" << handshake << " try:" << other_try_to_sin_robot_id << " e_state:" << m_eState << endl;
-        CVector2 distance_to_meeting_point = m_meeting_point - m_position;
-        cout << m_heading.GetX() << ", " << m_heading.GetY() << " " <<  distance_to_meeting_point.Length() << endl;
+    if(GetId() == robot_log_id){
+        // cout << GetId() << " matched:" << matched_robot_id << " TCP:" << handshake << " try:" << other_try_to_sin_robot_id << " e_state:" << m_eState << endl;
+        // CVector2 distance_to_meeting_point = m_meeting_point - m_position;
+        // cout << m_heading.GetX() << ", " << m_heading.GetY() << " " <<  distance_to_meeting_point.Length() << endl;
         // Real heading_d = m_heading.Length() - m_prev_heading.Length();
         // cout << heading_d.GetX() << ", " << heading_d.GetY() << " " <<  heading_d.Length() << endl;
         // cout << heading_d << endl;

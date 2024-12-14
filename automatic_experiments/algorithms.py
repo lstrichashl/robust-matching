@@ -103,6 +103,19 @@ class MeetingPointEpuck(NonFaultyAlgorithm):
             "@label": "iterated_meeting_points_epuck_loop_functions",
             "params": self.get_loop_functions_params()
         }
+    
+class GreedyMeetingPoint(NonFaultyAlgorithm):
+    def __init__(self, range: int) -> None:
+        super().__init__(name="greedy_meeting_points",template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos', range=range)
+        self.name = "greedy_meeting_points"
+        self.controller_type = "greedy_meeting_points"
+
+    def get_loop_functions(self):
+        return {
+            "@library":  f'{base_dir}/build/src/loop_functions/greedy_meeting_points_loop_functions/libgreedy_meeting_points_loop_functions.so',
+            "@label": "greedy_meeting_points_loop_functions",
+            "params": self.get_loop_functions_params()
+        }
 
 class FaultyAlgorithm(Algorithm):
     def __init__(self, name: str, range: int) -> None:
@@ -157,6 +170,8 @@ def algorithmFactory(name, range) -> Algorithm:
         return MeetingPointEpuck(range=range)
     elif name == "meeting_points_crash":
         return MeetingPointsCrash(range=range)
+    elif name == "greedy_meeting_point":
+        return GreedyMeetingPoint(range=range)
     elif "virtual_forces_random_crash" in name:
         times = name.split("-")[1]
         start_time = times.split("_")[0]
@@ -224,7 +239,7 @@ class Experiment:
         with open(self.argos_file_path, 'w') as f:
             f.write(to_save_string)
 
-        print(self.argos_file_path)
+        # print(self.argos_file_path)
         return self.argos_file_path
     
 
@@ -239,7 +254,7 @@ def distribute_max_range(experiment: Experiment):
             experiment.non_faulty_algorithm.robot_type: {
                 '@id': 'non_faulty', 
                 '@rab_range': experiment.non_faulty_algorithm.range, 
-                '@rab_data_size': '3', 
+                '@rab_data_size': '4', 
                 'controller': {'@config': experiment.non_faulty_algorithm.controller_type}
             }
         },{
@@ -247,7 +262,7 @@ def distribute_max_range(experiment: Experiment):
             experiment.non_faulty_algorithm.robot_type: {
                 '@id': 'faulty', 
                 '@rab_range': experiment.faulty_algorithm.range, 
-                '@rab_data_size': '3', 
+                '@rab_data_size': '4', 
                 'controller': {'@config': experiment.faulty_algorithm.controller_type}
             }
         }]

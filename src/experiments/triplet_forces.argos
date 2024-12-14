@@ -6,14 +6,14 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="1500" ticks_per_second="10" random_seed="249973" /> //204484
+    <experiment length="1500" ticks_per_second="10" random_seed="0" /> //204484
   </framework>
   
   <!-- *************** -->
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <greedy_meeting_point_controller id="greedy_meeting_points" library="build/src/controllers/meeting_points/libmeeting_points.so">
+    <triplet_forces_controller id="triplet_forces" library="build/src/controllers/triplet/libtriplet.so">
         <actuators>
             <differential_steering implementation="default" />
             <epuck2_leds implementation="default" medium="leds" />
@@ -30,8 +30,8 @@
                        no_turn_angle_threshold="5"
                        max_speed="5" />
       </params>
-    </greedy_meeting_point_controller>
-    <greedy_meeting_point_controller id="greedy_crash" library="build/src/controllers/abstract_controllers/libabstract_controllers.so">
+    </triplet_forces_controller>
+    <triplet_forces_controller id="triplet_forces_crash" library="build/src/controllers/abstract_controllers/libabstract_controllers.so">
         <actuators>
           <differential_steering implementation="default" />
           <epuck2_leds implementation="default" medium="leds" />
@@ -50,7 +50,7 @@
                          no_turn_angle_threshold="10"
                          max_speed="1" />
         </params>
-      </greedy_meeting_point_controller>
+      </triplet_forces_controller>
       <greedy_meeting_point_walk_away_controller id="walk_away" library="build/src/controllers/meeting_points/libmeeting_points.so">
         <actuators>
           <differential_steering implementation="default" />
@@ -105,35 +105,55 @@
                          max_speed="5" />
         </params>
       </virtual_forces_adverserial_controller>
+
+      <virtual_forces_bot_controller id="virtual_forces" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
+      <actuators>
+        <differential_steering implementation="default" />
+        <epuck2_leds implementation="default" medium="leds" />
+        <range_and_bearing implementation="default" />
+      </actuators>
+      <sensors>
+      	<epuck2_encoder implementation="default" />
+        <epuck2_battery implementation="default"/>
+        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+      </sensors>
+      <params>
+        <wheel_turning hard_turn_angle_threshold="90"
+                       soft_turn_angle_threshold="70"
+                       no_turn_angle_threshold="10"
+                       max_speed="5" />
+      </params>
+    </virtual_forces_bot_controller>
   </controllers>
 
     <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/greedy_meeting_points_loop_functions/libgreedy_meeting_points_loop_functions.so"
                     label="greedy_meeting_points_loop_functions">
         <params
           log_file_path="tmp"
+          triplet="true"
         />
-        <distribute_max_range range="0.5" arena_size="4.0">
-          <robot quantity="20">
-              <e-puck2 id="non_faulty" rab_range="0.5" rab_data_size="4">
-                  <controller config="greedy_meeting_points"></controller>
+        <distribute_max_range range="5" arena_size="2">
+          <robot quantity="21">
+              <e-puck2 id="non_faulty" rab_range="5" rab_data_size="4">
+                  <controller config="triplet_forces"></controller>
               </e-puck2>
           </robot>
-          <!-- <robot quantity="0">
-            <e-puck2 id="faulty" rab_range="0.5" rab_data_size="4">
-                <controller config="walk_away"></controller>
+          <robot quantity="9">
+            <e-puck2 id="faulty" rab_range="5" rab_data_size="4">
+                <controller config="triplet_forces_crash"></controller>
             </e-puck2>
-        </robot> -->
+        </robot>
       </distribute_max_range>
   </loop_functions>
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-    <arena size="2.0,2.0,1.0" center="0.0,0.0,0.5">
+    <arena size="16.0,16.0,1.0" center="0.0,0.0,0.5">
         <!-- <distribute>
-        <position method="uniform" min="-1,-1,0" max="1,1,0" />
+        <position method="uniform" min="-7.75,-7.75,0" max="7.75,7.75,0" />
         <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-        <entity quantity="20" max_trials="100">
+        <entity quantity="2" max_trials="100">
             <e-puck2 id="non_faulty" rab_range="0.5" rab_data_size="4">
                 <controller config="greedy_meeting_points"></controller>
             </e-puck2>

@@ -16,7 +16,8 @@ using namespace argos;
 
 enum EState {
    STATE_ALONE = 0,
-   STATE_PAIRED
+   STATE_PAIRED,
+   STATE_TRIPLET
 };
 
 class BaseConrtoller: public CCI_Controller{
@@ -36,6 +37,7 @@ public:
    virtual EState GetEState(){
       return m_eState;
    }
+   virtual string GetId();
    double PAIRING_THRESHOLD = 0.07;
    CVector2 m_heading;
    UInt32 m_time;
@@ -80,6 +82,7 @@ protected:
     CCI_RangeAndBearingSensor* m_pcRABSens;
     CCI_EPuck2EncoderSensor* m_pcEncoderSensor;
     SWheelTurningParams m_sWheelTurningParams;
+    string m_new_id;
 
    
 protected:

@@ -24,10 +24,13 @@ void CBasicLoopFunctions::Init(TConfigurationNode& t_tree) {
                 PlaceCluster(*itDistr);
             }
     }
+    string is_triplet;
 
     TConfigurationNode& paramsNode = GetNode(t_tree, "params");
     try{
         GetNodeAttribute(paramsNode, "log_file_path", m_log_file_path);
+        GetNodeAttributeOrDefault<string>(paramsNode, "triplet", is_triplet, "false");
+        m_is_triplet_experiment = is_triplet == "true";
     }
     catch(...){
         std::cout << "error with loading params tag in CPrintExperimentFunctions class" << std::endl;
@@ -178,6 +181,9 @@ void CBasicLoopFunctions::PostStep(){
 }
 
 bool CBasicLoopFunctions::IsExperimentFinished() {
+    if(m_is_triplet_experiment){
+        return false;
+    }
     if(GetSpace().GetSimulationClock() < 20){
         return false;
     }

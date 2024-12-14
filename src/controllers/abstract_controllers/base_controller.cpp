@@ -6,6 +6,7 @@ BaseConrtoller::BaseConrtoller():
    m_pcLedAct(NULL) {
       pcRNG = CRandom::CreateRNG("argos");
       m_is_crash = false;
+      m_new_id = "";
    }
 
 void BaseConrtoller::Init(TConfigurationNode& t_node){
@@ -34,6 +35,25 @@ void BaseConrtoller::Init(TConfigurationNode& t_node){
     Reset();
 }
 
+string BaseConrtoller::GetId(){
+   string input = CCI_Controller::GetId();
+   // if(m_new_id == "0"){
+      // cout << input << endl;
+   // }
+   if(m_new_id == ""){
+      string numberPart;
+      for (int i = input.size() - 1; i >= 0; --i) {
+         if (std::isdigit(input[i])) {
+            numberPart = input[i] + numberPart;
+         } else {
+            break;
+         }
+      }
+      m_new_id = to_string(static_cast<uint8_t>(stoi(numberPart)));
+   }
+   return m_new_id;
+}
+
 void BaseConrtoller::Reset() {
    m_eState = STATE_ALONE;
    m_pcRABAct->SetData(0, STATE_ALONE);
@@ -52,7 +72,8 @@ void BaseConrtoller::ControlStep(){
         m_eState = STATE_ALONE;
     }
     m_pcRABAct->SetData(0, m_eState);
-   int id = stoi(GetId());
+   UInt8 id = stoi(GetId());
+   cout << id << endl;
     m_pcRABAct->SetData(1, id);
     if(m_eState == STATE_PAIRED){
       m_heading = CVector2::ZERO;

@@ -245,6 +245,24 @@
                      max_speed="5" />
     </params>
   </meeting_point_epuck_controller>
+    <greedy_meeting_point_controller id="greedy_meeting_points" library="build/src/controllers/meeting_points/libmeeting_points.so">
+      <actuators>
+          <differential_steering implementation="default" />
+          <epuck2_leds implementation="default" medium="leds" />
+          <range_and_bearing implementation="default" />
+        </actuators>
+        <sensors>
+            <epuck2_encoder implementation="default" />
+          <epuck2_battery implementation="default"/>
+          <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+        </sensors>
+    <params>
+      <wheel_turning hard_turn_angle_threshold="90"
+                      soft_turn_angle_threshold="70"
+                      no_turn_angle_threshold="5"
+                      max_speed="5" />
+    </params>
+  </greedy_meeting_point_controller>
   </controllers>
 
   <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions"
@@ -254,12 +272,12 @@
         />
         <distribute_max_range range="0.5" arena_size="5.0">
           <robot quantity="10">
-              <e-puck2 id="non_faulty" rab_range="0.5" rab_data_size="3">
+              <e-puck2 id="non_faulty" rab_range="0.5" rab_data_size="4">
                   <controller config="virtual_forces"></controller>
               </e-puck2>
           </robot>
           <robot quantity="10">
-              <e-puck2 id="faulty" rab_range="0.5" rab_data_size="3">
+              <e-puck2 id="faulty" rab_range="0.5" rab_data_size="4">
                   <controller config="virtual_forces_walk_away"></controller>
               </e-puck2>
           </robot>

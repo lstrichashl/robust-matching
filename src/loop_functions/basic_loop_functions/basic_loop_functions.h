@@ -49,6 +49,7 @@ protected:
 
    string m_log_file_path;
    double m_range;
+   bool m_is_triplet_experiment;
 
    virtual void write_all_logs(vector<string> logs, string params_string);
 

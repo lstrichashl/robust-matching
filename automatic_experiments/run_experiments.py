@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 from multiprocessing.pool import ThreadPool
 from functools import reduce
-from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm, KeepDistance, VirtualForcesWalkAway, AlgoMatchingWalkAway, VirtualForcesRandom, VirtualForcesRandomCrash, AlgoMatchingCrash
+from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm, KeepDistance, VirtualForcesWalkAway, AlgoMatchingWalkAway, VirtualForcesRandom, VirtualForcesRandomCrash, AlgoMatchingCrash,  GreedyMeetingPoint
 import json
 import uuid
 from tqdm import tqdm
@@ -59,20 +59,20 @@ def main():
     # n_robots = 6
     # range = 100
     all_robots = [20]
-    # all_range = [0.3] + [0.2,0.4,0.6,0.7,0.8,0.9,1]
-    all_range = [0.6,0.7,0.8,0.9,1]
+    # all_range = [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
+    # all_range = [0.6,0.7,0.8,0.9,1]
     # all_range = [1,1.5,2]
-    # all_range = [0.5]
+    all_range = [0.5]
     for n_robots, range in tqdm(product(all_robots,all_range)):
         print(f"{n_robots=} {range=}")
         tp = ThreadPool(num)
         run_tag = f"fixed_velocity_random_orientation_randomCommitedMovement/connected/range_{range}_robots_{n_robots}"
 
-        non_faulty_algorithms = [
-            AlgoMatching(is_commited=True, range=range),
-            AlgoMatching(is_commited=False, name="repeated", repeate_interval=10, range=range),
-            VirtualForcesRandom(range=range)
-        ]
+        # non_faulty_algorithms = [
+        #     AlgoMatching(is_commited=True, range=range),
+        #     AlgoMatching(is_commited=False, name="repeated", repeate_interval=10, range=range),
+        #     VirtualForcesRandom(range=range)
+        # ]
         # faulty_algorithms = [
         #     VirtualForcesRandomCrash(range=range, start_crash_time=0,end_crash_time=50),
         #     VirtualForcesRandomCrash(range=range, start_crash_time=50,end_crash_time=100),
@@ -95,6 +95,9 @@ def main():
             Crash(range=range),
             # KeepDistance(range=range),
             # VirtualForcesWalkAway(range=range),
+        ]
+        non_faulty_algorithms = [
+            GreedyMeetingPoint(range=range)
         ]
         file_pathes = []
         for nf_algo, f_algo in product(non_faulty_algorithms, faulty_algorithms):

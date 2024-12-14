@@ -173,8 +173,8 @@ Real GaziRepultion(double distance){
     if(distance > 20){
         return 0;
     }
-    double b = 10;
-    double c = 30;
+    double b = 5;
+    double c = 20;
     double v = distance * (- b * ::pow(M_E, -::pow(distance,2)/c));
     return v;
 }
