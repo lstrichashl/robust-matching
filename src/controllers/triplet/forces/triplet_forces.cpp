@@ -42,7 +42,7 @@ CVector2 CTripletForces::FlockingVector() {
                 // }
             }
             else {
-                Real force = GaziForce(tMsgs[i].Range);
+                Real force = GaziRepultion(tMsgs[i].Range);
                 gaziForce += CVector2(force, tMsgs[i].HorizontalBearing);
             }
         }

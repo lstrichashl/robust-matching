@@ -7,7 +7,7 @@ import pathlib
 import json
 from scipy import stats
 
-base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/fixed_velocity_random_orientation_randomCommitedMovement/connected"
+base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/final/connected"
 
 def plot_data(data, number_of_robots):
     max_faulty_num = (int)(number_of_robots/2+1)

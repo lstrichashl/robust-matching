@@ -31,24 +31,6 @@
                        max_speed="5" />
       </params>
     </virtual_forces_bot_controller>
-    <tit_for_tat_controller id="tit_for_tat" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
-      <actuators>
-        <differential_steering implementation="default" />
-        <epuck2_leds implementation="default" medium="leds" />
-        <range_and_bearing implementation="default" />
-      </actuators>
-      <sensors>
-      	<epuck2_encoder implementation="default" />
-        <epuck2_battery implementation="default"/>
-        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
-      </sensors>
-      <params>
-        <wheel_turning hard_turn_angle_threshold="90"
-                       soft_turn_angle_threshold="70"
-                       no_turn_angle_threshold="10"
-                       max_speed="5" />
-      </params>
-    </tit_for_tat_controller>
     <virtual_forces_random_controller id="virtual_forces_random" library="build/src/controllers/virtual_forces/libvirtual_forces.so">
       <actuators>
         <differential_steering implementation="default" />
@@ -153,8 +135,8 @@
       </sensors>
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
-                       soft_turn_angle_threshold="2"
-                       no_turn_angle_threshold="2"
+                       soft_turn_angle_threshold="70"
+                       no_turn_angle_threshold="10"
                        max_speed="5" />
       </params>
     </robust_matching_controller>
@@ -240,13 +222,31 @@
         </sensors>
     <params>
       <wheel_turning hard_turn_angle_threshold="90"
-                     soft_turn_angle_threshold="5"
-                     no_turn_angle_threshold="5"
+                     soft_turn_angle_threshold="70"
+                     no_turn_angle_threshold="10"
                      max_speed="5" />
     </params>
   </meeting_point_epuck_controller>
     <greedy_meeting_point_controller id="greedy_meeting_points" library="build/src/controllers/meeting_points/libmeeting_points.so">
-      <actuators>
+        <actuators>
+            <differential_steering implementation="default" />
+            <epuck2_leds implementation="default" medium="leds" />
+            <range_and_bearing implementation="default" />
+          </actuators>
+          <sensors>
+              <epuck2_encoder implementation="default" />
+            <epuck2_battery implementation="default"/>
+            <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+          </sensors>
+      <params>
+        <wheel_turning hard_turn_angle_threshold="90"
+                       soft_turn_angle_threshold="70"
+                       no_turn_angle_threshold="20"
+                       max_speed="5" />
+      </params>
+    </greedy_meeting_point_controller>
+    <greedy_meeting_point_controller id="greedy_meeting_points_crash" library="build/src/controllers/abstract_controllers/libabstract_controllers.so">
+        <actuators>
           <differential_steering implementation="default" />
           <epuck2_leds implementation="default" medium="leds" />
           <range_and_bearing implementation="default" />
@@ -256,13 +256,15 @@
           <epuck2_battery implementation="default"/>
           <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
         </sensors>
-    <params>
-      <wheel_turning hard_turn_angle_threshold="90"
-                      soft_turn_angle_threshold="70"
-                      no_turn_angle_threshold="5"
-                      max_speed="5" />
-    </params>
-  </greedy_meeting_point_controller>
+        <params >
+          <crash m_crash_starttime="0" 
+                m_crash_endtime="1"/>
+          <wheel_turning hard_turn_angle_threshold="90"
+                         soft_turn_angle_threshold="70"
+                         no_turn_angle_threshold="10"
+                         max_speed="1" />
+        </params>
+      </greedy_meeting_point_controller>
   </controllers>
 
   <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions"

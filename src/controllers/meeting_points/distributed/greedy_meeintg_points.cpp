@@ -31,7 +31,7 @@ CGreedyMeetingPoint::CGreedyMeetingPoint():CMeetingPointEpuck(){
 
 
 void CGreedyMeetingPoint::ControlStep(){
-    string robot_log_id = "272";
+    string robot_log_id = "None";
     const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
     if(m_eState == STATE_ALONE){
         if(handshake == IDLE){

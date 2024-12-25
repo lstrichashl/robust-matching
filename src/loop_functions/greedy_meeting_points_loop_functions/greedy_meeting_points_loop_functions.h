@@ -1,14 +1,14 @@
 #ifndef GREEDY_MEETING_POINTS_LOOP_FUNCTIONS_H
 #define GREEDY_MEETING_POINTS_LOOP_FUNCTIONS_H
 
-#include "src/loop_functions/basic_loop_functions/basic_loop_functions.h"
+#include "src/loop_functions/print_experiment_loop_fuctions/print_experiment_loop_fuctions.h"
 #include <argos3/plugins/robots/e-puck2/simulator/epuck2_entity.h>
 #include "src/controllers/meeting_points/distributed/greedy_meeting_points.h"
 #include <unordered_map>
 
 using namespace argos;
 
-class CGreedyMeetingPointsLoopFunctions : public CBasicLoopFunctions {
+class CGreedyMeetingPointsLoopFunctions : public CPrintExperimentFunctions {
 
     public:
         CGreedyMeetingPointsLoopFunctions();

@@ -4,7 +4,7 @@ from itertools import product
 from plot import stat_experiment_set, algo_to_label, get_std_mean, key_to_color
 import numpy as np
 
-base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/fixed_velocity_random_orientation_randomCommitedMovement/connected"
+base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/final/connected"
 # base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/arena1.5/connected"
 
 def plot_time_distributions(data, axss):
@@ -109,7 +109,7 @@ def plot_number_of_robots_on_x(range, f_percent):
     nf_algorithms = ["virtual_forces_random", "algo_matching"]
     f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
     base_dir2 = "/home/lior/workspace/robust-matching/automatic_experiments/results"
-    dirs = ["fixed_velocity_random_orientation_randomCommitedMovement/connected", "arena3/connected","arena4.5/connected"]
+    dirs = ["final/connected", "arena3/connected","arena4.5/connected"]
     numbers_of_robots = [10,20,40,80]
     f_robots = (np.array(numbers_of_robots)*f_percent).astype(int)
     tables = [
@@ -360,7 +360,7 @@ if __name__ == "__main__":
     # base_dir3 = "/home/lior/workspace/robust-matching/automatic_experiments/results/repeated"
     number_of_robots = 20
     vis_range = 0.5
-    f_count = 0
+    f_count = 5
     run_tag = f"range_{vis_range}_robots_{number_of_robots}"
     # plot_compare_faults(number_of_robots, vis_range)
     # plot_number_of_robots_on_x(range=vis_range, f_percent=0.2)

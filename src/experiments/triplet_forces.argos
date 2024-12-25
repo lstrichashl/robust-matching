@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="1500" ticks_per_second="10" random_seed="0" /> //204484
+    <experiment length="1500" ticks_per_second="10" random_seed="322134" /> //204484
   </framework>
   
   <!-- *************** -->
@@ -138,7 +138,7 @@
                   <controller config="triplet_forces"></controller>
               </e-puck2>
           </robot>
-          <robot quantity="9">
+          <robot quantity="0">
             <e-puck2 id="faulty" rab_range="5" rab_data_size="4">
                 <controller config="triplet_forces_crash"></controller>
             </e-puck2>

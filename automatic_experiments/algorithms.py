@@ -104,7 +104,7 @@ class MeetingPointEpuck(NonFaultyAlgorithm):
             "params": self.get_loop_functions_params()
         }
     
-class GreedyMeetingPoint(NonFaultyAlgorithm):
+class GreedyMeetingPoints(NonFaultyAlgorithm):
     def __init__(self, range: int) -> None:
         super().__init__(name="greedy_meeting_points",template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos', range=range)
         self.name = "greedy_meeting_points"
@@ -149,6 +149,11 @@ class MeetingPointsCrash(FaultyAlgorithm):
     def __init__(self, range: int) -> None:
         super().__init__(name=f"meeting_point_crash", range=range)
 
+class GreedyMeetingPointsCrash(FaultyAlgorithm):
+    def __init__(self, range: int) -> None:
+        super().__init__(name=f"greedy_meeting_points_crash", range=range)
+
+
 def algorithmFactory(name, range) -> Algorithm:
     if name == "virtual_forces":
         return VirtualForces(range=range)
@@ -170,8 +175,10 @@ def algorithmFactory(name, range) -> Algorithm:
         return MeetingPointEpuck(range=range)
     elif name == "meeting_points_crash":
         return MeetingPointsCrash(range=range)
-    elif name == "greedy_meeting_point":
-        return GreedyMeetingPoint(range=range)
+    elif name == "greedy_meeting_points":
+        return GreedyMeetingPoints(range=range)
+    elif name == "greedy_meeting_points_crash":
+        return GreedyMeetingPointsCrash(range=range)
     elif "virtual_forces_random_crash" in name:
         times = name.split("-")[1]
         start_time = times.split("_")[0]

@@ -11,7 +11,8 @@ static const UInt32      MAX_PLACE_TRIALS = 20;
 
 CBasicLoopFunctions::CBasicLoopFunctions():
     m_logs(0),
-    m_range(0)
+    m_range(0),
+    m_is_triplet_experiment(false)
     {}
 
 void CBasicLoopFunctions::Init(TConfigurationNode& t_tree) {
@@ -29,8 +30,8 @@ void CBasicLoopFunctions::Init(TConfigurationNode& t_tree) {
     TConfigurationNode& paramsNode = GetNode(t_tree, "params");
     try{
         GetNodeAttribute(paramsNode, "log_file_path", m_log_file_path);
-        GetNodeAttributeOrDefault<string>(paramsNode, "triplet", is_triplet, "false");
-        m_is_triplet_experiment = is_triplet == "true";
+        // GetNodeAttributeOrDefault<string>(paramsNode, "triplet", is_triplet, "false");
+        // m_is_triplet_experiment = is_triplet == "true";
     }
     catch(...){
         std::cout << "error with loading params tag in CPrintExperimentFunctions class" << std::endl;

@@ -4,7 +4,7 @@ set(greedy_meeting_points_loop_functions_SOURCES greedy_meeting_points_loop_func
 add_library(greedy_meeting_points_loop_functions SHARED ${greedy_meeting_points_loop_functions_SOURCES})
 target_link_libraries(greedy_meeting_points_loop_functions
   abstract_controllers
-  basic_loop_functions
+  print_experiment_loop_fuctions
   robust_matching
   meeting_points
   minimum_cost_perfect_matching

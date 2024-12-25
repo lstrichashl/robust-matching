@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="1500" ticks_per_second="10" random_seed="249973" /> //204484
+    <experiment length="1500" ticks_per_second="10" random_seed="0" />
   </framework>
   
   <!-- *************** -->
@@ -27,7 +27,7 @@
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
-                       no_turn_angle_threshold="5"
+                       no_turn_angle_threshold="20"
                        max_speed="5" />
       </params>
     </greedy_meeting_point_controller>
@@ -113,16 +113,16 @@
           log_file_path="tmp"
         />
         <distribute_max_range range="0.5" arena_size="4.0">
-          <robot quantity="20">
+          <robot quantity="10">
               <e-puck2 id="non_faulty" rab_range="0.5" rab_data_size="4">
                   <controller config="greedy_meeting_points"></controller>
               </e-puck2>
           </robot>
-          <!-- <robot quantity="0">
+          <robot quantity="10">
             <e-puck2 id="faulty" rab_range="0.5" rab_data_size="4">
-                <controller config="walk_away"></controller>
+                <controller config="greedy_crash"></controller>
             </e-puck2>
-        </robot> -->
+        </robot>
       </distribute_max_range>
   </loop_functions>
 

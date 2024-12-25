@@ -25,7 +25,7 @@ CVector2 CVirtualForces::FlockingVector() {
                 localAttractionForce += CVector2(fLJ, tMsgs[i].HorizontalBearing);
             }
             else {
-                Real force = GaziForce(tMsgs[i].Range);
+                Real force = GaziRepultion(tMsgs[i].Range);
                 gaziForce += CVector2(force, tMsgs[i].HorizontalBearing);
             }
         }

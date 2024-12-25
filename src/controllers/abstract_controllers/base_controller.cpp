@@ -73,7 +73,6 @@ void BaseConrtoller::ControlStep(){
     }
     m_pcRABAct->SetData(0, m_eState);
    UInt8 id = stoi(GetId());
-   cout << id << endl;
     m_pcRABAct->SetData(1, id);
     if(m_eState == STATE_PAIRED){
       m_heading = CVector2::ZERO;
@@ -90,7 +89,13 @@ void BaseConrtoller::ControlStep(){
 void BaseConrtoller::SetWheelSpeedsFromVector(const CVector2& c_heading) {
    CRadians cHeadingAngle = c_heading.Angle().SignedNormalize();
    Real fHeadingLength = c_heading.Length();
-   Real fBaseAngularWheelSpeed = Min<Real>(fHeadingLength, m_sWheelTurningParams.MaxSpeed);
+   Real fBaseAngularWheelSpeed;
+   if (fHeadingLength > 0){
+      fBaseAngularWheelSpeed = 2;
+   }
+   else{
+      fBaseAngularWheelSpeed = 0;
+   }
    //  std::cout << fBaseAngularWheelSpeed << std::endl;
 
    if(m_sWheelTurningParams.TurningMechanism == SWheelTurningParams::HARD_TURN) {

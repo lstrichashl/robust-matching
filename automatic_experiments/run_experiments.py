@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 from multiprocessing.pool import ThreadPool
 from functools import reduce
-from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm, KeepDistance, VirtualForcesWalkAway, AlgoMatchingWalkAway, VirtualForcesRandom, VirtualForcesRandomCrash, AlgoMatchingCrash,  GreedyMeetingPoint
+from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm, KeepDistance, VirtualForcesWalkAway, AlgoMatchingWalkAway, VirtualForcesRandom, VirtualForcesRandomCrash, AlgoMatchingCrash,  GreedyMeetingPoints, GreedyMeetingPointsCrash
 import json
 import uuid
 from tqdm import tqdm
@@ -19,7 +19,7 @@ def work(tmp_file_path):
     process = subprocess.Popen(['argos3', '-c', tmp_file_path], stdout=subprocess.DEVNULL)
     process.wait()
     process.kill()
-    # os.remove(tmp_file_path)
+    os.remove(tmp_file_path)
 
 def build():
     os.system(f'cd {base_dir}/build && make')
@@ -29,7 +29,7 @@ def create_all_files(non_faulty_algorithm:NonFaultyAlgorithm, faulty_algorithm:F
     id = uuid.uuid4()
     experiments_folder = f'{base_dir}/automatic_experiments/results/{run_tag}/{non_faulty_algorithm.name}_{faulty_algorithm.name}'
     for random_seed in range(1,number_of_test_runs+1):
-        for faulty_count in range(0,1):
+        for faulty_count in range(5,6):
             experiment = Experiment(
                 non_faulty_count=n_robots-faulty_count,
                 faulty_count=faulty_count,
@@ -66,13 +66,14 @@ def main():
     for n_robots, range in tqdm(product(all_robots,all_range)):
         print(f"{n_robots=} {range=}")
         tp = ThreadPool(num)
-        run_tag = f"fixed_velocity_random_orientation_randomCommitedMovement/connected/range_{range}_robots_{n_robots}"
+        run_tag = f"final/connected/range_{range}_robots_{n_robots}"
 
-        # non_faulty_algorithms = [
-        #     AlgoMatching(is_commited=True, range=range),
-        #     AlgoMatching(is_commited=False, name="repeated", repeate_interval=10, range=range),
-        #     VirtualForcesRandom(range=range)
-        # ]
+        non_faulty_algorithms = [
+            AlgoMatching(is_commited=True, range=range),
+            AlgoMatching(is_commited=False, name="repeated", repeate_interval=10, range=range),
+            VirtualForcesRandom(range=range),
+            #GreedyMeetingPoints(range=range)
+        ]
         # faulty_algorithms = [
         #     VirtualForcesRandomCrash(range=range, start_crash_time=0,end_crash_time=50),
         #     VirtualForcesRandomCrash(range=range, start_crash_time=50,end_crash_time=100),
@@ -91,14 +92,15 @@ def main():
         #     AlgoMatchingCrash(range=range, start_crash_time=250,end_crash_time=300)
         # ]
         faulty_algorithms = [
-            # AlgoMatchingWalkAway(range=range),
+            AlgoMatchingWalkAway(range=range),
             Crash(range=range),
-            # KeepDistance(range=range),
-            # VirtualForcesWalkAway(range=range),
+            KeepDistance(range=range),
+            VirtualForcesWalkAway(range=range),
+            #GreedyMeetingPointsCrash(range=range)
         ]
-        non_faulty_algorithms = [
-            GreedyMeetingPoint(range=range)
-        ]
+        # non_faulty_algorithms = [
+        #     GreedyMeetingPoints(range=range)
+        # ]
         file_pathes = []
         for nf_algo, f_algo in product(non_faulty_algorithms, faulty_algorithms):
             file_pathes += create_all_files(number_of_test_runs=50, n_robots=n_robots,non_faulty_algorithm=nf_algo, faulty_algorithm=f_algo, run_tag=run_tag)
