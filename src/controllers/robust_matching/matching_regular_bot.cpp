@@ -13,7 +13,7 @@ CRobustMatching::CRobustMatching():BaseConrtoller(){
 
 
 void CRobustMatching::ControlStep() {
-   m_heading = m_heading.Normalize() * 5;
+   m_heading = m_heading.Normalize();
    BaseConrtoller::ControlStep();
 }
 

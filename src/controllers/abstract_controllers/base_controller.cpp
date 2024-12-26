@@ -89,13 +89,7 @@ void BaseConrtoller::ControlStep(){
 void BaseConrtoller::SetWheelSpeedsFromVector(const CVector2& c_heading) {
    CRadians cHeadingAngle = c_heading.Angle().SignedNormalize();
    Real fHeadingLength = c_heading.Length();
-   Real fBaseAngularWheelSpeed;
-   if (fHeadingLength > 0){
-      fBaseAngularWheelSpeed = 2;
-   }
-   else{
-      fBaseAngularWheelSpeed = 0;
-   }
+   Real fBaseAngularWheelSpeed = Min<Real>(fHeadingLength, m_sWheelTurningParams.MaxSpeed);
    //  std::cout << fBaseAngularWheelSpeed << std::endl;
 
    if(m_sWheelTurningParams.TurningMechanism == SWheelTurningParams::HARD_TURN) {

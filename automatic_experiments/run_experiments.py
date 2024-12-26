@@ -92,11 +92,10 @@ def main():
         #     AlgoMatchingCrash(range=range, start_crash_time=250,end_crash_time=300)
         # ]
         faulty_algorithms = [
-            AlgoMatchingWalkAway(range=range),
-            Crash(range=range),
+            # AlgoMatchingWalkAway(range=range),
+            # Crash(range=range),
             KeepDistance(range=range),
-            VirtualForcesWalkAway(range=range),
-            #GreedyMeetingPointsCrash(range=range)
+            # VirtualForcesWalkAway(range=range),
         ]
         # non_faulty_algorithms = [
         #     GreedyMeetingPoints(range=range)

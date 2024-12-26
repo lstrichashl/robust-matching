@@ -163,11 +163,11 @@ def plot_compare_algoithms(number_of_robots, f_count, vis_range):
         } for f_algorithm in f_algorithms
     ]
 
-    plots = [plots[0]]
+    plots = [plots[1]]
     print(plots[0]["title"])
     for v in plots:
         for result in v["data"]:
-            _,_,pairs_times, times_pairs = stat_experiment_set(result["dir"], cuttime=1500)
+            _,_,pairs_times, times_pairs = stat_experiment_set(result["dir"], cuttime=1100)
             means,stds = {},{}
             for time, values in times_pairs.items():
                 means[time] = values['mean']
@@ -180,7 +180,7 @@ def plot_compare_algoithms(number_of_robots, f_count, vis_range):
         # plt.set_title(v["title"])
         plt.xlabel("time")
         plt.ylabel("pairs")
-        plt.yticks(range(0,11))
+        plt.yticks(range(0,7))
     plt.show()
     # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/number_of_pairs_by_time_algorithms_range{vis_range}_robots{number_of_robots}_faulty{f_count}_{v['title']}.png",bbox_inches='tight')
 
