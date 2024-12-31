@@ -10,7 +10,6 @@ CMeetingPoint::CMeetingPoint():
    m_pcPosAct(NULL),
    m_pcPosSens(NULL),
    BaseConrtoller(){
-   m_typename = "non_faulty";
    PAIRING_THRESHOLD = 0.07;
 }
 

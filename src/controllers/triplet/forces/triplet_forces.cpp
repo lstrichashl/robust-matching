@@ -19,7 +19,7 @@ void CTripletForces::ControlStep() {
     if(m_eState != STATE_ALONE){
       m_heading = CVector2::ZERO;
     }
-   if(m_is_crash){
+   if(fault_type == crash){
       m_heading = CVector2::ZERO;
       m_pcLedAct->SetAllRGBColors(CColor::RED);
       m_pcLedAct->SetAllRedLeds(true);

@@ -20,6 +20,13 @@ enum EState {
    STATE_TRIPLET
 };
 
+enum FaultyType{
+   nonfaulty = 0,
+   crash,
+   keep_distance,
+   walk_away
+};
+
 class BaseConrtoller: public CCI_Controller{
 
 public:
@@ -30,6 +37,7 @@ public:
    virtual void SetWheelSpeedsFromVector(const CVector2& c_heading);
    virtual bool ShouldTransitionToPaired();
    virtual bool ShouldTransitionToAlone();
+   virtual CVector2 KeepDistanceFlockingVector();
    virtual void ControlStep();
    virtual std::string GetType(){
       return m_typename;
@@ -43,7 +51,6 @@ public:
    UInt32 m_time;
    CVector2 m_position;
    CQuaternion m_orientation;
-   bool m_is_crash;
    int m_crash_starttime = 100000000;
    int m_crash_endtime = 100000000;
    int m_crash_time;
@@ -68,12 +75,20 @@ public:
    };
    virtual CVector2 RandomWalk();
    std::set<int> m_matched_robot_indexes;
+   std::set<int> m_rejected_sin_robot_ids;
    string matched_robot_id;
    virtual void NewIteration() {}
    CVector2 m_meeting_point;
    string m_typename;
    int time_for_wait_for_parter_in_target = 0;
 
+   FaultyType fault_type;
+   
+   virtual Real LennardJonesPotential(double distance){
+      double epsilon = 10;
+      double theta = 15;
+      return  -epsilon * (::pow(theta/distance, 4) - ::pow(theta/distance, 2));
+   }
 protected:
     EState m_eState;
     CCI_DifferentialSteeringActuator *m_pcWheels;

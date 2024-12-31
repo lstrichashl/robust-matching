@@ -168,7 +168,7 @@ void CBasicLoopFunctions::PreStep(){
     for(unsigned i = 0; i < m_robots.size(); i++){
         BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
         if(cController1.m_crash_time < time){
-            cController1.m_is_crash = true;
+            cController1.fault_type = crash;
             cController1.m_typename = "crash";
         }
     }

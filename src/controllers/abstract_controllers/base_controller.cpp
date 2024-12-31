@@ -5,8 +5,8 @@ BaseConrtoller::BaseConrtoller():
    m_pcWheels(NULL),
    m_pcLedAct(NULL) {
       pcRNG = CRandom::CreateRNG("argos");
-      m_is_crash = false;
       m_new_id = "";
+      fault_type = nonfaulty;
    }
 
 void BaseConrtoller::Init(TConfigurationNode& t_node){
@@ -77,10 +77,15 @@ void BaseConrtoller::ControlStep(){
     if(m_eState == STATE_PAIRED){
       m_heading = CVector2::ZERO;
     }
-   if(m_is_crash){
-      m_heading = CVector2::ZERO;
+   if(fault_type != nonfaulty){
       m_pcLedAct->SetAllRGBColors(CColor::RED);
       m_pcLedAct->SetAllRedLeds(true);
+   }
+   if(fault_type == crash){
+      m_heading = CVector2::ZERO;
+   }
+   if(fault_type == walk_away){
+      m_heading = -m_heading.Normalize();
    }
    SetWheelSpeedsFromVector(m_heading);
 }
@@ -208,4 +213,28 @@ CVector2 BaseConrtoller::RandomWalk(){
    m_orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
    to_point.Rotate(-cZAngle);
    return to_point.Normalize();
+}
+
+
+CVector2 BaseConrtoller::KeepDistanceFlockingVector(){
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+    if(!tMsgs.empty()) {
+        CVector2 cAccum;
+        Real fLJ;
+        for(size_t i = 0; i < tMsgs.size(); ++i) {
+            double distance = tMsgs[i].Range;
+            if(tMsgs[i].Data[0] == STATE_ALONE) {
+                fLJ = LennardJonesPotential(tMsgs[i].Range);
+                cAccum += CVector2(fLJ, tMsgs[i].HorizontalBearing);
+            }
+            else{
+                fLJ = distance * (0.0000005 - 40 * ::pow(M_E, -::pow(distance,2)/50)); // Gazi force
+                cAccum += CVector2(fLJ, tMsgs[i].HorizontalBearing);
+            }
+        }
+        return cAccum;
+    }
+    else {
+        return CVector2();
+    }
 }

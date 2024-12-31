@@ -6,7 +6,7 @@ void CCrashController::Reset(){
     m_pcLedAct->SetAllRGBColors(CColor::RED);
     m_pcLedAct->SetAllRedLeds(true);
     m_heading = CVector2::ZERO;
-    m_is_crash = true;
+    fault_type = crash;
 }
 
 void CCrashController::ControlStep(){
