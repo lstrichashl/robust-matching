@@ -76,22 +76,22 @@ class AlgoMatching(NonFaultyAlgorithm):
             "params": self.get_loop_functions_params()
         }
 
-class MeetingPoints(NonFaultyAlgorithm):
-    def __init__(self, range: int) -> None:
-        super().__init__(name="meeting_points",template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos', range=range)
-        self.name = "meeting_point"
-        self.controller_type = "meeting_point"
-        self.robot_type = "eye-bot"
-        self.arena_size = 16
+# class MeetingPoints(NonFaultyAlgorithm):
+#     def __init__(self, range: int) -> None:
+#         super().__init__(name="meeting_points",template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos', range=range)
+#         self.name = "meeting_point"
+#         self.controller_type = "meeting_point"
+#         self.robot_type = "eye-bot"
+#         self.arena_size = 16
 
-    def get_loop_functions(self):
-        return {
-            "@library":  f'{base_dir}/build/src/loop_functions/iterated_meeting_points_loop_functions/libiterated_meeting_points_loop_functions',
-            "@label": "iterated_meeting_points_loop_functions",
-            "params": self.get_loop_functions_params()
-        }
+#     def get_loop_functions(self):
+#         return {
+#             "@library":  f'{base_dir}/build/src/loop_functions/iterated_meeting_points_loop_functions/libiterated_meeting_points_loop_functions',
+#             "@label": "iterated_meeting_points_loop_functions",
+#             "params": self.get_loop_functions_params()
+#         }
 
-class MeetingPointEpuck(NonFaultyAlgorithm):
+class MeetingPointsEpuck(NonFaultyAlgorithm):
     def __init__(self, range: int) -> None:
         super().__init__(name="meeting_point_epuck",template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos', range=range)
         self.name = "meeting_point_epuck"
@@ -171,8 +171,8 @@ def algorithmFactory(name, range) -> Algorithm:
         return KeepDistance(range=range)
     elif name == "virtual_forces_random":
         return VirtualForcesRandom(range=range)
-    elif name == "meeting_points":
-        return MeetingPointEpuck(range=range)
+    elif name == "meeting_points_epuck":
+        return MeetingPointsEpuck(range=range)
     elif name == "meeting_points_crash":
         return MeetingPointsCrash(range=range)
     elif name == "greedy_meeting_points":

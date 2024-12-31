@@ -11,7 +11,7 @@ set(iterated_meeting_points_loop_functions_SOURCES iterated_meeting_points_loop_
 add_library(iterated_meeting_points_loop_functions SHARED ${iterated_meeting_points_loop_functions_SOURCES})
 target_link_libraries(iterated_meeting_points_loop_functions
   abstract_controllers
-  basic_loop_functions
+  print_experiment_loop_fuctions
   robust_matching
   meeting_points
   minimum_cost_perfect_matching

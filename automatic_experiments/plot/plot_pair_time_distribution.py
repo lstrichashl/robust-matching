@@ -151,7 +151,7 @@ def plot_number_of_robots_on_x(range, f_percent):
 
 
 def plot_compare_algoithms(number_of_robots, f_count, vis_range):
-    nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
+    nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated", "greedy_meeting_points", "meeting_point_epuck"]
     f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
     plots = [
         {
@@ -167,7 +167,7 @@ def plot_compare_algoithms(number_of_robots, f_count, vis_range):
     print(plots[0]["title"])
     for v in plots:
         for result in v["data"]:
-            _,_,pairs_times, times_pairs = stat_experiment_set(result["dir"], cuttime=1100)
+            _,_,pairs_times, times_pairs = stat_experiment_set(result["dir"], cuttime=2000)
             means,stds = {},{}
             for time, values in times_pairs.items():
                 means[time] = values['mean']
@@ -180,7 +180,7 @@ def plot_compare_algoithms(number_of_robots, f_count, vis_range):
         # plt.set_title(v["title"])
         plt.xlabel("time")
         plt.ylabel("pairs")
-        plt.yticks(range(0,7))
+        plt.yticks(range(0,8))
     plt.show()
     # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/number_of_pairs_by_time_algorithms_range{vis_range}_robots{number_of_robots}_faulty{f_count}_{v['title']}.png",bbox_inches='tight')
 

@@ -3,6 +3,7 @@ import json
 import numpy as np
 from tqdm import tqdm
 from itertools import product
+import matplotlib.pyplot as plt
 
 def open_file(path):
     f = open(path, 'r')
@@ -183,9 +184,11 @@ def get_time_to_stable(results):
 def key_to_color(key:str):
     colors = {
         # "virtual_forces_random":"#ff7f0e",
-        "Virtual Forces":"#1f77b4",
-        "Committed": "#ff7f0e",
-        "IP": "#2ca02c"
+        "Virtual Forces":plt.cm.tab10.colors[0],
+        "Committed": plt.cm.tab10.colors[1],
+        "IP": plt.cm.tab10.colors[2],
+        "Greedy Meeting Points": plt.cm.tab10.colors[3],
+        "Meeting Points": plt.cm.tab10.colors[4],
     }
     return colors.get(key, "#ffffff")
 
@@ -197,7 +200,9 @@ def algo_to_label(algo):
         "algo_matching_walk_away": "Matching Walk Away",
         "crash": "Crash",
         "virtual_forces_walk_away": "Virtual Forces Walk Away",
-        "repeated": "IP"
+        "repeated": "IP",
+        "greedy_meeting_points": "Greedy Meeting Points",
+        "meeting_point_epuck": "Meeting Points"
     }
     return algo_to_label.get(algo, algo)
 

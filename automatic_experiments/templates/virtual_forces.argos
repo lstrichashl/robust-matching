@@ -177,39 +177,7 @@
                        max_speed="1" />
       </params>
     </adverserial_opposite_direction_controller>
-    <meeting_point_controller id="meeting_point" library="build/src/controllers/meeting_points/libmeeting_points.so">
-      <actuators>
-        <quadrotor_position implementation="default" />
-        <range_and_bearing implementation="default" />
-      </actuators>
-      <sensors>
-        <positioning implementation="default" />
-        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
-      </sensors>
-      <params>
-        <wheel_turning hard_turn_angle_threshold="90"
-                       soft_turn_angle_threshold="70"
-                       no_turn_angle_threshold="10"
-                       max_speed="1" />
-      </params>
-    </meeting_point_controller>
-    <meeting_point_crash_controller id="meeting_point_crash" library="build/src/controllers/meeting_points/libmeeting_points.so">
-      <actuators>
-        <quadrotor_position implementation="default" />
-        <range_and_bearing implementation="default" />
-      </actuators>
-      <sensors>
-        <positioning implementation="default" />
-        <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
-      </sensors>
-      <params>
-        <wheel_turning hard_turn_angle_threshold="90"
-                       soft_turn_angle_threshold="70"
-                       no_turn_angle_threshold="10"
-                       max_speed="1" />
-      </params>
-    </meeting_point_crash_controller>
-       <meeting_point_epuck_controller id="meeting_point_epuck" library="build/src/controllers/meeting_points/libmeeting_points.so">
+    <meeting_point_epuck_controller id="meeting_point_epuck" library="build/src/controllers/meeting_points/libmeeting_points.so">
       <actuators>
           <differential_steering implementation="default" />
           <epuck2_leds implementation="default" medium="leds" />
@@ -220,13 +188,13 @@
           <epuck2_battery implementation="default"/>
           <range_and_bearing implementation="medium" medium="rab" show_rays="false" />
         </sensors>
-    <params>
-      <wheel_turning hard_turn_angle_threshold="90"
-                     soft_turn_angle_threshold="70"
-                     no_turn_angle_threshold="10"
-                     max_speed="5" />
-    </params>
-  </meeting_point_epuck_controller>
+      <params>
+        <wheel_turning hard_turn_angle_threshold="90"
+                      soft_turn_angle_threshold="70"
+                      no_turn_angle_threshold="10"
+                      max_speed="1" />
+      </params>
+    </meeting_point_epuck_controller>
     <greedy_meeting_point_controller id="greedy_meeting_points" library="build/src/controllers/meeting_points/libmeeting_points.so">
         <actuators>
             <differential_steering implementation="default" />
@@ -241,8 +209,8 @@
       <params>
         <wheel_turning hard_turn_angle_threshold="90"
                        soft_turn_angle_threshold="70"
-                       no_turn_angle_threshold="20"
-                       max_speed="5" />
+                       no_turn_angle_threshold="10"
+                       max_speed="1" />
       </params>
     </greedy_meeting_point_controller>
     <greedy_meeting_point_controller id="greedy_meeting_points_crash" library="build/src/controllers/abstract_controllers/libabstract_controllers.so">

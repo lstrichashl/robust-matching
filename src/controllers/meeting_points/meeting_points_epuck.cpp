@@ -50,32 +50,33 @@ void CMeetingPointEpuck::ControlStep() {
     //     m_pcWheels->SetLinearVelocity(0.0f, 0.0f);
     // }
 
-    int diffRight = GetEncoderDiffRight();
-    int diffLeft = GetEncoderDiffLeft();
+    // int diffRight = GetEncoderDiffRight();
+    // int diffLeft = GetEncoderDiffLeft();
 
-    Real orientationChange = float(diffRight-diffLeft) * CRadians::PI.GetValue() / 1292.7f;
-    m_relative_orientation += orientationChange;
-    if(m_relative_orientation > CRadians::PI.GetValue()){
-        m_relative_orientation -= 2 * CRadians::PI.GetValue();
-    }
-    if(m_relative_orientation < -CRadians::PI.GetValue()){
-        m_relative_orientation += 2 * CRadians::PI.GetValue();
-    }
+    // Real orientationChange = float(diffRight-diffLeft) * CRadians::PI.GetValue() / 1292.7f;
+    // m_relative_orientation += orientationChange;
+    // if(m_relative_orientation > CRadians::PI.GetValue()){
+    //     m_relative_orientation -= 2 * CRadians::PI.GetValue();
+    // }
+    // if(m_relative_orientation < -CRadians::PI.GetValue()){
+    //     m_relative_orientation += 2 * CRadians::PI.GetValue();
+    // }
 
 
-    Real distanceChange = float(diffRight+diffLeft) * CRadians::PI.GetValue() * 0.0205f;
-    m_fDistance += distanceChange;
+    // Real distanceChange = float(diffRight+diffLeft) * CRadians::PI.GetValue() * 0.0205f;
+    // m_fDistance += distanceChange;
     
 
-    CVector2 changevector(-distanceChange/1000, CRadians(m_relative_orientation));
-    m_encoder_position -= changevector;
+    // CVector2 changevector(-distanceChange/1000, CRadians(m_relative_orientation));
+    // m_encoder_position -= changevector;
     // m_heading = ToMateVector(m_encoder_position,m_meeting_point);
     // cout << m_heading << endl;
-    if(m_heading.Length()-PAIRING_THRESHOLD/2 < 0) {
+    Real distance_to_meeting_point = (m_meeting_point - m_position).Length();
+    if(distance_to_meeting_point-PAIRING_THRESHOLD/2 < 0) {
         m_heading = CVector2::ZERO;
     }
     else{
-        m_heading = m_heading.Normalize() * 5;
+        m_heading = m_heading.Normalize();
     }
     m_heading += FlockingVector();
     BaseConrtoller::ControlStep();
@@ -173,8 +174,8 @@ Real GaziRepultion(double distance){
     if(distance > 20){
         return 0;
     }
-    double b = 5;
-    double c = 20;
+    double b = 7;
+    double c = 15;
     double v = distance * (- b * ::pow(M_E, -::pow(distance,2)/c));
     return v;
 }

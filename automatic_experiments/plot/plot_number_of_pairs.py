@@ -21,14 +21,16 @@ def plot_data(data, number_of_robots):
             stats = stat_all(results_path = result["dir"], from_cache=True)
             means,stds = get_number_of_pairs(stats)
             plt.errorbar(list(means.keys()), list(means.values()), list(stds.values()), fmt="o", label=result["label"], capsize=5, color=key_to_color(result["label"]))
-        # plt.plot(f_range, np.array(worst_case), "--", label="worst", color="red", alpha=0.3)
-        # plt.plot(f_range, np.array(best_case), "--", label="best", color="green", alpha=0.3)
+        plt.plot(f_range, np.array(worst_case), "--", label="worst", color="red", alpha=0.3)
+        plt.plot(f_range, np.array(best_case), "--", label="best", color="green", alpha=0.3)
         plt.plot(f_range, np.array(expected_commited), "--", label="expected", color="gray", alpha=0.3)
         plt.grid(linestyle = ':')
         plt.legend()
         # plt.title(v["title"])
         plt.xlabel("faults")
         plt.ylabel("pairs")
+        plt.yticks(range(0,11))
+        plt.xticks(range(0,11))
         i += 1
 
 
@@ -52,11 +54,11 @@ def plot_compare_faulty_algorithms(number_of_robots: int, range):
                 "label": algo_to_label(metadata["non_faulty_algorithm"]['name'])
             })
     # fig, axs = plt.subplots(1)
-    k = list(plots.keys())[0]
+    k = list(plots.keys())[2]
     print(k)
     plot_data({k:plots[k]}, number_of_robots)
-    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/plot_compare_faults_range{range}_robots{number_of_robots}_{k}.png", bbox_inches='tight')
-    # plt.show() 
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/plot_compare_faults_range{range}_robots{number_of_robots}_{k}.png", bbox_inches='tight')
+    plt.show() 
 
 def plot_compare_range(number_of_robots):
     nf_algorithm = ["virtual_forces_random", "algo_matching"]

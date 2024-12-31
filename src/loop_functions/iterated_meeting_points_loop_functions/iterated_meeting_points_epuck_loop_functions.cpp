@@ -4,7 +4,7 @@
 CIteratedMeetingPointsEpuck::CIteratedMeetingPointsEpuck():
     m_matching(0),
     m_costs(0),
-    CBasicLoopFunctions()
+    CPrintExperimentFunctions()
     {
         default_robot_type = "e-puck2";
     }
@@ -113,31 +113,16 @@ void CIteratedMeetingPointsEpuck::UpdateMatching(){
     vector<CEntity*> signle_robots = m_robots;
     try{
         Graph* g = GenerateGraph3(signle_robots, 20000, m_robotGraph, m_matching);
-        // for(int i = 0; i < m_robots.size(); i++){
-        //     string result1;
-        //     for(const auto& elem : g->AdjList(i)){
-        //         result1 += std::to_string(elem) + " ";
-        //     }
-        //     cout << i << ": " << result1 << endl;
-        // }
-        cout << g->edges.size() << endl;
-        for(int i = 0; i < g->edges.size(); i++){
-            cout << g->edges[i].first << " " << g->edges[i].second << endl;
-        }
         UInt32 time = GetSpace().GetSimulationClock();
-        if(true){
-
         MatchingResult result = GetMatchingResult(g, signle_robots, 20000);
 
         m_matching = result._matching;
         m_robotGraph = result._graph;
         m_robots_in_matching = result._robots;
         vector<int> matching = result._matching;
-        cout << "matching:" << endl;
         m_matching_max_cost = -1;
         for(vector<int>::iterator it = matching.begin(); it != matching.end(); it++){
             pair<int, int> edge = m_robotGraph.GetEdge( *it );
-            cout << edge.first << "," << edge.second << endl;
             double cost = m_robotGraph.GetCost(edge.first, edge.second);
             if(cost > m_matching_max_cost) {
                 m_matching_max_cost = cost;
@@ -152,16 +137,12 @@ void CIteratedMeetingPointsEpuck::UpdateMatching(){
             BaseConrtoller& cController2 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(robot2)->GetController());
             cController1.m_meeting_point = GetMeetingPoint(robot1, robot2);
             cController2.m_meeting_point = GetMeetingPoint(robot2, robot1);
-            if(edge.first == 3 || edge.second == 3){
-                cout << edge.first << "," << edge.second << endl;
-            }
             cController1.m_matched_robot_indexes.insert(edge.second);
             cController2.m_matched_robot_indexes.insert(edge.first);
             cController1.matched_robot_id = cController2.GetId();
             cController2.matched_robot_id = cController1.GetId();
             cController1.NewIteration();
             cController2.NewIteration();
-        }
         }
     }
    catch(std::exception& ex) {
@@ -181,9 +162,9 @@ CVector2 ToMateVector2(CEntity* robot1, CVector2 meeting_point) {
 void CIteratedMeetingPointsEpuck::PreStep(){
     CBasicLoopFunctions::PreStep();
     UInt32 time = GetSpace().GetSimulationClock();
-    if(time == 1 || time % 150 == 0){ // time-m_start_time_iterval > m_matching_max_cost * 150
-        cout << "new iterval" << endl;
+    if(time == 1 || time - m_start_time_iterval > m_matching_max_cost * 750){
         m_start_time_iterval = time;
+        // cout << m_start_time_iterval << "," <<  m_matching_max_cost * 750 << endl;
         UpdateMatching();
     }
 

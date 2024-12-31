@@ -5,12 +5,13 @@ bool sortBySecond(const pair<int,Real>& a, const pair<int,Real>& b){
     return a.second < b.second;
 }
 
+
 Real GaziRepultion2(double distance){
     if(distance > 20){
         return 0;
     }
-    double b = 1;
-    double c = 1;
+    double b = 7;
+    double c = 15;
     double v = distance * (- b * ::pow(M_E, -::pow(distance,2)/c));
     return v;
 }
@@ -29,11 +30,13 @@ CGreedyMeetingPoint::CGreedyMeetingPoint():CMeetingPointEpuck(){
     matched_robot_id = "-1";
 }
 
-
 void CGreedyMeetingPoint::ControlStep(){
-    string robot_log_id = "None";
+    string robot_log_id = "5";
     const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
     if(m_eState == STATE_ALONE){
+        if(other_try_to_sin_robot_id != -1){
+            m_rejected_sin_robot_ids.insert(other_try_to_sin_robot_id);
+        }
         if(handshake == IDLE){
             if(! tMsgs.empty()) {
                 vector<pair<int,Real>> neighboring_idle_robots;
@@ -49,8 +52,17 @@ void CGreedyMeetingPoint::ControlStep(){
                         neighboring_idle_robots.push_back(make_pair(tMsgs[i].Data[1], tMsgs[i].Range));
                     }
                 }
+                Real rand = pcRNG->Uniform(CRange<Real>(0,1));
+                if(rand < 0.2){
+                    m_rejected_sin_robot_ids = {};
+                }
                 if(neighboring_sin_me_robots.size() > 0){
                     std::sort(neighboring_sin_me_robots.begin(), neighboring_sin_me_robots.end(), sortBySecond);
+                    neighboring_sin_me_robots.erase(std::remove_if(neighboring_sin_me_robots.begin(), neighboring_sin_me_robots.end(),
+                                                                [this](const std::pair<int, double>& x){
+                                                                    return m_rejected_sin_robot_ids.find(x.first) != m_rejected_sin_robot_ids.end();
+                                                                }),
+                                                    neighboring_sin_me_robots.end());
                     for(int j = 0; j < neighboring_sin_me_robots.size(); j++){
                         if(m_matched_robot_indexes.find(neighboring_sin_me_robots[j].first) == m_matched_robot_indexes.end()){
                             handshake = SINACK;
@@ -64,6 +76,14 @@ void CGreedyMeetingPoint::ControlStep(){
                 }
                 else if(neighboring_idle_robots.size() > 0){
                     std::sort(neighboring_idle_robots.begin(), neighboring_idle_robots.end(), sortBySecond);
+                    if(m_rejected_sin_robot_ids.size() == neighboring_sin_me_robots.size()){
+                        m_rejected_sin_robot_ids = {};
+                    }
+                    neighboring_idle_robots.erase(std::remove_if(neighboring_idle_robots.begin(), neighboring_idle_robots.end(),
+                                                                [this](const std::pair<int, double>& x){
+                                                                    return m_rejected_sin_robot_ids.find(x.first) != m_rejected_sin_robot_ids.end();
+                                                                }),
+                                                    neighboring_idle_robots.end());
                     for(int j = 0; j < neighboring_idle_robots.size(); j++){
                         if(m_matched_robot_indexes.find(neighboring_idle_robots[j].first) == m_matched_robot_indexes.end()){
                             handshake = SIN;
