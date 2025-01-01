@@ -6,7 +6,6 @@
 
 CTripletForces::CTripletForces():
     BaseConrtoller(){
-    m_typename = "non_faulty";
     number_of_robots_in_group = 1;
 }
 

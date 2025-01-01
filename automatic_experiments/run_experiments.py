@@ -19,7 +19,7 @@ def work(tmp_file_path):
     process = subprocess.Popen(['argos3', '-c', tmp_file_path], stdout=subprocess.DEVNULL)
     process.wait()
     process.kill()
-    os.remove(tmp_file_path)
+    # os.remove(tmp_file_path)
 
 def build():
     os.system(f'cd {base_dir}/build && make')
@@ -70,7 +70,7 @@ def main():
 
         non_faulty_algorithms = [
             AlgoMatching(is_commited=True, range=range),
-            AlgoMatching(is_commited=False, name="repeated", repeate_interval=10, range=range),
+            AlgoMatching(is_commited=False, id="repeated", repeate_interval=10, range=range),
             VirtualForcesRandom(range=range),
             GreedyMeetingPoints(range=range),
             MeetingPointsEpuck(range=range)

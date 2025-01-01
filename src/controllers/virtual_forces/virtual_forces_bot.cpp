@@ -6,7 +6,6 @@
 
 CVirtualForces::CVirtualForces():
     BaseConrtoller(){
-    m_typename = "non_faulty";
 }
 
 void CVirtualForces::ControlStep() {

@@ -2,7 +2,7 @@
 
 CGreedyMeetingPointWalkAWay::CGreedyMeetingPointWalkAWay()
     :CGreedyMeetingPoint(){
-    m_typename = "CGreedyMeetingPointWalkAWay";
+    fault_type = virtual_forces_walk_away;
 }
 
 void CGreedyMeetingPointWalkAWay::Reset() {

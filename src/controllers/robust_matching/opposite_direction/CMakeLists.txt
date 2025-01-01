@@ -1,6 +1,0 @@
-add_library(opposite_direction MODULE opposite_direction.h opposite_direction.cpp)
-target_link_libraries(opposite_direction
-  robust_matching
-  argos3core_simulator
-  argos3plugin_simulator_epuck2
-  argos3plugin_simulator_genericrobot)

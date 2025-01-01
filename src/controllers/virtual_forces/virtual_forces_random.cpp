@@ -34,4 +34,3 @@ CVector2 CVirtualForcesRandom::FlockingVector() {
 }
 
 REGISTER_CONTROLLER(CVirtualForcesRandom, "virtual_forces_random_controller")
-REGISTER_CONTROLLER(CVirtualForcesRandomCrash, "virtual_forces_random_crash_controller")

@@ -55,7 +55,7 @@ void CBasicLoopFunctions::write_all_logs(vector<string> logs, string params_stri
     std::string robot_types = "[";
     for (unsigned i=0; i<m_robots.size(); i++){
         BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
-        robot_types += "{\"robot_id\":\""+to_string(i)+"\",\"type\":\""+cController1.GetType()+"\"},";
+        robot_types += "{\"robot_id\":\""+to_string(i)+"\",\"type\":\""+toStringFaultType(cController1.fault_type)+"\"},";
     }
     robot_types.pop_back();
     robot_types += "]";
@@ -102,7 +102,7 @@ vector<CEntity*> CBasicLoopFunctions::GetNFRobots(){
     m_nf_robots = vector<CEntity*>();
         for(unsigned i = 0; i < m_robots.size(); i++){
             BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
-            if(cController1.GetType() == "non_faulty"){
+            if(cController1.fault_type == nonfaulty){
                 m_nf_robots.push_back(m_robots[i]);
             }
         }
@@ -169,7 +169,6 @@ void CBasicLoopFunctions::PreStep(){
         BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_robots[i])->GetController());
         if(cController1.m_crash_time < time){
             cController1.fault_type = crash;
-            cController1.m_typename = "crash";
         }
     }
 }

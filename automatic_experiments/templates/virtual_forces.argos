@@ -188,12 +188,12 @@
           <epuck2_battery implementation="default"/>
           <range_and_bearing implementation="medium" medium="rab" show_rays="false" />
         </sensors>
-      <params>
-        <wheel_turning hard_turn_angle_threshold="90"
-                      soft_turn_angle_threshold="70"
-                      no_turn_angle_threshold="10"
-                      max_speed="1" />
-      </params>
+    <params>
+      <wheel_turning hard_turn_angle_threshold="90"
+                     soft_turn_angle_threshold="70"
+                     no_turn_angle_threshold="10"
+                     max_speed="1" />
+    </params>
     </meeting_point_epuck_controller>
     <greedy_meeting_point_controller id="greedy_meeting_points" library="build/src/controllers/meeting_points/libmeeting_points.so">
         <actuators>

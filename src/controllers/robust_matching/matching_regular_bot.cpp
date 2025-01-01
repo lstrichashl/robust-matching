@@ -7,9 +7,7 @@
 #include "math.h"
 
 
-CRobustMatching::CRobustMatching():BaseConrtoller(){
-   m_typename = "non_faulty";
-}
+CRobustMatching::CRobustMatching():BaseConrtoller(){}
 
 
 void CRobustMatching::ControlStep() {
@@ -18,4 +16,3 @@ void CRobustMatching::ControlStep() {
 }
 
 REGISTER_CONTROLLER(CRobustMatching, "robust_matching_controller")
-REGISTER_CONTROLLER(CRobustMatchingCrash, "robust_matching_crash_controller")

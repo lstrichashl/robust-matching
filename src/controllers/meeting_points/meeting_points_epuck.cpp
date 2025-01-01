@@ -8,7 +8,6 @@
 
 CMeetingPointEpuck::CMeetingPointEpuck():
     BaseConrtoller(){
-    m_typename = "non_faulty";
     PAIRING_THRESHOLD = 0.07;
     NewIteration();
 

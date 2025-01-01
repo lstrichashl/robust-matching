@@ -1,6 +1,6 @@
 from run_experiments import work, build
 from multiprocessing.pool import ThreadPool
-from algorithms import Crash, Experiment, Algorithm, VirtualForces, AlgoMatching, NonFaultyAlgorithm, FaultyAlgorithm, algorithmFactory
+from algorithms import *
 from argparse import ArgumentParser, Namespace
 import time
 
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     tp = ThreadPool(1)
     build()
     non_faulty_algorithm = algorithmFactory(options.algorithm, range=options.range)
-    faulty_algorithm = algorithmFactory(options.faulty_algorithm, range=options.range)
+    faulty_algorithm = faultalgorithmFactory(options.faulty_algorithm, nonfaultyalgorithm=non_faulty_algorithm)
     print(options.non_faulty)
     experiment = Experiment(
                 non_faulty_count=options.non_faulty,

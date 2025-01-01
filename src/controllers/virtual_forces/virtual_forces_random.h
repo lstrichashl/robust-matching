@@ -20,24 +20,4 @@ public:
 
 };
 
-class CVirtualForcesRandomCrash: public CVirtualForcesRandom {
-
-public:
-    CVirtualForcesRandomCrash():CVirtualForcesRandom(){
-        m_typename = "crash";
-    }
-
-    void Init(TConfigurationNode& t_node){
-        try{
-            TConfigurationNode& crashnode = GetNode(t_node, "crash");
-            GetNodeAttribute(crashnode, "start_time", m_crash_starttime);
-            GetNodeAttribute(crashnode, "end_time", m_crash_endtime);
-        }
-        catch(CARGoSException& ex) {
-            THROW_ARGOSEXCEPTION_NESTED("Error initializing controller crash parameters.", ex);
-        }
-        CVirtualForcesRandom::Init(t_node);
-    }
-};
-
 #endif

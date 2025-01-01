@@ -6,7 +6,6 @@
 
 CForcesMoving::CForcesMoving():
     BaseConrtoller(){
-    m_typename = "non_faulty";
 }
 
 void CForcesMoving::ControlStep() {

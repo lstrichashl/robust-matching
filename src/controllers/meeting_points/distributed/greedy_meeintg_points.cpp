@@ -31,7 +31,7 @@ CGreedyMeetingPoint::CGreedyMeetingPoint():CMeetingPointEpuck(){
 }
 
 void CGreedyMeetingPoint::ControlStep(){
-    string robot_log_id = "5";
+    string robot_log_id = "None";
     const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
     if(m_eState == STATE_ALONE){
         if(other_try_to_sin_robot_id != -1){
@@ -178,7 +178,7 @@ void CGreedyMeetingPoint::ControlStep(){
 }
 
 void CGreedyMeetingPoint::headingUpdate(){
-    CVector2 random = RandomWalk();
+    CVector2 random = CVector2::ZERO;
     Real heading_d = m_heading.Length() - m_prev_heading.Length();
     m_prev_heading = m_heading;
 

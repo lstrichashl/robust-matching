@@ -45,13 +45,4 @@ void CMeetingPoint::Reset(){
 }
 
 
-CMeetingPointCrash::CMeetingPointCrash():CMeetingPoint(){
-    m_typename = "crash";
-}
-
-void CMeetingPointCrash::ControlStep(){
-    // m_pcPosAct->SetAbsolutePosition(m_target_position);
-}
-
-REGISTER_CONTROLLER(CMeetingPointCrash, "meeting_point_crash_controller")
 REGISTER_CONTROLLER(CMeetingPoint, "meeting_point_controller")

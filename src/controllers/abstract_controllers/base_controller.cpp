@@ -10,10 +10,21 @@ BaseConrtoller::BaseConrtoller():
    }
 
 void BaseConrtoller::Init(TConfigurationNode& t_node){
+   string type = "";
    try{
-      TConfigurationNode&  crash_node = GetNode(t_node, "crash");
-      GetNodeAttribute(crash_node, "m_crash_starttime", m_crash_starttime);
-      GetNodeAttribute(crash_node, "m_crash_endtime", m_crash_endtime);
+      TConfigurationNode&  crash_node = GetNode(t_node, "fault");
+      GetNodeAttribute(crash_node, "type", type);
+      if(type == "crash"){
+         GetNodeAttribute(crash_node, "m_crash_starttime", m_crash_starttime);
+         GetNodeAttribute(crash_node, "m_crash_endtime", m_crash_endtime);
+         fault_type == crash;
+      }
+      else if(type == "keep_distance"){
+         fault_type = keep_distance;
+      }
+      else if(type == "virtual_forces_walk_away"){
+         fault_type = virtual_forces_walk_away;
+      }
    }
    catch(CARGoSException& ex) {
       m_crash_starttime = 100000000;
@@ -84,8 +95,11 @@ void BaseConrtoller::ControlStep(){
    if(fault_type == crash){
       m_heading = CVector2::ZERO;
    }
-   if(fault_type == walk_away){
-      m_heading = -m_heading.Normalize();
+   if(fault_type == virtual_forces_walk_away){
+      m_heading = VirtualForceWalkAwayFlockingVector();
+   }
+   if(fault_type == keep_distance){
+      m_heading = KeepDistanceFlockingVector();
    }
    SetWheelSpeedsFromVector(m_heading);
 }
@@ -237,4 +251,29 @@ CVector2 BaseConrtoller::KeepDistanceFlockingVector(){
     else {
         return CVector2();
     }
+}
+
+CVector2 BaseConrtoller::VirtualForceWalkAwayFlockingVector() {
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+    if(! tMsgs.empty()) {
+        CVector2 cAccum;
+        Real fLJ;
+        for(size_t i = 0; i < tMsgs.size(); ++i) {
+            fLJ = -ElectricalForce(tMsgs[i].Range);
+            cAccum += CVector2(fLJ, tMsgs[i].HorizontalBearing);
+        }
+        return cAccum;
+    }
+    else {
+        return CVector2();
+    }
+}
+
+string toStringFaultType(FaultyType type){
+   switch(type) {
+      case nonfaulty: return "nonfaulty";
+      case crash: return "crash";
+      case virtual_forces_walk_away: return "virtual_forces_walk_away";
+      case keep_distance: return "keep_distance";
+   }
 }

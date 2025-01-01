@@ -22,9 +22,9 @@ enum EState {
 
 enum FaultyType{
    nonfaulty = 0,
-   crash,
-   keep_distance,
-   walk_away
+   crash = 1,
+   keep_distance = 2,
+   virtual_forces_walk_away = 3
 };
 
 class BaseConrtoller: public CCI_Controller{
@@ -38,10 +38,8 @@ public:
    virtual bool ShouldTransitionToPaired();
    virtual bool ShouldTransitionToAlone();
    virtual CVector2 KeepDistanceFlockingVector();
+   virtual CVector2 VirtualForceWalkAwayFlockingVector();
    virtual void ControlStep();
-   virtual std::string GetType(){
-      return m_typename;
-   }
    virtual EState GetEState(){
       return m_eState;
    }
@@ -79,7 +77,6 @@ public:
    string matched_robot_id;
    virtual void NewIteration() {}
    CVector2 m_meeting_point;
-   string m_typename;
    int time_for_wait_for_parter_in_target = 0;
 
    FaultyType fault_type;
@@ -88,6 +85,10 @@ public:
       double epsilon = 10;
       double theta = 15;
       return  -epsilon * (::pow(theta/distance, 4) - ::pow(theta/distance, 2));
+   }
+   virtual Real ElectricalForce(double distance){
+      double epsilon = 1;
+      return epsilon * ::pow(distance/30, -2);
    }
 protected:
     EState m_eState;
@@ -105,4 +106,6 @@ protected:
    CRandom::CRNG* pcRNG;
 };
 
+
+string toStringFaultType(FaultyType type);
 #endif
