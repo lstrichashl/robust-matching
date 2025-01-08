@@ -7,7 +7,11 @@ import matplotlib.pyplot as plt
 
 def open_file(path):
     f = open(path, 'r')
-    data2 = json.load(f)
+    try:
+        data2 = json.load(f)
+    except json.decoder.JSONDecodeError as e:
+        print(path)
+        raise e
     return data2
 
 
@@ -35,7 +39,7 @@ def filter_faulty_pairs(pairing, robottypes):
         robot_types[type["type"]].append(int(type["robot_id"]))
     nf_pairing = []
     for pair in pairing:
-        if pair[0] in robot_types['non_faulty'] and pair[1] in robot_types['non_faulty']:
+        if pair[0] in robot_types['nonfaulty'] and pair[1] in robot_types['nonfaulty']:
             nf_pairing.append(pair)
     return nf_pairing
 
@@ -80,7 +84,7 @@ def stat_experiment(
 def stat_experiment_set(
     directory_path,
     cuttime = 5000,
-    normalize_by_diameter = True
+    normalize_by_diameter = False
 ):
     files = [f for f in pathlib.Path(directory_path).iterdir() if f.is_file() and ".log" in f.name]
     arr_time_to_pairing = []
@@ -184,25 +188,29 @@ def get_time_to_stable(results):
 def key_to_color(key:str):
     colors = {
         # "virtual_forces_random":"#ff7f0e",
-        "Virtual Forces":plt.cm.tab10.colors[0],
+        "VF":plt.cm.tab10.colors[0],
         "Committed": plt.cm.tab10.colors[1],
         "IP": plt.cm.tab10.colors[2],
-        "Greedy Meeting Points": plt.cm.tab10.colors[3],
-        "Meeting Points": plt.cm.tab10.colors[4],
+        "GMP": plt.cm.tab10.colors[3],
+        "MP": plt.cm.tab10.colors[4],
+        "GMP Random": plt.cm.tab10.colors[5],
+        "VF Static": plt.cm.tab10.colors[6]
     }
     return colors.get(key, "#ffffff")
 
 def algo_to_label(algo):
     algo_to_label = {
-        "virtual_forces_random": "Virtual Forces",
+        "virtual_forces_random_controller": "VF",
         "algo_matching": "Committed",
         "keep_distance": "Keep Distance",
         "algo_matching_walk_away": "Matching Walk Away",
         "crash": "Crash",
         "virtual_forces_walk_away": "Virtual Forces Walk Away",
         "repeated": "IP",
-        "greedy_meeting_points": "Greedy Meeting Points",
-        "meeting_point_epuck": "Meeting Points"
+        "greedy_meeting_point_controller": "GMP",
+        "meeting_point_epuck_controller": "MP",
+        "greedy_meeting_point_controller_random": "GMP Random",
+        "virtual_forces_bot_controller":"VF Static"
     }
     return algo_to_label.get(algo, algo)
 

@@ -14,6 +14,7 @@ def parse_options() -> Namespace:
     parser.add_argument("-a", "--algorithm", type=str, default="virtual_forces")
     parser.add_argument("-fa", "--faulty_algorithm", type=str, default="virtual_forces_walk_away")
     parser.add_argument("-r", "--range", type=float, default=5)
+    parser.add_argument("-ra", "--random", type=bool, default=False)
     options = parser.parse_args()
     return options
 
@@ -22,7 +23,7 @@ if __name__ == "__main__":
     options = parse_options()
     tp = ThreadPool(1)
     build()
-    non_faulty_algorithm = algorithmFactory(options.algorithm, range=options.range)
+    non_faulty_algorithm = algorithmFactory(options.algorithm, range=options.range,random_exploration=options.random)
     faulty_algorithm = faultalgorithmFactory(options.faulty_algorithm, nonfaultyalgorithm=non_faulty_algorithm)
     print(options.non_faulty)
     experiment = Experiment(

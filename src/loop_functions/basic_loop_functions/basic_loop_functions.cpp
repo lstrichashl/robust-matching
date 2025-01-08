@@ -226,7 +226,11 @@ void CBasicLoopFunctions::add_log(){
     for(int i = 0; i < m_last_positions.size(); i++){
         nf_distance_travel += (m_last_positions[i] - m_new_positions[i]).Length();
     }
-    string distance_travel_string = "\"distance_travel:\":"+to_string(nf_distance_travel);
+    string dist = to_string(nf_distance_travel);
+    if(isnan(nf_distance_travel) || isinf(nf_distance_travel)){
+        dist = "0";
+    }
+    string distance_travel_string = "\"distance_travel:\":"+dist;
     std::string log =  "{" + matcing_string + "," + tick_string + "," + distance_travel_string + "}";
     m_logs.push_back(log);
 }
@@ -298,7 +302,7 @@ void CBasicLoopFunctions::PlaceCluster(vector<DistributeConfig> configs,Real rob
     CVector2 c_center(0,0);
     vector<CVector2> all_positions = GetPositions(seed_entites);
     all_positions.push_back(c_center);
-    while(all_positions.size() == 1 || !_is_connected_graph(all_positions, robot_range)){
+    while(all_positions.size() == 1){ //|| !_is_connected_graph(all_positions, robot_range)){
         RemoveAll(spawn_entites);
         all_positions = {c_center};
         spawn_entites = {};
@@ -350,7 +354,7 @@ void CBasicLoopFunctions::PlaceCluster(vector<DistributeConfig> configs,Real rob
             }
             base_id += unQuantity;
         }
-        arena_range = CRange<Real>(arena_range.GetMin()+0.1, arena_range.GetMax()-0.1);
+        arena_range = CRange<Real>(arena_range.GetMin(), arena_range.GetMax());
     }
 }
 

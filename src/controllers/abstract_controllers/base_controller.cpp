@@ -25,10 +25,27 @@ void BaseConrtoller::Init(TConfigurationNode& t_node){
       else if(type == "virtual_forces_walk_away"){
          fault_type = virtual_forces_walk_away;
       }
+      else if(type == "opposite"){
+         fault_type = opposite;
+      }
    }
    catch(CARGoSException& ex) {
       m_crash_starttime = 100000000;
       m_crash_endtime = 100000000;
+   }
+   try{
+      string type;
+      TConfigurationNode&  exploration_node = GetNode(t_node, "exploration");
+      GetNodeAttribute(exploration_node, "implementation", type);
+      if(type == "random"){
+         m_random_exploration = true;
+      }
+      else{
+         m_random_exploration = false;
+      }
+   }
+   catch(CARGoSException& ex) {
+      m_random_exploration = false;
    }
     m_crash_time = pcRNG->Uniform(CRange<Real>(m_crash_starttime, m_crash_endtime));
     m_pcWheels = GetActuator<CCI_DifferentialSteeringActuator>("differential_steering");
@@ -100,6 +117,9 @@ void BaseConrtoller::ControlStep(){
    }
    if(fault_type == keep_distance){
       m_heading = KeepDistanceFlockingVector();
+   }
+   if(fault_type == opposite){
+      m_heading = -m_heading;
    }
    SetWheelSpeedsFromVector(m_heading);
 }

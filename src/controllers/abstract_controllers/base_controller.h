@@ -24,7 +24,8 @@ enum FaultyType{
    nonfaulty = 0,
    crash = 1,
    keep_distance = 2,
-   virtual_forces_walk_away = 3
+   virtual_forces_walk_away = 3,
+   opposite = 4,
 };
 
 class BaseConrtoller: public CCI_Controller{
@@ -80,6 +81,7 @@ public:
    int time_for_wait_for_parter_in_target = 0;
 
    FaultyType fault_type;
+   bool m_random_exploration;
    
    virtual Real LennardJonesPotential(double distance){
       double epsilon = 10;

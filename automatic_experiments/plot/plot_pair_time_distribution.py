@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from itertools import product
 from plot import stat_experiment_set, algo_to_label, get_std_mean, key_to_color
 import numpy as np
+import matplotlib.cm as cm
 
 base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/final/connected"
 # base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/arena1.5/connected"
@@ -150,25 +151,25 @@ def plot_number_of_robots_on_x(range, f_percent):
 
 
 
-def plot_compare_algoithms(number_of_robots, f_count, vis_range):
-    nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated", "greedy_meeting_points", "meeting_point_epuck"]
-    f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
+def plot_evolution_over_time(number_of_robots, f_count, vis_range, nf_algorithms, f_algorithm):
     plots = [
         {
             "title": algo_to_label(f_algorithm),
             "data": [{
                 "dir": f"{base_dir}/range_{vis_range}_robots_{number_of_robots}/{nf_algorithm}_{f_algorithm}/faulty{f_count}",
                 "label": algo_to_label(nf_algorithm)
-            } for nf_algorithm in nf_algorithms if not(nf_algorithm == "virtual_forces_random" and f_algorithm == "algo_matching_walk_away")] 
-        } for f_algorithm in f_algorithms
+            } for nf_algorithm in nf_algorithms if not(nf_algorithm == "virtual_forces_random_controller" and f_algorithm == "algo_matching_walk_away")] 
+        }
     ]
 
-    plots = [plots[1]]
+    plots = [plots[0]]
     print(plots[0]["title"])
+    plt.figure()
     for v in plots:
         for result in v["data"]:
-            _,_,pairs_times, times_pairs = stat_experiment_set(result["dir"], cuttime=2000)
+            _,_,_, times_pairs = stat_experiment_set(result["dir"], cuttime=1500)
             means,stds = {},{}
+            times_pairs = dict(sorted(times_pairs.items()))
             for time, values in times_pairs.items():
                 means[time] = values['mean']
                 stds[time] = values['std']
@@ -180,13 +181,271 @@ def plot_compare_algoithms(number_of_robots, f_count, vis_range):
         # plt.set_title(v["title"])
         plt.xlabel("time")
         plt.ylabel("pairs")
-        plt.yticks(range(0,8))
+        # plt.yticks(range(0,8))
     plt.show()
-    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/number_of_pairs_by_time_algorithms_range{vis_range}_robots{number_of_robots}_faulty{f_count}_{v['title']}.png",bbox_inches='tight')
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/number_of_pairs_by_time_meeting_points_range{vis_range}_robots{number_of_robots}_faulty{f_count}_{v['title']}.png",bbox_inches='tight')
+    # plt.close()
+
+def plot_number_of_pairs_random_exploration_comparison(number_of_robots, f_count):
+    means = [
+        [0,0,0,0], #static
+        [0,0,0,0] #  random
+    ]
+    errors = [
+        [0,0,0,0],# static
+        [0,0,0,0],# random
+    ]
+    _,arr_numer_of_pairs,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_0.5_robots_{number_of_robots}/greedy_meeting_point_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_numer_of_pairs))
+    means[0][0] = number_of_pairs['mean']
+    errors[0][0] = number_of_pairs['std']
+
+    _,arr_numer_of_pairs,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_2_robots_{number_of_robots}/greedy_meeting_point_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_numer_of_pairs))
+    means[0][1] = number_of_pairs['mean']
+    errors[0][1] = number_of_pairs['std']
+
+    _,arr_numer_of_pairs,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_0.5_robots_{number_of_robots}/virtual_forces_bot_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_numer_of_pairs))
+    means[0][2] = number_of_pairs['mean']
+    errors[0][2] = number_of_pairs['std']
+
+    _,arr_numer_of_pairs,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_2_robots_{number_of_robots}/virtual_forces_bot_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_numer_of_pairs))
+    means[0][3] = number_of_pairs['mean']
+    errors[0][3] = number_of_pairs['std']
+
+
+    _,arr_numer_of_pairs,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_0.5_robots_{number_of_robots}/greedy_meeting_point_controller_random_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_numer_of_pairs))
+    means[1][0] = number_of_pairs['mean']
+    errors[1][0] = number_of_pairs['std']
+
+    _,arr_numer_of_pairs,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_2_robots_{number_of_robots}/greedy_meeting_point_controller_random_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_numer_of_pairs))
+    means[1][1] = number_of_pairs['mean']
+    errors[1][1] = number_of_pairs['std']
+
+    _,arr_numer_of_pairs,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_0.5_robots_{number_of_robots}/virtual_forces_random_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_numer_of_pairs))
+    means[1][2] = number_of_pairs['mean']
+    errors[1][2] = number_of_pairs['std']
+
+    _,arr_numer_of_pairs,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_2_robots_{number_of_robots}/virtual_forces_random_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_numer_of_pairs))
+    means[1][3] = number_of_pairs['mean']
+    errors[1][3] = number_of_pairs['std']
+
+    categories = ["GMP d=0.5", "GMP d=2", "VF d=0.5", "VF d=2"]
+    groups = ["Static", "Random"]
+    x = np.arange(len(categories))
+    group_offsets = np.array([0,0.2])
+
+    plt.figure()
+    for i, (vals, errs) in enumerate(zip(means, errors)):
+        plt.bar(
+            x+group_offsets[i],
+            vals,
+            width=0.2,
+            yerr=errs,
+            # fmt="o",
+            linestyle="None",
+            label=groups[i]
+        )
+    plt.xticks(x, categories)
+    plt.yticks(range(0,13,1))
+    plt.legend(loc="upper center", ncols=2)
+    plt.show()
+    # plt.savefig("/home/lior/workspace/thesis/images/experiments/random_vs_static_robots20_faults0.png",bbox_inches='tight')
+    # plt.close()
+
+def plot2(number_of_robots, f_count):
+    means = [
+        [list(range(11)),list(range(11))], #static
+        [list(range(11)),list(range(11))] #  random
+    ]
+    values2 = [
+        [0,0], #static
+        [0,0]#random
+    ]
+    errors = [
+        [0,0],# static
+        [0,0],# random
+    ]
+    arr_time_to_pairing,_,times_pairs,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_0.5_robots_{number_of_robots}/greedy_meeting_point_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    for time, values in times_pairs.items():
+        means[0][0][time] = values['mean']
+    values2[0][0] = number_of_pairs['mean']
+    errors[0][0] = number_of_pairs['std']
+
+    arr_time_to_pairing,_,times_pairs,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_0.5_robots_{number_of_robots}/greedy_meeting_point_controller_random_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    for time, values in times_pairs.items():
+        means[1][0][time] = values['mean']
+    values2[1][0] = number_of_pairs['mean']
+    errors[1][0] = number_of_pairs['std']
+
+    arr_time_to_pairing,_,times_pairs,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_2_robots_{number_of_robots}/greedy_meeting_point_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    for time, values in times_pairs.items():
+        means[0][1][time] = values['mean']
+    values2[0][1] = number_of_pairs['mean']
+    errors[0][1] = number_of_pairs['std']
+
+    arr_time_to_pairing,_,times_pairs,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_2_robots_{number_of_robots}/greedy_meeting_point_controller_random_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    for time, values in times_pairs.items():
+        means[1][1][time] = values['mean']
+    values2[1][1] = number_of_pairs['mean']
+    errors[1][1] = number_of_pairs['std']
+
+    categories = ["GMP d=0.5", "GMP d=2"]
+    groups = ["Static", "Random"]
+    group_offsets = np.array([0,0.2])
+    bar_width = 0.2
+
+    plt.figure()
+    colormap = cm.get_cmap('viridis', len(means[1][1]))
+    colors = [colormap(i) for i in range(len(means[1][1]))]
+    for i, (group_values, errs) in enumerate(zip(means, errors)):
+        for x,vals in enumerate(group_values):
+            durations = np.diff(vals)
+            start_positions = [0]
+            start_positions.extend(np.cumsum(durations[:-1]))
+            for j, (start,duration) in enumerate(zip(start_positions, durations)):
+                plt.bar(
+                    x+group_offsets[i],
+                    durations,
+                    bar_width,
+                    bottom=start,
+                    # fmt="o",
+                    linestyle="None",
+                    color=colors[j],
+                )
+
+    x = np.arange(len(categories))
+    for i, (vals, errs) in enumerate(zip(values2, errors)):
+        plt.errorbar(
+            x+group_offsets[i],
+            vals,
+            yerr=errs,
+            fmt="o",
+            linestyle="None"
+        )
+    plt.xticks(range(len(categories)), categories)
+    plt.legend(loc="upper center", ncols=2)
+    plt.show()
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/time_random_vs_static_robots{number_of_robots}_faults{f_count}.png",bbox_inches='tight')
+    # plt.close()
+
+
+def plot_time_of_random_vs_static(number_of_robots, f_count):
+    means = [
+        [0,0,0,0], #static
+        [0,0,0,0] #  random
+    ]
+    errors = [
+        [0,0,0,0],# static
+        [0,0,0,0],# random
+    ]
+    arr_time_to_pairing,_,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_0.5_robots_{number_of_robots}/greedy_meeting_point_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    means[0][0] = number_of_pairs['mean']
+    errors[0][0] = number_of_pairs['std']
+
+    arr_time_to_pairing,_,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_2_robots_{number_of_robots}/greedy_meeting_point_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    means[0][1] = number_of_pairs['mean']
+    errors[0][1] = number_of_pairs['std']
+
+    arr_time_to_pairing,_,_,_= stat_experiment_set(f"automatic_experiments/results/final/connected/range_0.5_robots_{number_of_robots}/virtual_forces_bot_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    means[0][2] = number_of_pairs['mean']
+    errors[0][2] = number_of_pairs['std']
+
+    arr_time_to_pairing,_,_,_= stat_experiment_set(f"automatic_experiments/results/final/connected/range_2_robots_{number_of_robots}/virtual_forces_bot_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    means[0][3] = number_of_pairs['mean']
+    errors[0][3] = number_of_pairs['std']
+
+
+    arr_time_to_pairing,_,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_0.5_robots_{number_of_robots}/greedy_meeting_point_controller_random_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    means[1][0] = number_of_pairs['mean']
+    errors[1][0] = number_of_pairs['std']
+
+    arr_time_to_pairing,_,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_2_robots_{number_of_robots}/greedy_meeting_point_controller_random_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    means[1][1] = number_of_pairs['mean']
+    errors[1][1] = number_of_pairs['std']
+
+    arr_time_to_pairing,_,_,_= stat_experiment_set(f"automatic_experiments/results/final/connected/range_0.5_robots_{number_of_robots}/virtual_forces_random_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    means[1][2] = number_of_pairs['mean']
+    errors[1][2] = number_of_pairs['std']
+
+    arr_time_to_pairing,_,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_2_robots_{number_of_robots}/virtual_forces_random_controller_crash/faulty{f_count}", cuttime=1500)
+    number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
+    means[1][3] = number_of_pairs['mean']
+    errors[1][3] = number_of_pairs['std']
+
+    categories = ["GMP d=0.5", "GMP d=2", "VF d=0.5", "VF d=2"]
+    groups = ["Static", "Random"]
+    x = np.arange(len(categories))
+    group_offsets = np.array([0,0.2])
+
+    plt.figure()
+    for i, (vals, errs) in enumerate(zip(means, errors)):
+        plt.bar(
+            x+group_offsets[i],
+            vals,
+            width=0.2,
+            yerr=errs,
+            # fmt="o",
+            linestyle="None",
+            label=groups[i]
+        )
+    plt.xticks(x, categories)
+    plt.legend(loc="upper center", ncols=2)
+    # plt.show()
+    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/time_random_vs_static_robots{number_of_robots}_faults{f_count}.png",bbox_inches='tight')
+    plt.close()
+
+def plot_time_by_pair(number_of_robots, f_count, vis_range, nf_algorithms, f_algorithm):
+    plots = [
+        {
+            "title": algo_to_label(f_algorithm),
+            "data": [{
+                "dir": f"{base_dir}/range_{vis_range}_robots_{number_of_robots}/{nf_algorithm}_{f_algorithm}/faulty{f_count}",
+                "label": algo_to_label(nf_algorithm)
+            } for nf_algorithm in nf_algorithms if not(nf_algorithm == "virtual_forces_random_controller" and f_algorithm == "algo_matching_walk_away")] 
+        }
+    ]
+
+    plots = [plots[0]]
+    plt.figure()
+    for v in plots:
+        for result in v["data"]:
+            _,_,pairs_times, _ = stat_experiment_set(result["dir"], cuttime=1500)
+            means,stds = {},{}
+            pairs_times = dict(sorted(pairs_times.items()))
+            for time, values in pairs_times.items():
+                means[time] = values['mean']
+                stds[time] = values['std']
+            plt.errorbar(list(means.keys()), list(means.values()), list(stds.values()), fmt=".-", label=result["label"], capsize=5,color=key_to_color(result["label"]))
+        plt.grid(linestyle = ':')
+        plt.legend(fontsize=7)
+        plt.xlabel("time")
+        plt.ylabel("pairs")
+    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/time_by_pair_algorithms_range{vis_range}_robots{number_of_robots}_faulty{f_count}_{v['title']}.png",bbox_inches='tight')
+    plt.close()
+
+
 
 
 def plot_compare_algoithms_reverse(number_of_robots, f_count, range):
-    nf_algorithms = ["virtual_forces_random", "algo_matching"]
+    nf_algorithms = ["virtual_forces_random_controller", "algo_matching"]
     f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
     plots = [
         {
@@ -206,9 +465,9 @@ def plot_compare_algoithms_reverse(number_of_robots, f_count, range):
 def plot_range_on_x(number_of_robots, f_count):
     # base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/arena1.5/connected"
     # f_count=4
-    nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
+    nf_algorithms = ["virtual_forces_random_controller", "algo_matching", "repeated", "greedy_meeting_point_controller", "meeting_point_epuck_controller"]
     f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
-    ranges = [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
+    ranges = [0.5,2]
     # ranges=[1,1.5,2]
     # faults = [1,3,5,8]
     tables = [
@@ -219,7 +478,7 @@ def plot_range_on_x(number_of_robots, f_count):
                     "dir": f"{base_dir}/range_{visrange}_robots_{number_of_robots}/{nf}_{f}/faulty{f_count}",
                     "x": visrange if visrange != 100 else 1
                 } for visrange in ranges]
-            } for nf in nf_algorithms  if not(nf == "virtual_forces_random" and f == "algo_matching_walk_away")],
+            } for nf in nf_algorithms  if not(nf == "virtual_forces_random_controller" and f == "algo_matching_walk_away")],
             "title": algo_to_label(f)
         } for f in f_algorithms
     ]
@@ -241,14 +500,14 @@ def plot_range_on_x(number_of_robots, f_count):
         # plt.title(table["title"])
         plt.xlabel("range")
         plt.ylabel("time max pairing/diameter")
-        plt.yticks(range(100,1000,100))
+        # plt.yticks(range(100,1000,100))
         i += 1
 
-    # plt.show()
-    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_range_on_x_robots{number_of_robots}_faulty{f_count}_{table['title']}.png", bbox_inches='tight')
+    plt.show()
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_range_on_x_robots{number_of_robots}_faulty{f_count}_{table['title']}.png", bbox_inches='tight')
 
 def plot_compare_crash_timing():
-    nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
+    nf_algorithms = ["virtual_forces_random_controller", "algo_matching", "repeated"]
     f_algorithms = ["crash"]
     plots = [
         {
@@ -266,7 +525,7 @@ def plot_compare_crash_timing():
 
 
 def plot_delay_crash(vis_range):
-    nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
+    nf_algorithms = ["virtual_forces_random_controller", "algo_matching", "repeated"]
     delay_ranges = ["0_50", "50_100", "100_150","150_200", "200_250","250_300"]
     f_count = 5
     number_of_robots = 20
@@ -311,10 +570,10 @@ def plot_delay_crash(vis_range):
 def plot_faults_on_x(number_of_robots, visrange):
     # base_dir = "/home/lior/workspace/robust-matching/automatic_experiments/results/arena1.5/connected"
     # f_count=4
-    nf_algorithms = ["virtual_forces_random", "algo_matching", "repeated"]
+    nf_algorithms = ["virtual_forces_random_controller", "algo_matching", "repeated"]
     f_algorithms = ["crash", "keep_distance", "algo_matching_walk_away", "virtual_forces_walk_away"]
     # ranges=[1,1.5,2]
-    faults = range(0,11,1)
+    faults = range(1,11,1)
     tables = [
         {
             "plots":[{
@@ -323,7 +582,7 @@ def plot_faults_on_x(number_of_robots, visrange):
                     "dir": f"{base_dir}/range_{visrange}_robots_{number_of_robots}/{nf}_{f}/faulty{f_count}",
                     "x": f_count
                 } for f_count in faults]
-            } for nf in nf_algorithms  if not(nf == "virtual_forces_random" and f == "algo_matching_walk_away")],
+            } for nf in nf_algorithms  if not(nf == "virtual_forces_random_controller" and f == "algo_matching_walk_away")],
             "title": algo_to_label(f)
         } for f in f_algorithms
     ]
@@ -348,9 +607,8 @@ def plot_faults_on_x(number_of_robots, visrange):
         plt.yticks(range(100,1000,100))
         i += 1
 
-    # plt.show()
-    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_faults_on_x_robots{number_of_robots}_faulty{f_count}_{table['title']}.png", bbox_inches='tight')
-
+    plt.show()
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_faults_on_x_robots{number_of_robots}_faulty{f_count}_{table['title']}.png", bbox_inches='tight')
 
 
 
@@ -359,9 +617,12 @@ if __name__ == "__main__":
     # private/robust-matching/automatic_experiments/results/virtual_forces_gazi"
     # base_dir3 = "/home/lior/workspace/robust-matching/automatic_experiments/results/repeated"
     number_of_robots = 20
-    vis_range = 0.5
-    f_count = 5
-    run_tag = f"range_{vis_range}_robots_{number_of_robots}"
+    # vis_range = 2
+    # f_count = 0
+    # run_tag = f"range_{vis_range}_robots_{number_of_robots}"
+    f_algorithms = ["crash", "keep_distance", "opposite", "virtual_forces_walk_away"]
+    nf_algorithms = ["virtual_forces_random_controller", "algo_matching", "repeated", "greedy_meeting_point_controller", "meeting_point_epuck_controller"]
+
     # plot_compare_faults(number_of_robots, vis_range)
     # plot_number_of_robots_on_x(range=vis_range, f_percent=0.2)
     # plot_compare_number_of_robots(vis_range, f_percent=0.2)
@@ -369,10 +630,19 @@ if __name__ == "__main__":
     # plot_delay_crash(vis_range)
     # plot_compare_algoithms_reverse(number_of_robots, f_count=f_count, range=vis_range)
     # plot_convergance_time(number_of_robots, f_count, vis_range)
-    # stat_all(results_path = "/home/lior/workspace/robust-matching/automatic_experiments/results/range_100_robots_20/virtual_forces_random_algo_matching_walk_away", from_cache=False)
+    # stat_all(results_path = "/home/lior/workspace/robust-matching/automatic_experiments/results/range_100_robots_20/virtual_forces_random_controller_algo_matching_walk_away", from_cache=False)
     # stat_experiment_set(directory_path="automatic_experiments/results/range_100_robots_6/algo_matching_virtual_forces_walk_away/faulty3")
-
-
-    plot_compare_algoithms(number_of_robots, f_count, vis_range)
-    # plot_range_on_x(number_of_robots,f_count)
+# plot_range_on_x(number_of_robots,f_count)
     # plot_faults_on_x(number_of_robots, vis_range)
+
+
+    # for f_algorithm in f_algorithms:
+        # plot_evolution_over_time(number_of_robots, f_count=5, vis_range=0.5, nf_algorithms=nf_algorithms, f_algorithm=f_algorithm)
+    plot_time_by_pair(number_of_robots, f_count=0, vis_range=0.5, nf_algorithms=nf_algorithms, f_algorithm="crash")
+    
+    # plot_number_of_pairs_random_exploration_comparison(number_of_robots=20,f_count=0)
+
+    # plot_time_of_random_vs_static(number_of_robots=20, f_count=0)
+    # plot_evolution_over_time(number_of_robots, f_count=10, vis_range=0.5, nf_algorithms=["greedy_meeting_point_controller", "greedy_meeting_point_controller_random", "meeting_point_epuck_controller"], f_algorithm="crash")
+
+    # plot_number_of_pairs_bar(number_of_robots, visrange=0.5, f_count=0, nf_algorithms=nf_algorithms, f_algorithm="crash")

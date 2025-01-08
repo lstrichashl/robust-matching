@@ -70,11 +70,21 @@ class Algorithm:
         # }
 
 class NonFaultyAlgorithm(Algorithm):
-    def __init__(self, controller_type: str, range: int, library, template_file_path: str) -> None:
+    def __init__(self, controller_type: str, range: int, library, template_file_path: str,random_exploration:bool = False) -> None:
         super().__init__(controller_type, range=range,library=library)
         self.template_file_path = template_file_path
         self.robot_type = "e-puck2"
         self.arena_size = 4.0
+        self.random_exploration=random_exploration
+
+    def to_dict(self):
+        d = super().to_dict()
+        if self.random_exploration:
+            d["params"]["exploration"] = {
+                "@implementation": "random"
+            }
+        return d
+        
 
 class VirtualForces(NonFaultyAlgorithm):
     def __init__(self, range: int,controller_type="virtual_forces_bot_controller") -> None:
@@ -137,16 +147,34 @@ class MeetingPointsEpuck(NonFaultyAlgorithm):
         }
     
 class GreedyMeetingPoints(NonFaultyAlgorithm):
-    def __init__(self, range: int) -> None:
+    def __init__(self, range: int, random_exploration) -> None:
         super().__init__(controller_type="greedy_meeting_point_controller",
                          template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos',
                          range=range,
-                         library="build/src/controllers/meeting_points/libmeeting_points.so")
+                         library="build/src/controllers/meeting_points/libmeeting_points.so",
+                         )
+        self.random_exploration = random_exploration
+        if random_exploration:
+            self.id = "greedy_meeting_point_controller_random"
 
     def get_loop_functions(self):
         return {
             "@library":  f'{base_dir}/build/src/loop_functions/greedy_meeting_points_loop_functions/libgreedy_meeting_points_loop_functions.so',
             "@label": "greedy_meeting_points_loop_functions",
+            "params": self.get_loop_functions_params()
+        }
+
+class TripletVirtuualForces(NonFaultyAlgorithm):
+    def __init__(self, range):
+        super().__init__(controller_type="triplet_forces_controller",
+                        range=range,
+                        library="build/src/controllers/triplet/libtriplet.so", 
+                        template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos')
+
+    def get_loop_functions(self):
+        return {
+            "@library":  f'{base_dir}/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions',
+            "@label": "print_experiment_loop_fuctions",
             "params": self.get_loop_functions_params()
         }
 
@@ -163,7 +191,7 @@ class FaultyAlgorithm(Algorithm):
         return d
         
 class Crash(FaultyAlgorithm):
-    def __init__(self, nonfaulty_algorithm, start_crash_time: int, end_crash_time) -> None:
+    def __init__(self, nonfaulty_algorithm, start_crash_time=0, end_crash_time=1) -> None:
         super().__init__(id="crash",nonfaulty_algorithm=nonfaulty_algorithm)
         self.start_crash_time = start_crash_time
         self.end_crash_time = end_crash_time
@@ -179,10 +207,14 @@ class VirtualForcesWalkAway(FaultyAlgorithm):
         super().__init__(id="virtual_forces_walk_away", nonfaulty_algorithm=nonfaulty_algorithm),
 class AlgoMatchingWalkAway(FaultyAlgorithm):
     def __init__(self, nonfaulty_algorithm) -> None:
-        super().__init__(id="algo_matching_walk_away", nonfaulty_algorithm=nonfaulty_algorithm)
+        super().__init__(id="opposite", nonfaulty_algorithm=nonfaulty_algorithm)
 class KeepDistance(FaultyAlgorithm):
     def __init__(self, nonfaulty_algorithm) -> None:
         super().__init__(id="keep_distance", nonfaulty_algorithm=nonfaulty_algorithm)
+    def to_dict(self):
+        d = super().to_dict()
+        d["params"]["wheel_turning"]["@max_speed"] = "20"
+        return d
 
 def faultalgorithmFactory(name, nonfaultyalgorithm):
     if name == "crash":
@@ -201,7 +233,7 @@ def faultalgorithmFactory(name, nonfaultyalgorithm):
     #     end_time = times.split("_")[1]
     #     return VirtualForcesRandomCrash(range=range, start_crash_time=start_time,end_crash_time=end_time)
 
-def algorithmFactory(name, range) -> Algorithm:
+def algorithmFactory(name, range, random_exploration=False) -> Algorithm:
     if name == "virtual_forces":
         return VirtualForces(range=range)
     elif name == "commited":
@@ -213,7 +245,9 @@ def algorithmFactory(name, range) -> Algorithm:
     elif name == "meeting_points_epuck":
         return MeetingPointsEpuck(range=range)
     elif name == "greedy_meeting_points":
-        return GreedyMeetingPoints(range=range)
+        return GreedyMeetingPoints(range=range,random_exploration=random_exploration)
+    elif name == "triplet_forces":
+        return TripletVirtuualForces(range=range)
     else:
         raise name + " is not found"
 
@@ -288,7 +322,7 @@ class Experiment:
 def distribute_max_range(experiment: Experiment):
     return {
         '@range': experiment.non_faulty_algorithm.range,
-        '@arena_size': experiment.non_faulty_algorithm.arena_size,
+        '@arena_size': 1.5,
         'robot': [{
             '@quantity': experiment.non_faulty_count, 
             experiment.non_faulty_algorithm.robot_type: {

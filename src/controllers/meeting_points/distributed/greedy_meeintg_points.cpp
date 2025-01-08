@@ -179,6 +179,9 @@ void CGreedyMeetingPoint::ControlStep(){
 
 void CGreedyMeetingPoint::headingUpdate(){
     CVector2 random = CVector2::ZERO;
+    if(m_random_exploration){
+        random = RandomWalk();
+    }
     Real heading_d = m_heading.Length() - m_prev_heading.Length();
     m_prev_heading = m_heading;
 

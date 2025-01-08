@@ -41,7 +41,7 @@ public:
          return 0;
       }
       double b = 7;
-      double c = 15;
+      double c = 25;
       double v = distance * (- b * ::pow(M_E, -::pow(distance,2)/c));
       return v;
    }
