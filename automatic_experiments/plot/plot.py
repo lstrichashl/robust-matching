@@ -80,6 +80,21 @@ def stat_experiment(
         times_pairs[int(log["tick"])] = max_pair
     return pairs_times, times_pairs, diameter
 
+def get_distance_traveled(
+    directory_path,
+    cuttime = 1500,
+):
+    files = [f for f in pathlib.Path(directory_path).iterdir() if f.is_file() and ".log" in f.name]
+    distances = []
+    for i, file in enumerate(files):
+        a = open_file(file)
+        distance_traveled = 0
+        for i, log in enumerate(a["logs"][2:]):
+            if int(log["tick"]) > cuttime:
+                break
+            distance_traveled += log["distance_travel:"]
+        distances.append(distance_traveled)
+    return distances
 
 def stat_experiment_set(
     directory_path,

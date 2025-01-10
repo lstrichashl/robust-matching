@@ -59,47 +59,24 @@ def main():
     num = 2  # set to the number of workers you want (the default is the cpu count of your machine)
     build()
     number_of_test_runs = 50
-    # n_robots = 6
-    # range = 100
-    all_robots = [20]
-    # all_range = [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
-    # all_range = [0.6,0.7,0.8,0.9,1]
-    # all_range = [1,1.5,2]
+    all_robots = [80]
     all_range = [2]
     number_of_faults = [0]
-    # number_of_faults = [5]
-    for n_robots, range in tqdm(product(all_robots,all_range)):
-        print(f"{n_robots=} {range=}")
+    for n_robots, via_range in tqdm(product(all_robots,all_range)):
+        print(f"{n_robots=} {via_range=}")
         tp = ThreadPool(num)
-        run_tag = f"final/connected/range_{range}_robots_{n_robots}"
+        run_tag = f"final/connected/range_{via_range}_robots_{n_robots}"
 
         non_faulty_algorithms = [
-            # AlgoMatching(is_commited=True, range=range),
-            # AlgoMatching(is_commited=False, id="repeated", repeate_interval=10, range=range),
-            # VirtualForcesRandom(range=range),
-            # MeetingPointsEpuck(range=range),
-            # GreedyMeetingPoints(range=range,random_exploration=True),
-            # GreedyMeetingPoints(range=range,random_exploration=False),
+            AlgoMatching(is_commited=True, range=via_range),
+            # AlgoMatching(is_commited=False, id="repeated", repeate_interval=10, range=via_range),
+            # VirtualForcesRandom(range=via_range),
+            # MeetingPointsEpuck(range=via_range),
+            # GreedyMeetingPoints(range=via_range,random_exploration=True),
+            # GreedyMeetingPoints(range=via_range,random_exploration=False),
             # VirtualForces(range=range),
-            TripletVirtuualForces(range=range)
+            # TripletVirtuualForces(range=range)
         ]
-        # faulty_algorithms = [
-        #     VirtualForcesRandomCrash(range=range, start_crash_time=0,end_crash_time=50),
-        #     VirtualForcesRandomCrash(range=range, start_crash_time=50,end_crash_time=100),
-        #     VirtualForcesRandomCrash(range=range, start_crash_time=100,end_crash_time=150),
-        #     VirtualForcesRandomCrash(range=range, start_crash_time=150,end_crash_time=200),
-        #     VirtualForcesRandomCrash(range=range, start_crash_time=200,end_crash_time=250),
-        #     VirtualForcesRandomCrash(range=range, start_crash_time=250,end_crash_time=300)
-        # ]
-
-        # faulty_algorithms = [
-        #     AlgoMatchingCrash(range=range, start_crash_time=0,end_crash_time=50),
-        #     AlgoMatchingCrash(range=range, start_crash_time=50,end_crash_time=100),
-        #     AlgoMatchingCrash(range=range, start_crash_time=100,end_crash_time=150),
-        #     AlgoMatchingCrash(range=range, start_crash_time=150,end_crash_time=200),
-        #     AlgoMatchingCrash(range=range, start_crash_time=200,end_crash_time=250),
-        #     AlgoMatchingCrash(range=range, start_crash_time=250,end_crash_time=300)
-        # ]
         faulty_algorithms = [
             # AlgoMatchingWalkAway,
             Crash,
@@ -113,7 +90,7 @@ def main():
                                             non_faulty_algorithm=nf_algo,
                                             faulty_algorithm_class=f_algo,
                                             run_tag=run_tag,
-                                            number_of_faults=number_of_faults)
+                                            number_of_faults=number_of_faults)                      
         
         ts_start = time.time()
         # file_pathes = [0,"/home/lior/workspace/robust-matching/automatic_experiments/results/unlimited_visibility/repeated_virtual_forces_walk_away/faulty0/random_seed1.argos",0]

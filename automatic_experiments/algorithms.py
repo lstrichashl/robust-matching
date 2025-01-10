@@ -192,14 +192,14 @@ class FaultyAlgorithm(Algorithm):
         
 class Crash(FaultyAlgorithm):
     def __init__(self, nonfaulty_algorithm, start_crash_time=0, end_crash_time=1) -> None:
-        super().__init__(id="crash",nonfaulty_algorithm=nonfaulty_algorithm)
+        super().__init__(id=f"crash_{start_crash_time}_{end_crash_time}",nonfaulty_algorithm=nonfaulty_algorithm)
         self.start_crash_time = start_crash_time
         self.end_crash_time = end_crash_time
     
     def to_dict(self):
         d = super().to_dict()
-        d["params"]["fault"]["@m_crash_starttime"] = 0
-        d["params"]["fault"]["@m_crash_endtime"] = 1
+        d["params"]["fault"]["@m_crash_starttime"] = self.start_crash_time
+        d["params"]["fault"]["@m_crash_endtime"] = self.end_crash_time
         return d
 
 class VirtualForcesWalkAway(FaultyAlgorithm):
@@ -218,7 +218,7 @@ class KeepDistance(FaultyAlgorithm):
 
 def faultalgorithmFactory(name, nonfaultyalgorithm):
     if name == "crash":
-        return Crash(nonfaultyalgorithm, 0, 1) #TODO: load different controllers
+        return Crash(nonfaultyalgorithm,0,1)
     elif name == "virtual_forces_walk_away":
         return VirtualForcesWalkAway(nonfaultyalgorithm)
     elif name == "algo_matching_walk_away":

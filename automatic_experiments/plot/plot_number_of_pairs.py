@@ -1,4 +1,4 @@
-from plot import stat_all, algo_to_label, get_number_of_pairs, key_to_color, stat_experiment_set, get_std_mean
+from plot import stat_all, algo_to_label, get_number_of_pairs, key_to_color, stat_experiment_set, get_std_mean, get_distance_traveled
 import matplotlib.pyplot as plt
 from itertools import product
 from expected_number_of_pairs_commited import get_expected_faulty_pairs_in_system_of_n_robots
@@ -197,13 +197,14 @@ def plot_convergance_time_of_each_fault(number_of_robots, vis_range, nf_algorith
     for nf in nf_algorithms:
         means = []
         errors = []
-        for i in range(11):
+        faults = range(1,11)
+        for i in faults:
             arr_time_to_pairing,_,_,_ = stat_experiment_set(f"automatic_experiments/results/final/connected/range_{vis_range}_robots_{number_of_robots}/{nf}_{f_algorithm}/faulty{i}", cuttime=1500)
             number_of_pairs = get_std_mean(np.array(arr_time_to_pairing))
             means.append(number_of_pairs['mean'])
             errors.append(number_of_pairs['std'])
         label = algo_to_label(nf)
-        plt.errorbar(range(len(means)), means, errors, fmt="-", label=label, capsize=5, color=key_to_color(label))
+        plt.errorbar(faults, means, errors, fmt="-o", label=label, capsize=5, color=key_to_color(label))
     
     plt.xlabel("faults")
     plt.ylabel("time")
@@ -211,23 +212,47 @@ def plot_convergance_time_of_each_fault(number_of_robots, vis_range, nf_algorith
     plt.show()
     # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/convergance_time_of_each_fault_robots{number_of_robots}_visrange{vis_range}_{f_algorithm}.png",bbox_inches='tight')
     # plt.close()
-            
+
+
+def plot_distance_traveled(number_of_robots, vis_range,nf_algorithms, f_algorithm):
+    plt.figure()
+    for nf in nf_algorithms:
+        means = []
+        errors = []
+        faults = range(1,11)
+        for i in faults:
+            distances = get_distance_traveled(f"automatic_experiments/results/final/connected/range_{vis_range}_robots_{number_of_robots}/{nf}_{f_algorithm}/faulty{i}", cuttime=1500)
+            d = get_std_mean(np.array(distances))
+            means.append(d['mean'])
+            errors.append(d['std'])
+        label = algo_to_label(nf)
+        plt.errorbar(faults, means, errors, fmt="-o", label=label, capsize=5, color=key_to_color(label))
+    
+    plt.xlabel("faults")
+    plt.ylabel("distance")
+    plt.legend()
+    plt.yticks(range(0,10))
+    # plt.show()
+    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/distance_of_each_fault_robots{number_of_robots}_visrange{vis_range}_{f_algorithm}.png",bbox_inches='tight')
+    plt.close()
 
 if __name__ == "__main__":
     number_of_robots = 20
     vis_range = 2
     f_count = 5
     # for vis_range in [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]:
-    nf_algorithms = ["virtual_forces_random_controller", "algo_matching", "repeated", "greedy_meeting_point_controller", "meeting_point_epuck_controller"]
+    nf_algorithms = ["virtual_forces_random_controller", "algo_matching", "repeated", "greedy_meeting_point_controller", "meeting_point_epuck_controller", "greedy_meeting_point_controller_random"]
     f_algorithms = ["crash", "keep_distance", "opposite", "virtual_forces_walk_away"]
     f_algorithms = [f_algorithms[0]]
-    nf_algorithms = ["greedy_meeting_point_controller", "greedy_meeting_point_controller_random", "meeting_point_epuck_controller"]
+    # nf_algorithms = ["greedy_meeting_point_controller", "greedy_meeting_point_controller_random", "meeting_point_epuck_controller"]
     # nf_algorithms = ["virtual_forces_random_controller", "virtual_forces_bot_controller"]
 
-    plot_compare_faulty_algorithms(number_of_robots, vis_range=0.5,nf_algorithms=nf_algorithms,f_algorithm="crash")
+    # plot_compare_faulty_algorithms(number_of_robots, vis_range=0.5,nf_algorithms=nf_algorithms,f_algorithm="crash")
     # plot_compare_range(number_of_robots=10, f_count=2, f_algorithm="crash")
     # plot_t_test(number_of_robots, vis_range, f_count)
     # plot_compare_number_of_robots(0.5, f_percent=0.5,f_algorithm="crash")
 
 
-    # plot_convergance_time_of_each_fault(number_of_robots, vis_range=0.5, nf_algorithms=nf_algorithms, f_algorithm="crash")
+    # plot_convergance_time_of_each_fault(number_of_robots,vis_range=0.5, nf_algorithms=nf_algorithms, f_algorithm="virtual_forces_walk_away")
+
+    plot_distance_traveled(number_of_robots, vis_range=0.5, nf_algorithms=nf_algorithms,f_algorithm="crash")
