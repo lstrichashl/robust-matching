@@ -30,12 +30,12 @@
     </neighborhood_graph_controller>
   </controllers>
 
-  <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/print_experiment_loop_fuctions/libprint_experiment_loop_fuctions"
-                  label="print_experiment_loop_fuctions">
+  <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/greedy_meeting_points_loop_functions/libgreedy_meeting_points_loop_functions.so"
+                  label="neiberg_loop_functions">
         <params
           log_file_path="tmp"
         />
-        <distribute_max_range range="0.5" arena_size="5.0">
+        <distribute_max_range range="0.5" arena_size="1.5">
           <robot quantity="10">
               <e-puck2 id="r" rab_range="0.5" rab_data_size="1000">
                   <controller config="neighborhood_graph"></controller>
@@ -89,7 +89,7 @@
         label="basic_qt_user_functions" />
       <camera>
         <placements>
-            <placement index="0" position="0.0,-0.792159,1.51472" look_at="0.0,-0.41199,0.58981" up="-0.00924894,0.924863,0.380188" lens_focal_length="20"                 />
+            <placement index="0" position="0.0,0,1.51472" look_at="0.0,0,0" up="-0.00924894,0.924863,0.380188" lens_focal_length="20"                 />
 
         </placements>
       </camera>

@@ -14,10 +14,9 @@ void BaseConrtoller::Init(TConfigurationNode& t_node){
    try{
       TConfigurationNode&  crash_node = GetNode(t_node, "fault");
       GetNodeAttribute(crash_node, "type", type);
-      if(type == "crash"){
+      if(type.rfind("crash",0) == 0){
          GetNodeAttribute(crash_node, "m_crash_starttime", m_crash_starttime);
          GetNodeAttribute(crash_node, "m_crash_endtime", m_crash_endtime);
-         fault_type == crash;
       }
       else if(type == "keep_distance"){
          fault_type = keep_distance;

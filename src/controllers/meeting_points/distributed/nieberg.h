@@ -29,10 +29,45 @@ struct Edge {
     }
 };
 
-struct edge_hash {
+struct EdgeHash {
     std::size_t operator()(const Edge& e) const {
         return std::hash<UInt8>()(e.node1) ^ std::hash<UInt8>()(e.node2);
     }
+};
+
+struct AugmentationPath {
+    std::vector<UInt8> nodes;  // Nodes in the augmentation path
+    Real gain;                 // Gain associated with the path
+
+    bool operator==(const AugmentationPath& other) const {
+        if (nodes.size() != other.nodes.size()) {
+            return false;
+        }
+
+        if (nodes == other.nodes) {
+            return true;
+        }
+
+        return std::equal(nodes.begin(), nodes.end(), other.nodes.rbegin());
+    }
+};
+
+struct AugmentationPathHash {
+    size_t operator()(const AugmentationPath& path) const {
+        std::vector<UInt8> sortedNodes = path.nodes;
+        std::sort(sortedNodes.begin(), sortedNodes.end()); //TODO: sort or reverse? sort can remove path that I dont want to?
+
+        size_t hash = 0;
+        for (UInt8 node : sortedNodes) {
+            hash ^= std::hash<UInt8>()(node) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        }
+        return hash;
+    }
+};
+
+struct AugmentationGraph {
+    std::unordered_set<AugmentationPath, AugmentationPathHash> paths; // Unique paths
+    std::unordered_map<AugmentationPath, std::unordered_set<AugmentationPath, AugmentationPathHash>, AugmentationPathHash> edges; // Adjacency list
 };
 
 
@@ -50,10 +85,12 @@ public:
 
     // Graph representation
     std::unordered_set<UInt8> m_sNodes;        // Nodes in the graph
-    std::unordered_set<Edge, edge_hash> m_sEdges; // Edges in the graph
+    std::unordered_set<Edge, EdgeHash> m_sEdges; // Edges in the graph
 
     std::vector<std::vector<UInt8>> m_vAugmentationPaths;
     std::unordered_map<size_t, Real> m_vPathGains;
+
+    AugmentationGraph m_graph;
 
     NeighborhoodGraphController();
     virtual ~NeighborhoodGraphController() {}
@@ -69,7 +106,7 @@ public:
     virtual void DeserializeGraph(const CByteArray& cData,
                           UInt8& senderId,
                           std::unordered_set<UInt8>& sNodes,
-                          std::unordered_set<Edge, edge_hash>& sEdges);
+                          std::unordered_set<Edge, EdgeHash>& sEdges);
 
     virtual void FinalizeGraph();
 
@@ -77,6 +114,13 @@ public:
                                         UInt8 maxLength, 
                                         std::vector<std::vector<UInt8>>& paths, 
                                         std::unordered_map<size_t, Real>& pathGains);
+
+    virtual void AddHopToGraph();
+    virtual void StartMatching();
+
+    virtual AugmentationGraph GetAugmentationGraph(){
+        return m_graph;
+    }
 };
 
 #endif

@@ -46,14 +46,14 @@ void CGreedyMeetingPoint::ControlStep(){
                         cout << "message: "  << tMsgs[i].Data[0] << " " << tMsgs[i].Data[1] << " "<< tMsgs[i].Data[2] << " "<< tMsgs[i].Data[3] << endl;
                     }
                     if(tMsgs[i].Data[2] == SIN && tMsgs[i].Data[3] == stoi(GetId())){
-                        neighboring_sin_me_robots.push_back(make_pair(tMsgs[i].Data[1], tMsgs[i].Range));
+                        // neighboring_sin_me_robots.push_back(make_pair(tMsgs[i].Data[1], tMsgs[i].Range));
                     }
                     if(tMsgs[i].Data[0] == STATE_ALONE && tMsgs[i].Data[2] == IDLE) {
                         neighboring_idle_robots.push_back(make_pair(tMsgs[i].Data[1], tMsgs[i].Range));
                     }
                 }
                 Real rand = pcRNG->Uniform(CRange<Real>(0,1));
-                if(rand < 0.2){
+                if(rand < 1){
                     m_rejected_sin_robot_ids = {};
                 }
                 if(neighboring_sin_me_robots.size() > 0){

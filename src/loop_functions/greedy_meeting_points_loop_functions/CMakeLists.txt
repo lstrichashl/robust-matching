@@ -1,5 +1,5 @@
 link_directories(${CMAKE_BINARY_DIR}/src/controllers/robust_matching)
-set(greedy_meeting_points_loop_functions_SOURCES greedy_meeting_points_loop_functions.cpp)
+set(greedy_meeting_points_loop_functions_SOURCES greedy_meeting_points_loop_functions.cpp neiberg_loop_functions.cpp)
 
 add_library(greedy_meeting_points_loop_functions SHARED ${greedy_meeting_points_loop_functions_SOURCES})
 target_link_libraries(greedy_meeting_points_loop_functions
