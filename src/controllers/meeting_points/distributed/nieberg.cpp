@@ -15,6 +15,7 @@ void NeighborhoodGraphController::Init(TConfigurationNode& t_node) {
     GetNodeAttribute(t_node, "max_distance", m_uMaxDistance);
     GetNodeAttribute(t_node, "range", m_visRange);
     m_visRange *= 100;
+    time = 0;
 
     string id = GetId();
     m_uRobotId = stoi(id);
@@ -78,12 +79,12 @@ AugmentationGraph NeighborhoodGraphController::BuildAugmentationGraph(const std:
 
 
 void NeighborhoodGraphController::ControlStep(){
-
-    // if(m_uRobotId == 17){
-    //     // cout << "Nodes: ";
-    //     // for (UInt8 node : m_sNodes) {
-    //     //     cout << node << " ";
-    //     // }
+    time += 1;
+    // if(m_uRobotId == 15 && m_phase != Move){
+        // cout << "Nodes: ";
+        // for (UInt8 node : m_sNodes) {
+        //     cout << node << " ";
+        // }
     //     cout << "\nEdges: ";
     //     for (const auto& edge : m_sEdges) {
     //         cout << "(" << edge.node1 << ", " << edge.node2 << "," <<edge.isMatching << ") ";
@@ -97,7 +98,7 @@ void NeighborhoodGraphController::ControlStep(){
             std::vector<std::vector<UInt8>> paths;
             std::unordered_map<size_t, Real> gains;
 
-            AddHopToGraph();
+            // AddHopToGraph();
             FindAugmentationPaths(m_uRobotId, m_uMaxDistance, paths, gains);
             m_graph = BuildAugmentationGraph(paths, gains);
             m_vAugmentationPaths = paths;
@@ -135,7 +136,7 @@ void NeighborhoodGraphController::ControlStep(){
             m_uCurrentHop++;
         }
     }
-    if(m_phase == Move && m_matchedRobotId != UINT8_MAX) {
+    if(m_phase == Move && m_matchedRobotId != UINT8_MAX && m_eState == STATE_ALONE) {
         BaseConrtoller::Communicate();
         CVector2 to_mate = m_meeting_point - m_position;
         CRadians cZAngle, cYAngle, cXAngle;
@@ -152,6 +153,26 @@ void NeighborhoodGraphController::ControlStep(){
     }
     else{
         m_heading = CVector2::ZERO;
+    }
+    if(m_phase == Move && time % m_iterrationtime == 0){
+        if(m_eState == STATE_ALONE){
+            StartMatching();
+            m_matched_robot_indexes.insert(m_matchedRobotId);
+            m_matchedRobotId = UINT8_MAX;
+        }else{
+            m_phase = Idle;
+            m_sNodes.clear();
+            m_sEdges.clear();
+            m_sNodes.insert(m_uRobotId);
+            m_uCurrentHop = 0;
+            std::unordered_set<AugmentationPath, AugmentationPathHash> paths; // Unique paths
+            std::unordered_map<AugmentationPath, std::unordered_set<AugmentationPath, AugmentationPathHash>, AugmentationPathHash> edges; // Adjacency list
+
+            m_graph.paths = paths;
+            m_graph.edges = edges;
+            m_pcRABAct->Reset();
+            m_pcRABSens->Reset();
+        }
     }
 
 
@@ -194,7 +215,6 @@ void NeighborhoodGraphController::StartMatching(){
 }
 void NeighborhoodGraphController::Reset(){
     BaseConrtoller::Reset();
-    StartMatching();
 }
 
 void PrintCByteArray(const argos::CByteArray& cData, UInt8 robotid) {
@@ -221,7 +241,10 @@ void NeighborhoodGraphController::ExchangeNeighborhood() {
 
             // Deserialize the received graph
             DeserializeGraph(tMessage.Data, senderId, sReceivedNodes, sReceivedEdges);
-        
+            if(senderId != 0){
+            // if(m_uRobotId == 15){
+            //     cout << senderId ;
+            // }
             // Merge the received graph
             m_sNodes.insert(sReceivedNodes.begin(), sReceivedNodes.end());
             for (const auto& edge : sReceivedEdges) {
@@ -232,6 +255,7 @@ void NeighborhoodGraphController::ExchangeNeighborhood() {
                 // Add an edge between the current robot and the sender
                 UInt8 range= static_cast<UInt8>(tMessage.Range);
                 AddEdge(m_sEdges, m_uRobotId, senderId, senderId == m_matchedRobotId, 2*m_visRange - range);
+            }
             }
         }
     }
@@ -244,7 +268,8 @@ void NeighborhoodGraphController::ExchangeNeighborhood() {
 void NeighborhoodGraphController::SerializeGraph(CByteArray& cData) {
     // Serialize nodes
     cData << m_uRobotId;
-    cData << static_cast<UInt8>(m_sNodes.size());
+    UInt8 num_nodes = static_cast<UInt8>(m_sNodes.size());
+    cData << num_nodes;
     for (UInt8 uNode : m_sNodes) {
         cData << uNode;
     }
@@ -262,15 +287,20 @@ void NeighborhoodGraphController::SerializeGraph(CByteArray& cData) {
         UInt8 a = 0;
         cData << a;
     }
-    if(GetId() == "196"){
-        PrintCByteArray(cData, m_uRobotId);
-    }
 }
 
 void NeighborhoodGraphController::DeserializeGraph(const CByteArray& cData,
                         UInt8& senderId,
                         std::unordered_set<UInt8>& sNodes,
                         std::unordered_set<Edge, EdgeHash>& sEdges) {
+    // if(m_uRobotId == 15){
+    //     cout << m_uRobotId << " data:";
+    //     for(int i = 0; i < 30; i++){
+    //         cout << cData[i] << " ";
+    //     }
+    //     cout << endl;
+    // }
+
     size_t index = 0;
     senderId = cData[index++];
     // Deserialize nodes
@@ -281,7 +311,6 @@ void NeighborhoodGraphController::DeserializeGraph(const CByteArray& cData,
         }
         index++;
     }
-
     // Deserialize edges
     UInt8 uEdgeCount = cData[index++];
     for (UInt8 i = 0; i < uEdgeCount; ++i) {
@@ -414,6 +443,9 @@ void NeighborhoodGraphController::FindAugmentationPaths(UInt8 startNode, UInt8 m
                 if (std::find(currentPath.begin(), currentPath.end(), neighbor) == currentPath.end()) {
                     std::vector<UInt8> newPath = currentPath;
                     Real newGain = currentGain;
+                    // for (const auto& edge2 : m_sEdges) {
+                    //     if(edge2.node1 == neighbor && edge2.node2 != )
+                    // }
                     if (!edge.isMatching) {
                         newGain += edge.weight;
                     }

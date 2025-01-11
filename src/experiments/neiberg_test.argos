@@ -31,6 +31,25 @@
                         max_speed="5" />
         </params>
     </neighborhood_graph_controller>
+      <neighborhood_graph_controller id="crash" library="build/src/controllers/meeting_points/libmeeting_points.so">
+        <actuators>
+            <differential_steering implementation="default" />
+            <epuck2_leds implementation="default" medium="leds" />
+            <range_and_bearing implementation="default" />
+          </actuators>
+          <sensors>
+              <epuck2_encoder implementation="default" />
+            <epuck2_battery implementation="default"/>
+            <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
+          </sensors>
+        <params max_distance=5 range="0.5"> 
+          <fault type="crash" m_crash_starttime="0" m_crash_endtime="1"></fault>
+          <wheel_turning hard_turn_angle_threshold="90"
+                        soft_turn_angle_threshold="5"
+                        no_turn_angle_threshold="5"
+                        max_speed="5" />
+        </params>
+    </neighborhood_graph_controller>
   </controllers>
 
   <loop_functions library="/home/lior/workspace/robust-matching/build/src/loop_functions/greedy_meeting_points_loop_functions/libgreedy_meeting_points_loop_functions.so"
@@ -39,9 +58,14 @@
           log_file_path="tmp"
         />
         <distribute_max_range range="0.5" arena_size="1.5">
-          <robot quantity="10">
+          <robot quantity="15">
               <e-puck2 id="r" rab_range="0.5" rab_data_size="1000">
                   <controller config="neighborhood_graph"></controller>
+              </e-puck2>
+          </robot>
+            <robot quantity="5">
+              <e-puck2 id="r2" rab_range="0.5" rab_data_size="1000">
+                  <controller config="crash"></controller>
               </e-puck2>
           </robot>
       </distribute_max_range>

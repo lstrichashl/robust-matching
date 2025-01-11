@@ -77,6 +77,7 @@ enum Phase{
     Maximal_Independent_Set = 2,
     Augmenting = 3,
     Move = 4,
+    Idle = 5,
 };
 
 
@@ -101,6 +102,8 @@ public:
     AugmentationGraph m_graph;
     Phase m_phase;
     Real m_visRange;
+    int time;
+    int m_iterrationtime = 500;
 
     NeighborhoodGraphController();
     virtual ~NeighborhoodGraphController() {}

@@ -291,12 +291,12 @@ void CNeibergLoopFunctions::PostStep(){
         }
         if(m_num_iterations < 1){
             for(const auto& [id, controller] : robotControllers){
-                // controller->m_phase = Move;
                 controller->StartMatching();
             }
             m_num_iterations++;
         }
         else{
+            // m_num_iterations = 0;
             for(const auto& [id, controller] : robotControllers){
                 controller->m_phase = Move;
                 // controller->StartMatching();

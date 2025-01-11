@@ -92,12 +92,6 @@ void BaseConrtoller::Reset() {
 }
 
 void BaseConrtoller::Communicate(){
-   if(ShouldTransitionToPaired()){
-        m_eState = STATE_PAIRED;
-    }
-    else if(ShouldTransitionToAlone()){
-        m_eState = STATE_ALONE;
-    }
     m_pcRABAct->SetData(0, m_eState);
    UInt8 id = stoi(GetId());
     m_pcRABAct->SetData(1, id);
@@ -107,6 +101,12 @@ void BaseConrtoller::Communicate(){
 }
 
 void BaseConrtoller::handleFaultBehaviour(){
+   if(ShouldTransitionToPaired()){
+        m_eState = STATE_PAIRED;
+    }
+    else if(ShouldTransitionToAlone()){
+        m_eState = STATE_ALONE;
+    }
    if(fault_type != nonfaulty){
       m_pcLedAct->SetAllRGBColors(CColor::RED);
       m_pcLedAct->SetAllRedLeds(true);
