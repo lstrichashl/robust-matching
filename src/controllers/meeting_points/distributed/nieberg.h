@@ -100,6 +100,7 @@ public:
 
     AugmentationGraph m_graph;
     Phase m_phase;
+    Real m_visRange;
 
     NeighborhoodGraphController();
     virtual ~NeighborhoodGraphController() {}

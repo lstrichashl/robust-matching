@@ -181,7 +181,6 @@ void CBasicLoopFunctions::PostStep(){
 }
 
 bool CBasicLoopFunctions::IsExperimentFinished() {
-    return false;
     if(m_is_triplet_experiment){
         return false;
     }

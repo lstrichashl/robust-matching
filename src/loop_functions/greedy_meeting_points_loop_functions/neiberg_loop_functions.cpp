@@ -265,8 +265,6 @@ void AugmentMatching(
 
             robotU->m_meeting_point = GetMeetingPoint(robotU->m_position, robotV->m_position);
             robotV->m_meeting_point = GetMeetingPoint(robotV->m_position, robotU->m_position);
-            robotU->m_matched_robot_indexes.insert(v);
-            robotV->m_matched_robot_indexes.insert(u);
         }
         else{
             robotU->m_matchedRobotId = UINT8_MAX;
@@ -290,9 +288,19 @@ void CNeibergLoopFunctions::PostStep(){
         PrintAccumulatedMIS(accumulatedMIS);
         for (const auto& path : accumulatedMIS) {
             AugmentMatching(path.nodes, robotControllers);
-        }       
-        for(const auto& [id, controller] : robotControllers){
-            controller->m_phase = Move;
+        }
+        if(m_num_iterations < 1){
+            for(const auto& [id, controller] : robotControllers){
+                // controller->m_phase = Move;
+                controller->StartMatching();
+            }
+            m_num_iterations++;
+        }
+        else{
+            for(const auto& [id, controller] : robotControllers){
+                controller->m_phase = Move;
+                // controller->StartMatching();
+            }
         }
         // std::cout << "Robot Match Status:\n";
         // for (const auto& [robotId, controller] : robotControllers) {
@@ -305,6 +313,9 @@ void CNeibergLoopFunctions::PostStep(){
     }
 }
 
+bool CNeibergLoopFunctions::IsExperimentFinished() {
+    return CBasicLoopFunctions::IsExperimentFinished();
+}
 
 
 

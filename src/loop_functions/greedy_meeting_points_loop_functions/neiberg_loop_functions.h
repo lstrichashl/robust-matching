@@ -16,6 +16,9 @@ class CNeibergLoopFunctions : public CPrintExperimentFunctions {
         virtual void PostStep();
         virtual void Reset();
         virtual void Init(TConfigurationNode& t_tree);
+        virtual bool IsExperimentFinished();
+
+        int m_num_iterations;
 };
 
 

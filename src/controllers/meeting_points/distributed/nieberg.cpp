@@ -13,6 +13,8 @@ void NeighborhoodGraphController::Init(TConfigurationNode& t_node) {
 
     // Initialize robot parameters
     GetNodeAttribute(t_node, "max_distance", m_uMaxDistance);
+    GetNodeAttribute(t_node, "range", m_visRange);
+    m_visRange *= 100;
 
     string id = GetId();
     m_uRobotId = stoi(id);
@@ -95,8 +97,8 @@ void NeighborhoodGraphController::ControlStep(){
             std::vector<std::vector<UInt8>> paths;
             std::unordered_map<size_t, Real> gains;
 
-            FindAugmentationPaths(m_uRobotId, m_uMaxDistance, paths, gains);
             AddHopToGraph();
+            FindAugmentationPaths(m_uRobotId, m_uMaxDistance, paths, gains);
             m_graph = BuildAugmentationGraph(paths, gains);
             m_vAugmentationPaths = paths;
             m_vPathGains = gains;
@@ -229,7 +231,7 @@ void NeighborhoodGraphController::ExchangeNeighborhood() {
             if (m_uCurrentHop == 1 && m_matched_robot_indexes.find(senderId) == m_matched_robot_indexes.end()) {
                 // Add an edge between the current robot and the sender
                 UInt8 range= static_cast<UInt8>(tMessage.Range);
-                AddEdge(m_sEdges, m_uRobotId, senderId, senderId == m_matchedRobotId, range);
+                AddEdge(m_sEdges, m_uRobotId, senderId, senderId == m_matchedRobotId, 2*m_visRange - range);
             }
         }
     }
