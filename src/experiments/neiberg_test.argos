@@ -24,9 +24,12 @@
             <epuck2_battery implementation="default"/>
             <range_and_bearing implementation="medium" medium="rab" show_rays="true" />
           </sensors>
-        <params 
-            max_distance=5
-        />
+        <params max_distance=5> 
+          <wheel_turning hard_turn_angle_threshold="90"
+                        soft_turn_angle_threshold="5"
+                        no_turn_angle_threshold="5"
+                        max_speed="5" />
+        </params>
     </neighborhood_graph_controller>
   </controllers>
 

@@ -226,6 +226,11 @@ std::unordered_set<AugmentationPath, AugmentationPathHash> ProcessAugmentationGr
     return accumulatedMIS;
 }
 
+CVector2 GetMeetingPoint(CVector2 self_position, CVector2 mate_position) {
+    CVector2 meeting_point((mate_position.GetX()+self_position.GetX())/2, (mate_position.GetY()+self_position.GetY())/2);
+    return meeting_point;
+}
+
 void AugmentMatching(
     const std::vector<UInt8>& path, 
     std::unordered_map<UInt8, NeighborhoodGraphController*>& robotControllers) {
@@ -257,6 +262,11 @@ void AugmentMatching(
             }
             robotU->m_matchedRobotId = v;
             robotV->m_matchedRobotId = u;
+
+            robotU->m_meeting_point = GetMeetingPoint(robotU->m_position, robotV->m_position);
+            robotV->m_meeting_point = GetMeetingPoint(robotV->m_position, robotU->m_position);
+            robotU->m_matched_robot_indexes.insert(v);
+            robotV->m_matched_robot_indexes.insert(u);
         }
         else{
             robotU->m_matchedRobotId = UINT8_MAX;
@@ -274,16 +284,16 @@ void CNeibergLoopFunctions::PostStep(){
         robotControllers[cController1.m_uRobotId] = &cController1;
     }
     auto it = robotControllers.begin();
-    if(it->second->m_uCurrentHop == it->second->m_uMaxDistance+1){
+    if(it->second->m_phase == Maximal_Independent_Set){
         AugmentationGraph graph = CombineAllGraphs(robotControllers);
         std::unordered_set<AugmentationPath, AugmentationPathHash> accumulatedMIS = ProcessAugmentationGraph(graph);
         PrintAccumulatedMIS(accumulatedMIS);
         for (const auto& path : accumulatedMIS) {
             AugmentMatching(path.nodes, robotControllers);
+        }       
+        for(const auto& [id, controller] : robotControllers){
+            controller->m_phase = Move;
         }
-        // for(const auto& [id, controller] : robotControllers){
-        //     controller->StartMatching();
-        // }
         // std::cout << "Robot Match Status:\n";
         // for (const auto& [robotId, controller] : robotControllers) {
         // std::cout << "Robot " << static_cast<int>(robotId) 

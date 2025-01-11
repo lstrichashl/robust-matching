@@ -45,7 +45,7 @@ void CBasicLoopFunctions::Reset(){
         CEPuck2Entity* robot = any_cast<CEPuck2Entity*>(it->second);
         m_robots.push_back(robot);
     }
-    m_last_positions = GetPositions(m_robots);
+    m_last_positions = GetPositions(GetNFRobots());
     m_new_positions = m_last_positions;
     add_log();
 }
@@ -181,6 +181,7 @@ void CBasicLoopFunctions::PostStep(){
 }
 
 bool CBasicLoopFunctions::IsExperimentFinished() {
+    return false;
     if(m_is_triplet_experiment){
         return false;
     }
@@ -302,7 +303,7 @@ void CBasicLoopFunctions::PlaceCluster(vector<DistributeConfig> configs,Real rob
     CVector2 c_center(0,0);
     vector<CVector2> all_positions = GetPositions(seed_entites);
     all_positions.push_back(c_center);
-    while(all_positions.size() == 1){ //|| !_is_connected_graph(all_positions, robot_range)){
+    while(all_positions.size() == 1 || !_is_connected_graph(all_positions, robot_range)){
         RemoveAll(spawn_entites);
         all_positions = {c_center};
         spawn_entites = {};

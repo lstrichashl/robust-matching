@@ -41,6 +41,8 @@ public:
    virtual CVector2 KeepDistanceFlockingVector();
    virtual CVector2 VirtualForceWalkAwayFlockingVector();
    virtual void ControlStep();
+   virtual void Communicate();
+   virtual void handleFaultBehaviour();
    virtual EState GetEState(){
       return m_eState;
    }

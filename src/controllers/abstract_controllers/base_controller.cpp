@@ -91,8 +91,8 @@ void BaseConrtoller::Reset() {
    random_destination = CVector2::ZERO;
 }
 
-void BaseConrtoller::ControlStep(){
-    if(ShouldTransitionToPaired()){
+void BaseConrtoller::Communicate(){
+   if(ShouldTransitionToPaired()){
         m_eState = STATE_PAIRED;
     }
     else if(ShouldTransitionToAlone()){
@@ -104,6 +104,9 @@ void BaseConrtoller::ControlStep(){
     if(m_eState == STATE_PAIRED){
       m_heading = CVector2::ZERO;
     }
+}
+
+void BaseConrtoller::handleFaultBehaviour(){
    if(fault_type != nonfaulty){
       m_pcLedAct->SetAllRGBColors(CColor::RED);
       m_pcLedAct->SetAllRedLeds(true);
@@ -120,6 +123,11 @@ void BaseConrtoller::ControlStep(){
    if(fault_type == opposite){
       m_heading = -m_heading;
    }
+}
+
+void BaseConrtoller::ControlStep(){
+   Communicate();
+   handleFaultBehaviour();
    SetWheelSpeedsFromVector(m_heading);
 }
 

@@ -2,13 +2,14 @@
 #include <queue>
 
 NeighborhoodGraphController::NeighborhoodGraphController(){
-
+    
 }
 
 void NeighborhoodGraphController::Init(TConfigurationNode& t_node) {
+    BaseConrtoller::Init(t_node);
     // Initialize actuators and sensors
-    m_pcRABActuator = GetActuator<CCI_RangeAndBearingActuator  >("range_and_bearing" );
-    m_pcRABSensor = GetSensor  <CCI_RangeAndBearingSensor    >("range_and_bearing" );
+    // m_pcRABAct = GetActuator<CCI_RangeAndBearingActuator  >("range_and_bearing" );
+    // m_pcRABSens = GetSensor  <CCI_RangeAndBearingSensor    >("range_and_bearing" );
 
     // Initialize robot parameters
     GetNodeAttribute(t_node, "max_distance", m_uMaxDistance);
@@ -16,7 +17,8 @@ void NeighborhoodGraphController::Init(TConfigurationNode& t_node) {
     string id = GetId();
     m_uRobotId = stoi(id);
     m_uCurrentHop = 0;
-    m_matchedRobotId = 255;
+    m_matchedRobotId = UINT8_MAX;
+    m_phase = Construct_Augmentation_Graph;
     // if(m_uRobotId == 10){
     //     m_matchedRobotId = 12;
     // }    
@@ -34,7 +36,7 @@ void NeighborhoodGraphController::Init(TConfigurationNode& t_node) {
     m_sNodes.insert(m_uRobotId);
 }
 
-AugmentationGraph BuildAugmentationGraph(const std::vector<std::vector<UInt8>>& paths,
+AugmentationGraph NeighborhoodGraphController::BuildAugmentationGraph(const std::vector<std::vector<UInt8>>& paths,
                                          const std::unordered_map<size_t, Real>& gains) {
     AugmentationGraph graph;
 
@@ -43,6 +45,16 @@ AugmentationGraph BuildAugmentationGraph(const std::vector<std::vector<UInt8>>& 
         AugmentationPath path;
         path.nodes = paths[i];
         path.gain = gains.at(i); // Assuming gains are indexed by the same indices as paths
+        path.priority = pcRNG->Uniform(CRange<Real>(0, 1));
+        // auto minIt = std::min_element(path.nodes.begin(), path.nodes.end());
+        // int minNodeId = static_cast<int>(*minIt);
+
+        // if(minNodeId == m_uRobotId){
+        //     graph.my_paths.insert(path);
+        // }
+        // else{
+        //     graph.others_paths.insert(path);
+        // }
         graph.paths.insert(path);
     }
 
@@ -65,56 +77,121 @@ AugmentationGraph BuildAugmentationGraph(const std::vector<std::vector<UInt8>>& 
 
 void NeighborhoodGraphController::ControlStep(){
 
-    if(m_uRobotId == 17){
-        // cout << "Nodes: ";
-        // for (UInt8 node : m_sNodes) {
-        //     cout << node << " ";
-        // }
-        cout << "\nEdges: ";
-        for (const auto& edge : m_sEdges) {
-            cout << "(" << edge.node1 << ", " << edge.node2 << "," <<edge.isMatching << ") ";
+    // if(m_uRobotId == 17){
+    //     // cout << "Nodes: ";
+    //     // for (UInt8 node : m_sNodes) {
+    //     //     cout << node << " ";
+    //     // }
+    //     cout << "\nEdges: ";
+    //     for (const auto& edge : m_sEdges) {
+    //         cout << "(" << edge.node1 << ", " << edge.node2 << "," <<edge.isMatching << ") ";
+    //     }
+    // }
+    if(m_phase == Construct_Augmentation_Graph){
+        if (m_uCurrentHop < m_uMaxDistance) {
+            ExchangeNeighborhood();
+            m_uCurrentHop++;
+        } else if(m_uCurrentHop == m_uMaxDistance) {
+            std::vector<std::vector<UInt8>> paths;
+            std::unordered_map<size_t, Real> gains;
+
+            FindAugmentationPaths(m_uRobotId, m_uMaxDistance, paths, gains);
+            AddHopToGraph();
+            m_graph = BuildAugmentationGraph(paths, gains);
+            m_vAugmentationPaths = paths;
+            m_vPathGains = gains;
+
+            m_uCurrentHop++;
+        }
+        else{
+            m_phase = MAIN_LOOP;
+            m_uCurrentHop = 0;
+            accumulatedMIS.clear();
         }
     }
-
-    if (m_uCurrentHop < m_uMaxDistance) {
-        ExchangeNeighborhood();
-        m_uCurrentHop++;
-    } else if(m_uCurrentHop == m_uMaxDistance) {
-        std::vector<std::vector<UInt8>> paths;
-        std::unordered_map<size_t, Real> gains;
-
-        FindAugmentationPaths(m_uRobotId, m_uMaxDistance, paths, gains);
-        AddHopToGraph();
-        m_graph = BuildAugmentationGraph(paths, gains);
-
-        m_uCurrentHop++;
-    } 
-    else if(m_uCurrentHop  == m_uMaxDistance * 2) {
-        cout << "matching:"<< m_uRobotId << " " << m_matchedRobotId<<endl;
-        StartMatching();
+    else if(m_phase == MAIN_LOOP){
+        if(m_uCurrentHop < m_uMaxDistance){
+            PropegratePaths(m_vAugmentationPaths);
+            m_uCurrentHop++;
+        } else if(m_uCurrentHop == m_uMaxDistance) {
+            m_phase = Maximal_Independent_Set;
+            std::unordered_set<AugmentationPath, AugmentationPathHash> mis = CalculateMIS();
+            accumulatedMIS.insert(mis.begin(), mis.end());
+            RemoveAdjacentNodes(m_graph, mis);
+            m_uCurrentHop++;
+        }
+    }
+    else if(m_phase == Augmenting){
+        vector<vector<UInt8>> paths;
+        if(m_uCurrentHop == 0){
+            for(auto& path : accumulatedMIS){
+                paths.push_back(path.nodes);
+            }
+        }
+        if(m_uCurrentHop < m_uMaxDistance){
+            PropegratePaths(paths);
+            m_uCurrentHop++;
+        }
+    }
+    if(m_phase == Move && m_matchedRobotId != UINT8_MAX) {
+        BaseConrtoller::Communicate();
+        CVector2 to_mate = m_meeting_point - m_position;
+        CRadians cZAngle, cYAngle, cXAngle;
+        m_orientation.ToEulerAngles(cZAngle, cYAngle, cXAngle);
+        m_heading = to_mate.Rotate(-cZAngle);
+        Real distance_to_meeting_point = (m_meeting_point - m_position).Length();
+        if(distance_to_meeting_point-PAIRING_THRESHOLD/2 < 0) {
+            m_heading = CVector2::ZERO;
+        }
+        else{
+            m_heading = m_heading.Normalize();
+            m_heading += FlockingVector();
+        }
     }
     else{
-        // cout << "idle" << endl;
-        m_uCurrentHop++;
+        m_heading = CVector2::ZERO;
     }
+
+
+    handleFaultBehaviour();
+    SetWheelSpeedsFromVector(m_heading);
+    // else if(m_uCurrentHop  == m_uMaxDistance * 2) {
+    //     cout << "matching:"<< m_uRobotId << " " << m_matchedRobotId<<endl;
+    //     StartMatching();
+    // }
+    // else{
+    //     // cout << "idle" << endl;
+    //     m_uCurrentHop++;
+    // }
 
 }
 
+void NeighborhoodGraphController::RemoveAdjacentNodes(AugmentationGraph& graph, 
+                            const std::unordered_set<AugmentationPath, AugmentationPathHash>& mis){
+
+}
+
+unordered_set<AugmentationPath, AugmentationPathHash> NeighborhoodGraphController::CalculateMIS(){
+    unordered_set<AugmentationPath, AugmentationPathHash> mis;
+    return mis;
+}
 
 void NeighborhoodGraphController::StartMatching(){
     m_sNodes.clear();
     m_sEdges.clear();
     m_sNodes.insert(m_uRobotId);
     m_uCurrentHop = 0;
-    // std::unordered_set<AugmentationPath, AugmentationPathHash> paths; // Unique paths
-    // std::unordered_map<AugmentationPath, std::unordered_set<AugmentationPath, AugmentationPathHash>, AugmentationPathHash> edges; // Adjacency list
+    std::unordered_set<AugmentationPath, AugmentationPathHash> paths; // Unique paths
+    std::unordered_map<AugmentationPath, std::unordered_set<AugmentationPath, AugmentationPathHash>, AugmentationPathHash> edges; // Adjacency list
 
-    // m_graph.paths = paths;
-    // m_graph.edges = edges;
-    m_pcRABActuator->Reset();
-    m_pcRABSensor->Reset();
+    m_graph.paths = paths;
+    m_graph.edges = edges;
+    m_pcRABAct->Reset();
+    m_pcRABSens->Reset();
+    m_phase = Construct_Augmentation_Graph;
 }
 void NeighborhoodGraphController::Reset(){
+    BaseConrtoller::Reset();
     StartMatching();
 }
 
@@ -134,7 +211,7 @@ void AddEdge(std::unordered_set<Edge, EdgeHash>& sEdges, UInt8 uNode1, UInt8 uNo
 void NeighborhoodGraphController::ExchangeNeighborhood() {
     if(m_uCurrentHop >= 1){
         // Receive and merge graphs from neighbors
-        const auto& tMessages = m_pcRABSensor->GetReadings();
+        const auto& tMessages = m_pcRABSens->GetReadings();
         for (const auto& tMessage : tMessages) {
             UInt8 senderId;
             std::unordered_set<UInt8> sReceivedNodes;
@@ -142,14 +219,14 @@ void NeighborhoodGraphController::ExchangeNeighborhood() {
 
             // Deserialize the received graph
             DeserializeGraph(tMessage.Data, senderId, sReceivedNodes, sReceivedEdges);
-
+        
             // Merge the received graph
             m_sNodes.insert(sReceivedNodes.begin(), sReceivedNodes.end());
             for (const auto& edge : sReceivedEdges) {
-                AddEdge(m_sEdges, edge.node1, edge.node2, edge.isMatching, edge.weight); // Use normalized insertion
+                AddEdge(m_sEdges, edge.node1, edge.node2, edge.isMatching, edge.weight);
             }
 
-            if (m_uCurrentHop == 1) {
+            if (m_uCurrentHop == 1 && m_matched_robot_indexes.find(senderId) == m_matched_robot_indexes.end()) {
                 // Add an edge between the current robot and the sender
                 UInt8 range= static_cast<UInt8>(tMessage.Range);
                 AddEdge(m_sEdges, m_uRobotId, senderId, senderId == m_matchedRobotId, range);
@@ -159,7 +236,7 @@ void NeighborhoodGraphController::ExchangeNeighborhood() {
     // Serialize the graph into a message
     CByteArray cData;
     SerializeGraph(cData);
-    m_pcRABActuator->SetData(cData);
+    m_pcRABAct->SetData(cData);
 }
 
 void NeighborhoodGraphController::SerializeGraph(CByteArray& cData) {
@@ -197,7 +274,10 @@ void NeighborhoodGraphController::DeserializeGraph(const CByteArray& cData,
     // Deserialize nodes
     UInt8 uNodeCount = cData[index++];
     for (UInt8 i = 0; i < uNodeCount; ++i) {
-        sNodes.insert(cData[index++]);
+        if(m_matched_robot_indexes.find(cData[index]) == m_matched_robot_indexes.end()){
+            sNodes.insert(cData[index]);
+        }
+        index++;
     }
 
     // Deserialize edges
@@ -210,6 +290,52 @@ void NeighborhoodGraphController::DeserializeGraph(const CByteArray& cData,
         AddEdge(sEdges, uNode1, uNode2, isMatching == 1, weight);
     }
 }
+
+Real GaziRepultion3(double distance){
+    if(distance > 20){
+        return 0;
+    }
+    double b = 7;
+    double c = 15;
+    double v = distance * (- b * ::pow(M_E, -::pow(distance,2)/c));
+    return v;
+}
+CVector2 NeighborhoodGraphController::FlockingVector() {
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+    if(! tMsgs.empty()) {
+        CVector2 local_repulsion_force;
+        for(size_t i = 0; i < tMsgs.size(); ++i) {
+            // cout << tMsgs[i].Data[1] << endl;
+            if(tMsgs[i].Data[1] != m_matchedRobotId){
+                Real fLJ = GaziRepultion3(tMsgs[i].Range);
+                local_repulsion_force += CVector2(fLJ, tMsgs[i].HorizontalBearing);
+            }
+        }
+        // cout << local_repulsion_force << endl;
+        return local_repulsion_force;
+    }
+    else {
+        return CVector2();
+    }
+}
+
+
+void NeighborhoodGraphController::PropegratePaths(std::vector<std::vector<UInt8>>& paths){
+    // CByteArray cData;
+    // SerializePaths(paths, cData);
+    // m_pcRABAct->SetData(cData);
+
+    // // Receive and integrate paths from neighbors
+    // const auto& tMessages = m_pcRABSens->GetReadings();
+    // for (const auto& tMessage : tMessages) {
+    //     std::unordered_map<UInt8, PathNode> receivedPaths;
+    //     DeserializePaths(tMessage.Data, receivedPaths);
+    //     for (const auto& [id, pathNode] : receivedPaths) {
+    //         localPaths[id] = pathNode; // Merge received paths
+    //     }
+    // }
+}
+
 
 void NeighborhoodGraphController::FinalizeGraph() {
     // Output or process the final graph (for debugging purposes here)

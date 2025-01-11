@@ -38,6 +38,7 @@ struct EdgeHash {
 struct AugmentationPath {
     std::vector<UInt8> nodes;  // Nodes in the augmentation path
     Real gain;                 // Gain associated with the path
+    Real priority;             // MIS priority
 
     bool operator==(const AugmentationPath& other) const {
         if (nodes.size() != other.nodes.size()) {
@@ -70,12 +71,17 @@ struct AugmentationGraph {
     std::unordered_map<AugmentationPath, std::unordered_set<AugmentationPath, AugmentationPathHash>, AugmentationPathHash> edges; // Adjacency list
 };
 
+enum Phase{
+    Construct_Augmentation_Graph = 0,
+    MAIN_LOOP = 1,
+    Maximal_Independent_Set = 2,
+    Augmenting = 3,
+    Move = 4,
+};
+
 
 class NeighborhoodGraphController : public BaseConrtoller {
 public:
-    // Actuators and Sensors
-    CCI_RangeAndBearingActuator* m_pcRABActuator;
-    CCI_RangeAndBearingSensor* m_pcRABSensor;
 
     // Parameters
     UInt8 m_uRobotId;                          // Unique ID for the robot
@@ -90,7 +96,10 @@ public:
     std::vector<std::vector<UInt8>> m_vAugmentationPaths;
     std::unordered_map<size_t, Real> m_vPathGains;
 
+    std::unordered_set<AugmentationPath, AugmentationPathHash> accumulatedMIS;
+
     AugmentationGraph m_graph;
+    Phase m_phase;
 
     NeighborhoodGraphController();
     virtual ~NeighborhoodGraphController() {}
@@ -98,6 +107,7 @@ public:
     virtual void ControlStep();
     virtual void Reset() ;
     virtual void Destroy() override {}
+    virtual CVector2 FlockingVector();
 
     virtual void ExchangeNeighborhood();
 
@@ -114,6 +124,12 @@ public:
                                         UInt8 maxLength, 
                                         std::vector<std::vector<UInt8>>& paths, 
                                         std::unordered_map<size_t, Real>& pathGains);
+    virtual AugmentationGraph BuildAugmentationGraph(const std::vector<std::vector<UInt8>>& paths,
+                                                                            const std::unordered_map<size_t, Real>& gains);
+    virtual void PropegratePaths(std::vector<std::vector<UInt8>>& paths);
+    virtual std::unordered_set<AugmentationPath, AugmentationPathHash> CalculateMIS();
+    virtual void RemoveAdjacentNodes(AugmentationGraph& graph, 
+                                    const std::unordered_set<AugmentationPath, AugmentationPathHash>& mis);
 
     virtual void AddHopToGraph();
     virtual void StartMatching();
