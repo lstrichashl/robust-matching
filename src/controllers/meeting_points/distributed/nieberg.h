@@ -130,7 +130,7 @@ public:
                                         std::unordered_map<size_t, Real>& pathGains);
     virtual AugmentationGraph BuildAugmentationGraph(const std::vector<std::vector<UInt8>>& paths,
                                                                             const std::unordered_map<size_t, Real>& gains);
-    virtual void PropegratePaths(std::vector<std::vector<UInt8>>& paths);
+    virtual void PropegratePaths();
     virtual std::unordered_set<AugmentationPath, AugmentationPathHash> CalculateMIS();
     virtual void RemoveAdjacentNodes(AugmentationGraph& graph, 
                                     const std::unordered_set<AugmentationPath, AugmentationPathHash>& mis);

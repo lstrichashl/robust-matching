@@ -84,6 +84,7 @@ public:
 
    FaultyType fault_type;
    bool m_random_exploration;
+   int communication_rounds = 0;
    
    virtual Real LennardJonesPotential(double distance){
       double epsilon = 10;

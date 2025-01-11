@@ -39,7 +39,13 @@ void CPrintExperimentFunctions::Destroy(){
     init_positions.pop_back();
     init_positions += "]";
 
-    std::string filecontent = "{\"robot_types\":"+robot_types+",\"init_positions\":"+init_positions+",\"logs\":"+all_log+"}";
+    int all_communications = 0;
+    for(unsigned i = 0; i < m_nf_robots.size(); i++){
+        BaseConrtoller& cController1 = dynamic_cast<BaseConrtoller&>(GetControllableEntity3(m_nf_robots[i])->GetController());
+        all_communications += cController1.communication_rounds;
+    }
+
+    std::string filecontent = "{\"communications\":"+to_string(all_communications)+",\"robot_types\":"+robot_types+",\"init_positions\":"+init_positions+",\"logs\":"+all_log+"}";
     os << filecontent << std::endl;
     os.close();
 }

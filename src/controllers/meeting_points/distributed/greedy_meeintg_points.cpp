@@ -38,6 +38,7 @@ void CGreedyMeetingPoint::ControlStep(){
             m_rejected_sin_robot_ids.insert(other_try_to_sin_robot_id);
         }
         if(handshake == IDLE){
+            communication_rounds++;
             if(! tMsgs.empty()) {
                 vector<pair<int,Real>> neighboring_idle_robots;
                 vector<pair<int,Real>> neighboring_sin_me_robots;
@@ -98,6 +99,7 @@ void CGreedyMeetingPoint::ControlStep(){
             }
         }
         else if(handshake == SIN){
+            communication_rounds++;
             const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
             bool got_sinack = false;
             if(! tMsgs.empty()) {
@@ -119,6 +121,7 @@ void CGreedyMeetingPoint::ControlStep(){
             }
         }
         else if(handshake == SINACK){
+            communication_rounds++;
             const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
             bool got_ack = false;
             if(! tMsgs.empty()) {

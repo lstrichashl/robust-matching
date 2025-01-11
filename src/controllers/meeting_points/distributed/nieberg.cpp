@@ -90,6 +90,9 @@ void NeighborhoodGraphController::ControlStep(){
     //         cout << "(" << edge.node1 << ", " << edge.node2 << "," <<edge.isMatching << ") ";
     //     }
     // }
+    if(m_phase == Construct_Augmentation_Graph || m_phase == MAIN_LOOP || m_phase == Augmenting){
+        communication_rounds++;
+    }
     if(m_phase == Construct_Augmentation_Graph){
         if (m_uCurrentHop < m_uMaxDistance) {
             ExchangeNeighborhood();
@@ -114,7 +117,7 @@ void NeighborhoodGraphController::ControlStep(){
     }
     else if(m_phase == MAIN_LOOP){
         if(m_uCurrentHop < m_uMaxDistance){
-            PropegratePaths(m_vAugmentationPaths);
+            PropegratePaths();
             m_uCurrentHop++;
         } else if(m_uCurrentHop == m_uMaxDistance) {
             m_phase = Maximal_Independent_Set;
@@ -125,14 +128,8 @@ void NeighborhoodGraphController::ControlStep(){
         }
     }
     else if(m_phase == Augmenting){
-        vector<vector<UInt8>> paths;
-        if(m_uCurrentHop == 0){
-            for(auto& path : accumulatedMIS){
-                paths.push_back(path.nodes);
-            }
-        }
         if(m_uCurrentHop < m_uMaxDistance){
-            PropegratePaths(paths);
+            PropegratePaths();
             m_uCurrentHop++;
         }
     }
@@ -351,7 +348,7 @@ CVector2 NeighborhoodGraphController::FlockingVector() {
 }
 
 
-void NeighborhoodGraphController::PropegratePaths(std::vector<std::vector<UInt8>>& paths){
+void NeighborhoodGraphController::PropegratePaths(){
     // CByteArray cData;
     // SerializePaths(paths, cData);
     // m_pcRABAct->SetData(cData);
