@@ -163,6 +163,29 @@ class GreedyMeetingPoints(NonFaultyAlgorithm):
             "@label": "greedy_meeting_points_loop_functions",
             "params": self.get_loop_functions_params()
         }
+    
+class MeetingPointsDist(NonFaultyAlgorithm):
+    def __init__(self, range: int) -> None:
+        super().__init__(controller_type="neighborhood_graph_controller",
+                         template_file_path=f'{base_dir}/automatic_experiments/templates/virtual_forces.argos',
+                         range=range,
+                         library="build/src/controllers/meeting_points/libmeeting_points.so",
+                         )
+        # self.random_exploration = random_exploration
+        # if random_exploration:
+        #     self.id = "greedy_meeting_point_controller_random"
+
+    def get_loop_functions(self):
+        return {
+            "@library":  f'{base_dir}/build/src/loop_functions/greedy_meeting_points_loop_functions/libgreedy_meeting_points_loop_functions.so',
+            "@label": "neiberg_loop_functions",
+            "params": self.get_loop_functions_params()
+        }
+    def to_dict(self):
+        d = super().to_dict()
+        d["params"]["@max_distance"] = 5
+        d["params"]["@range"] = self.range
+        return d
 
 class TripletVirtuualForces(NonFaultyAlgorithm):
     def __init__(self, range):
@@ -200,6 +223,8 @@ class Crash(FaultyAlgorithm):
         d = super().to_dict()
         d["params"]["fault"]["@m_crash_starttime"] = self.start_crash_time
         d["params"]["fault"]["@m_crash_endtime"] = self.end_crash_time
+        d["params"]["@max_distance"] = 5
+        d["params"]["@range"] = self.range
         return d
 
 class VirtualForcesWalkAway(FaultyAlgorithm):
@@ -248,6 +273,8 @@ def algorithmFactory(name, range, random_exploration=False) -> Algorithm:
         return GreedyMeetingPoints(range=range,random_exploration=random_exploration)
     elif name == "triplet_forces":
         return TripletVirtuualForces(range=range)
+    elif name == "meeting_points_dist":
+        return MeetingPointsDist(range=range)
     else:
         raise name + " is not found"
 
@@ -328,7 +355,7 @@ def distribute_max_range(experiment: Experiment):
             experiment.non_faulty_algorithm.robot_type: {
                 '@id': 'non_faulty', 
                 '@rab_range': experiment.non_faulty_algorithm.range, 
-                '@rab_data_size': '4', 
+                '@rab_data_size': '1000', 
                 'controller': {'@config': experiment.non_faulty_algorithm.id}
             }
         },{
@@ -336,7 +363,7 @@ def distribute_max_range(experiment: Experiment):
             experiment.non_faulty_algorithm.robot_type: {
                 '@id': 'faulty', 
                 '@rab_range': experiment.faulty_algorithm.range, 
-                '@rab_data_size': '4', 
+                '@rab_data_size': '1000', 
                 'controller': {'@config': experiment.faulty_algorithm.id}
             }
         }]

@@ -96,6 +96,15 @@ def get_distance_traveled(
         distances.append(distance_traveled)
     return distances
 
+def get_communication(directory_path):
+    files = [f for f in pathlib.Path(directory_path).iterdir() if f.is_file() and ".log" in f.name]
+    communcations = []
+    for file in files:
+        a = open_file(file)
+        communcations.append(a["communications"])
+    return get_std_mean(communcations)
+
+
 def stat_experiment_set(
     directory_path,
     cuttime = 5000,
@@ -209,7 +218,8 @@ def key_to_color(key:str):
         "GMP": plt.cm.tab10.colors[3],
         "MP": plt.cm.tab10.colors[4],
         "GMP Random": plt.cm.tab10.colors[5],
-        "VF Static": plt.cm.tab10.colors[6]
+        "VF Static": plt.cm.tab10.colors[6],
+        "MP Dist": plt.cm.tab10.colors[7],
     }
     return colors.get(key, "#ffffff")
 
@@ -225,7 +235,8 @@ def algo_to_label(algo):
         "greedy_meeting_point_controller": "GMP",
         "meeting_point_epuck_controller": "MP",
         "greedy_meeting_point_controller_random": "GMP Random",
-        "virtual_forces_bot_controller":"VF Static"
+        "virtual_forces_bot_controller":"VF Static",
+        "neighborhood_graph_controller": "MP Dist",
     }
     return algo_to_label.get(algo, algo)
 

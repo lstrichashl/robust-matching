@@ -59,7 +59,7 @@ def main():
     num = 2  # set to the number of workers you want (the default is the cpu count of your machine)
     build()
     number_of_test_runs = 50
-    all_robots = [80]
+    all_robots = [20]
     all_range = [2]
     number_of_faults = [0]
     for n_robots, via_range in tqdm(product(all_robots,all_range)):
@@ -68,14 +68,15 @@ def main():
         run_tag = f"final/connected/range_{via_range}_robots_{n_robots}"
 
         non_faulty_algorithms = [
-            AlgoMatching(is_commited=True, range=via_range),
+            # AlgoMatching(is_commited=True, range=via_range),
             # AlgoMatching(is_commited=False, id="repeated", repeate_interval=10, range=via_range),
             # VirtualForcesRandom(range=via_range),
             # MeetingPointsEpuck(range=via_range),
             # GreedyMeetingPoints(range=via_range,random_exploration=True),
             # GreedyMeetingPoints(range=via_range,random_exploration=False),
             # VirtualForces(range=range),
-            # TripletVirtuualForces(range=range)
+            # TripletVirtuualForces(range=range),
+            MeetingPointsDist(range=via_range),
         ]
         faulty_algorithms = [
             # AlgoMatchingWalkAway,

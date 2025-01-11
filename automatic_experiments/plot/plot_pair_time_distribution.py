@@ -1,7 +1,7 @@
 
 import matplotlib.pyplot as plt
 from itertools import product
-from plot import stat_experiment_set, algo_to_label, get_std_mean, key_to_color, get_distance_traveled
+from plot import *
 import numpy as np
 import matplotlib.cm as cm
 
@@ -609,6 +609,77 @@ def plot_faults_on_x(number_of_robots, visrange):
     # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/pairing_time_faults_on_x_robots{number_of_robots}_faulty{f_count}_{table['title']}.png", bbox_inches='tight')
 
 
+def plot_communication(number_of_robots, visrange):
+    means = [
+        [0,0,0],
+        [0,0,0],
+        [0,0,0],
+    ]
+    errors = [
+        [0,0,0],
+        [0,0,0],
+        [0,0,0],
+    ]
+
+    comunication = get_communication(f"{base_dir}/range_{visrange}_robots_{number_of_robots}/greedy_meeting_point_controller_crash_0_1/faulty0")
+    means[0][0] = comunication['mean']
+    errors[0][0] = comunication['std']
+
+    comunication = get_communication(f"{base_dir}/range_{visrange}_robots_{number_of_robots}/greedy_meeting_point_controller_crash_0_1/faulty5")
+    means[0][1] = comunication['mean']
+    errors[0][1] = comunication['std']
+
+    comunication = get_communication(f"{base_dir}/range_{visrange}_robots_{number_of_robots}/greedy_meeting_point_controller_crash_0_1/faulty10")
+    means[0][2] = comunication['mean']
+    errors[0][2] = comunication['std']
+
+    comunication = get_communication(f"{base_dir}/range_{visrange}_robots_{number_of_robots}/greedy_meeting_point_controller_random_crash_0_1/faulty0")
+    means[1][0] = comunication['mean']
+    errors[1][0] = comunication['std']
+
+    comunication = get_communication(f"{base_dir}/range_{visrange}_robots_{number_of_robots}/greedy_meeting_point_controller_random_crash_0_1/faulty5")
+    means[1][1] = comunication['mean']
+    errors[1][1] = comunication['std']
+
+    comunication = get_communication(f"{base_dir}/range_{visrange}_robots_{number_of_robots}/greedy_meeting_point_controller_random_crash_0_1/faulty10")
+    means[1][2] = comunication['mean']
+    errors[1][2] = comunication['std']
+
+    comunication = get_communication(f"{base_dir}/range_{visrange}_robots_{number_of_robots}/neighborhood_graph_controller_crash_0_1/faulty0")
+    means[2][0] = comunication['mean']
+    errors[2][0] = comunication['std']
+
+    comunication = get_communication(f"{base_dir}/range_{visrange}_robots_{number_of_robots}/neighborhood_graph_controller_crash_0_1/faulty5")
+    means[2][1] = comunication['mean']
+    errors[2][1] = comunication['std']
+
+    comunication = get_communication(f"{base_dir}/range_{visrange}_robots_{number_of_robots}/neighborhood_graph_controller_crash_0_1/faulty10")
+    means[2][2] = comunication['mean']
+    errors[2][2] = comunication['std']
+
+    categories = ["fault0", "fault5", "fault10"]
+    groups = ["GMP", "GMP random", "MP"]
+    x = np.arange(len(categories))
+    group_offsets = np.array([0,0.2, 0.4])
+
+    plt.figure()
+    for i, (vals, errs) in enumerate(zip(means, errors)):
+        plt.bar(
+            x+group_offsets[i],
+            vals,
+            width=0.2,
+            yerr=errs,
+            # fmt="o",
+            linestyle="None",
+            label=groups[i]
+        )
+    plt.xticks(x, categories)
+    plt.ylabel("communication")
+    plt.legend(loc="upper center", ncols=2)
+    # plt.show()
+    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/communication_robots{number_of_robots}.png",bbox_inches='tight')
+    plt.close()
+
 
 if __name__ == "__main__":
     # base_dir = "/Users/lior.strichash/
@@ -621,6 +692,7 @@ if __name__ == "__main__":
     f_algorithms = ["crash", "keep_distance", "opposite", "virtual_forces_walk_away"]
     nf_algorithms = ["virtual_forces_random_controller", "algo_matching", "repeated", "greedy_meeting_point_controller", "meeting_point_epuck_controller", "greedy_meeting_point_controller_random"]
 
+    nf_algorithms = ["greedy_meeting_point_controller_random", "neighborhood_graph_controller", "meeting_point_epuck_controller"]
     # plot_compare_faults(number_of_robots, vis_range)
     # plot_number_of_robots_on_x(range=vis_range, f_percent=0.2)
     # plot_compare_number_of_robots(vis_range, f_percent=0.2)
@@ -634,7 +706,7 @@ if __name__ == "__main__":
     # plot_range_on_x(number_of_robots,f_count=5)
 
     # for f_algorithm in f_algorithms:
-        # plot_evolution_over_time(number_of_robots, f_count=5, vis_range=0.5, nf_algorithms=nf_algorithms, f_algorithm=f_algorithm)
+    # plot_evolution_over_time(number_of_robots, f_count=5, vis_range=0.5, nf_algorithms=nf_algorithms, f_algorithm="crash_0_1")
     # plot_time_by_pair(number_of_robots, f_count=5, vis_range=0.5, nf_algorithms=nf_algorithms, f_algorithm="virtual_forces_walk_away")
     
     # plot_number_of_pairs_random_exploration_comparison(number_of_robots=20,f_count=0)
@@ -644,3 +716,4 @@ if __name__ == "__main__":
 
     # plot_number_of_pairs_bar(number_of_robots, visrange=0.5, f_count=0, nf_algorithms=nf_algorithms, f_algorithm="crash")
 
+    plot_communication(number_of_robots,0.5)

@@ -38,7 +38,6 @@ void CGreedyMeetingPoint::ControlStep(){
             m_rejected_sin_robot_ids.insert(other_try_to_sin_robot_id);
         }
         if(handshake == IDLE){
-            communication_rounds++;
             if(! tMsgs.empty()) {
                 vector<pair<int,Real>> neighboring_idle_robots;
                 vector<pair<int,Real>> neighboring_sin_me_robots;
@@ -76,6 +75,7 @@ void CGreedyMeetingPoint::ControlStep(){
                     }
                 }
                 else if(neighboring_idle_robots.size() > 0){
+                    communication_rounds++;
                     std::sort(neighboring_idle_robots.begin(), neighboring_idle_robots.end(), sortBySecond);
                     if(m_rejected_sin_robot_ids.size() == neighboring_sin_me_robots.size()){
                         m_rejected_sin_robot_ids = {};

@@ -56,9 +56,9 @@ def plot_compare_faulty_algorithms(number_of_robots: int, vis_range, nf_algorith
     print(k)
     plt.figure()
     plot_data({k:plots[k]}, number_of_robots)
-    plt.savefig(f"/home/lior/workspace/thesis/images/experiments/plot_compare_faults_range{vis_range}_robots{number_of_robots}_{k}.png", bbox_inches='tight')
-    plt.close()
-    # plt.show() 
+    # plt.savefig(f"/home/lior/workspace/thesis/images/experiments/plot_compare_faults_range{vis_range}_robots{number_of_robots}_{k}.png", bbox_inches='tight')
+    # plt.close()
+    plt.show() 
 
 def plot_compare_range(number_of_robots, f_count, f_algorithm):
     nf_algorithms = ["virtual_forces_random_controller", "algo_matching", "repeated", "meeting_point_epuck_controller", "greedy_meeting_point_controller", "greedy_meeting_point_controller_random"]
@@ -244,10 +244,10 @@ if __name__ == "__main__":
     nf_algorithms = ["virtual_forces_random_controller", "algo_matching", "repeated", "greedy_meeting_point_controller", "meeting_point_epuck_controller", "greedy_meeting_point_controller_random"]
     f_algorithms = ["crash", "keep_distance", "opposite", "virtual_forces_walk_away"]
     f_algorithms = [f_algorithms[0]]
-    # nf_algorithms = ["greedy_meeting_point_controller", "greedy_meeting_point_controller_random", "meeting_point_epuck_controller"]
+    nf_algorithms = ["greedy_meeting_point_controller_random", "neighborhood_graph_controller", "meeting_point_epuck_controller"]
     # nf_algorithms = ["virtual_forces_random_controller", "virtual_forces_bot_controller"]
 
-    # plot_compare_faulty_algorithms(number_of_robots, vis_range=0.5,nf_algorithms=nf_algorithms,f_algorithm="crash")
+    # plot_compare_faulty_algorithms(number_of_robots, vis_range=0.5,nf_algorithms=nf_algorithms,f_algorithm="crash_0_1")
     # plot_compare_range(number_of_robots=10, f_count=2, f_algorithm="crash")
     # plot_t_test(number_of_robots, vis_range, f_count)
     # plot_compare_number_of_robots(0.5, f_percent=0.5,f_algorithm="crash")
@@ -255,4 +255,4 @@ if __name__ == "__main__":
 
     # plot_convergance_time_of_each_fault(number_of_robots,vis_range=0.5, nf_algorithms=nf_algorithms, f_algorithm="virtual_forces_walk_away")
 
-    plot_distance_traveled(number_of_robots, vis_range=0.5, nf_algorithms=nf_algorithms,f_algorithm="crash")
+    # plot_distance_traveled(number_of_robots, vis_range=0.5, nf_algorithms=nf_algorithms,f_algorithm="crash")
